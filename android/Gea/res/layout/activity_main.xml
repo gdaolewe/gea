@@ -8,9 +8,54 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical" >
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="1" >
+
+            <GridLayout
+                android:layout_column="0"
+                android:layout_gravity="left|top"
+                android:layout_row="0" >
+            </GridLayout>
+
+            <Button
+                android:id="@+id/button1"
+                android:layout_column="0"
+                android:layout_gravity="left|top"
+                android:layout_row="1"
+                android:text="Play" />
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_column="0"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_row="1"
+                android:text="Pause" />
+
+            <Button
+                android:id="@+id/button3"
+                android:layout_column="0"
+                android:layout_gravity="right|top"
+                android:layout_row="1"
+                android:text="Stop" />
+
+        </GridLayout>
+
+        <SeekBar
+            android:id="@+id/seekBar1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
 </RelativeLayout>
