@@ -20,6 +20,17 @@ body {
   height: 100%;
 }
 
+#progress-bar {
+  width: 300px;
+  height: 3px;
+}
+
+#fill {
+  width: 50%;
+  height: 100%;
+  background: #80C7E3;
+}
+
 #map {
   position: fixed;
   top: 0;
@@ -34,8 +45,4 @@ h2 {
   text-align: center;
   font-family: Tahoma;
   color: #8B1C62;
-}
-
-span {
-  padding: 25px;
 }
