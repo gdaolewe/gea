@@ -1,38 +1,35 @@
 <html>
- <head>
-  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
-  <link href="css/main.css" rel="stylesheet" type="text/css" />
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script type="text/javascript" src="js/script.js"></script>
-  <title>Gea</title>
- </head>
- <body>
-  <h2>Gea</h2>
-
-  <div id="map">(map here)</div>
-
-  <div id="results">(search results here)</div>
-   <br />
-  <div id="player-area">
-  <div id="player-metadata">Album - Song title by Artist</div>
-   <div id="player">
-    <div id="progress-bar"><img src="img/progressblue.png"/></div>
-     <br />
-     <p>
-       <div>
-         <span>Upvote</span>
-         <span>Downvote</span>
-       </div>
-       <div>
-         <span id="like"><img alt="Upvote this song" src="img/upvote.png"/></span>
-         <span id="dislike"><img alt="Downvote this song" src="img/downvote.png"/></span>
-       </div>
-     </p>
-     <div>
-       <span id="previous"><img alt="Previous song" src="img/prevbutton.jpg" /></span>
-       <span id="play-pause"><img id="play-pause-img" alt="Play" src="img/playbutton.jpg" /></span>
-       <span id="next"><img alt="Next song" src="img/nextbutton.jpg" /></span>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+    <link href="css/main.css" rel="stylesheet" type="text/css" />
+    <title>Gea</title>
+  </head>
+  <body>
+    <h2>Gea</h2>
+    <div id="map">(map here)</div>
+    <div id="results">(search results here)</div>
+    <div id="player">
+      <div id="player-metadata">Album - Song title by Artist</div>
+      <div id="progress-bar"><img src="img/progressblue.png"/></div>
+      <p>
+      <div>
+        <span>Upvote</span>
+        <span>Downvote</span>
+      </div>
+      <div>
+        <span id="like"><img alt="Upvote this song" src="img/upvote.png"/></span>
+        <span id="dislike"><img alt="Downvote this song" src="img/downvote.png"/></span>
+      </div>
+      </p>
+      <div>
+        <span id="previous"><img alt="Previous song" src="img/prevbutton.jpg" /></span>
+        <span id="play-pause"><img id="play-pause-img" alt="Play" src="img/playbutton.jpg" /></span>
+        <span id="next"><img alt="Next song" src="img/nextbutton.jpg" /></span>
+      </div>
     </div>
-  </div>
- </body>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.4/require.min.js" data-main="/js/main"></script>
+    <script>
+      window.require || document.write(unescape('%3Cscript src="/js/lib/require.min.js" data-main="/js/main"%3E%3C/script%3E'));
+    </script>
+  </body>
 </html>
