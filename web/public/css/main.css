@@ -31,10 +31,15 @@ body {
   height: 3px;
 }
 
+@-webkit-keyframes fill {
+  from {width: 0%;}
+  to {width: 100%;}
+}
+
 #fill {
-  width: 50%;
   height: 100%;
   background: #80C7E3;
+  -webkit-animation: fill 5s linear infinite;
 }
 
 #map {
