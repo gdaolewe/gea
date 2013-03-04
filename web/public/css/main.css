@@ -20,6 +20,12 @@ body {
   height: 100%;
 }
 
+#player-art {
+  width: 300px;
+  height: 300px;
+  background: #fff;
+}
+
 #progress-bar {
   width: 300px;
   height: 3px;

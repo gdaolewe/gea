@@ -9,6 +9,7 @@ define(['backbone', 'util/jqr!'], function (bb) {
     },
     initialize: function () {
       this.$playPauseButton = this.$('#play-pause-img');
+      this.$('#player-art').text('Art loaded.');
     },
     togglePlay: function (e) {
       e.stopPropagation();
