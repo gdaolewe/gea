@@ -1,25 +1,29 @@
 /*global define*/
 define(['backbone', 'util/jqr!'], function (bb) {
+  var playing = 1;
+  var playingText = ['Play', 'Pause'];
+
   return new (bb.View.extend({
     el: '#player',
     events: {
-      'click #play-pause-img': 'togglePlay',
+      'click #play-pause': 'togglePlay',
       'click #next': 'playNext',
       'click #previous': 'playPrevious'
     },
     initialize: function () {
-      this.$playPauseButton = this.$('#play-pause-img');
+      this.$playPauseButton = this.$('#play-pause');
+      this.$playPauseButton.text(playingText[playing]);
+      this.$progressBarFill = this.$('#fill');
       this.$('#player-art').text('Art loaded.');
+      this.$('#player-metadata').text('Metadata loaded.');
     },
     togglePlay: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      var button = this.$playPauseButton;
-      if(button.attr('src') == 'img/playbutton.jpg') {
-        button.attr('src','img/pausebutton.jpg');
-      } else {
-        button.attr('src','img/playbutton.jpg');
-      }
+      this.$playPauseButton.text(playingText[++playing % 2]);
+      this.$progressBarFill.css('-webkit-animation-play-state', function (i, v) {
+        return v === 'paused' ? 'running' : 'paused';
+      });
     },
     playNext: function (e) {
       e.stopPropagation();
