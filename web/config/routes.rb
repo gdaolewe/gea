@@ -1,4 +1,9 @@
 Web::Application.routes.draw do
+  controller 'rest_endpoint' do
+    get '/artist/:id' => :getArtist
+    get '/song/:id' => :getSong
+    get '/album/:id' => :getAlbum
+  end
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
