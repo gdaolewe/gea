@@ -46,3 +46,6 @@ if [[ -s Gemfile ]] && builtin command -v bundle >/dev/null
 then
   bundle install | GREP_OPTIONS= \grep -vE '^Using|Your bundle is complete'
 fi
+
+# Get libraries
+./getlibs.rb
