@@ -8,6 +8,7 @@ import android.widget.*;
 public class MainActivity extends Activity implements RequestTaskCompleteListener {
 	
 	static final String LOG_TAG = "Gea";
+	final String baseURL = "http://gea.kenpowers.net";
 	TextView serverResponseView;
 
     @Override
@@ -17,7 +18,7 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
                 
         serverResponseView = (TextView)findViewById(R.id.serverResponse);
         
-        new RequestTask(this).execute("http://www.google.com");    
+        new RequestTask(this).execute("http://google.com");    
     }
 
 
