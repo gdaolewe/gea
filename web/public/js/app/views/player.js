@@ -8,7 +8,9 @@ define(['backbone', 'util/jqr!'], function (bb) {
     events: {
       'click #play-pause': 'togglePlay',
       'click #next': 'playNext',
-      'click #previous': 'playPrevious'
+      'click #previous': 'playPrevious',
+      'click #like': 'like',
+      'click #dislike': 'dislike'
     },
     initialize: function () {
       this.$playPauseButton = this.$('#play-pause');
@@ -34,6 +36,16 @@ define(['backbone', 'util/jqr!'], function (bb) {
       e.stopPropagation();
       e.preventDefault();
       console.log('Previous song!');
+    },
+    like: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      console.log('Like!');
+    },
+    dislike: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      console.log('Dislike!');
     }
   }))();
 });
