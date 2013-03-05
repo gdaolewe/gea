@@ -27,21 +27,21 @@
                 android:layout_column="0"
                 android:layout_gravity="left|top"
                 android:layout_row="1"
-                android:text="Play" />
+                android:text="@string/play_button_text" />
 
             <Button
                 android:id="@+id/button2"
                 android:layout_column="0"
                 android:layout_gravity="center_horizontal|top"
                 android:layout_row="1"
-                android:text="Pause" />
+                android:text="@string/pause_button_text" />
 
             <Button
                 android:id="@+id/button3"
                 android:layout_column="0"
                 android:layout_gravity="right|top"
                 android:layout_row="1"
-                android:text="Stop" />
+                android:text="@string/stop_button_text" />
 
         </GridLayout>
 
@@ -60,14 +60,14 @@
                 android:layout_column="0"
                 android:layout_gravity="left|top"
                 android:layout_row="1"
-                android:text="Previous" />
+                android:text="@string/prev_button_text" />
 
             <Button
                 android:id="@+id/button5"
                 android:layout_column="0"
                 android:layout_gravity="right|top"
                 android:layout_row="1"
-                android:text="Next" />
+                android:text="@string/next_button_text" />
 
         </GridLayout>
 
