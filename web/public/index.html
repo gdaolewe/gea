@@ -1,38 +1,31 @@
 <html>
- <head>
-  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
-  <link href="stylesheets/main.css" rel="stylesheet" type="text/css" />
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script type="text/javascript" src="scripts/script.js"></script>
-  <title>Gea</title>
- </head>
- <body>
-  <h2>Gea</h2>
-   
-  <div id="map">(map here)</div>
-   
-  <div id="results">(search results here)</div>
-   <br />
-  <div id="player-area">
-  <div id="player-metadata">Album - Song title by Artist</div>
-   <div id="player">
-    <div id="progress-bar"><img src="images/progressblue.png"/></div>
-     <br />
-     <p>
-       <div>
-         <span>Upvote</span>
-         <span>Downvote</span>
-       </div>
-       <div>
-         <span id="like"><img alt="Upvote this song" src="images/upvote.png"/></span> 
-         <span id="dislike"><img alt="Downvote this song" src="images/downvote.png"/></span>
-       </div>
-     </p>
-     <div>
-       <span id="previous"><img alt="Previous song" src="images/prevbutton.jpg" /></span> 
-       <span id="play-pause"><img id="play-pause-img" alt="Play" src="images/playbutton.jpg" /></span>
-       <span id="next"><img alt="Next song" src="images/nextbutton.jpg" /></span> 
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+    <link href="css/main.css" rel="stylesheet" type="text/css" />
+    <title>Gea</title>
+  </head>
+  <body>
+    <div id="map">(map here)</div>
+    <div id="right">
+      <div id="player">
+        <div id="player-art">(art here)</div>
+        <div id="progress-bar"><div id="fill"></div></div>
+        <div id="controls">
+          <div id="previous">&lt;</div>
+          <div id="play-pause"></div>
+          <div id="next">&gt;</div>
+        </div>
+        <div id="social">
+          <div id="like">Like :D</div>
+          <div id="dislike">Dislike &gt;:(</div>
+        </div>
+        <div id="player-metadata"></div>
+      </div>
+      <div id="results">(search results here)</div>
     </div>
-  </div>
- </body>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.4/require.min.js" data-main="/js/main"></script>
+    <script>
+      window.require || document.write(unescape('%3Cscript src="/js/lib/require.min.js" data-main="/js/main"%3E%3C/script%3E'));
+    </script>
+  </body>
 </html>
