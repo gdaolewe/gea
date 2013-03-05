@@ -58,10 +58,10 @@ define(['backbone', 'util/jqr!'], function (bb) {
     getSong: function (id) {
       $.get('/song/' + id, $.proxy(function (song) {
         $.when($.get('/artist/' + song.artistID), $.get('/album/' + song.albumID)).done($.proxy(function (artist, album) {
-          this.album = album[0].title;
-          this.title = song.title;
-          this.artist = artist[0].name;
-          this.$metadata.text(this.album + ' - ' + this.title + ' by ' + this.artist);
+          var albumText = album[0].title;
+          var titleText = song.title;
+          var artistText = artist[0].name;
+          this.$metadata.text(albumText + ' - ' + titleText + ' by ' + artistText);
         }, this));
       }, this));
     }
