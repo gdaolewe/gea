@@ -11,7 +11,7 @@ import android.widget.*;
 public class MainActivity extends Activity implements RequestTaskCompleteListener {
 	
 	static final String LOG_TAG = "Gea";
-	final String baseURL = "http://10.0.2.2:3000";
+	final String baseURL = "http://gea.kenpowers.net";
 	TextView serverResponseView;
 
     @Override
