@@ -23,7 +23,8 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
                 
         //serverResponseView = (TextView)findViewById(R.id.titleText);
         
-        new RequestTask(this).execute(baseURL + "/song/1");   
+        String[] params = {"song","1"};
+        new RequestTask(this).execute(new GeaGETRequest(baseURL, params));   
     }
 
 
@@ -34,17 +35,23 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         return true;
     }
     
-    public void onTaskComplete(String result) {
+    public void onTaskComplete(GeaServerRequest request, String result) {
     	JSONObject obj = (JSONObject) JSONValue.parse(result);
-    	if (obj.get("title") != null && obj.get("songID") != null) {
-    		((TextView)findViewById(R.id.titleText)).setText("Title: " + obj.get("title"));
-    		new RequestTask(this).execute(baseURL + "/artist/" + obj.get("artistID"));
-    		new RequestTask(this).execute(baseURL + "/album/" + obj.get("albumID"));
-    	}
-    	else if (obj.get("name") != null) {
-    		((TextView)findViewById(R.id.artistText)).setText("Artist: " + obj.get("name"));
-    	} else if (obj.get("title") != null) {
-    		((TextView)findViewById(R.id.albumText)).setText("Album: " + obj.get("title"));
+    	
+    	
+    	if ( request.getRequestMethod().equals("GET") ) {
+    		if ( ((GeaGETRequest)request).getParameterAtIndex(0).equals("song") ) {
+    			((TextView)findViewById(R.id.titleText)).setText("Title: " + obj.get("title"));
+        		String[] params = {"artist", obj.get("artistID").toString() };
+        		new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
+        		params = new String[]{"album", (String)obj.get("albumID").toString() };
+        		new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
+    		} else if ( ((GeaGETRequest)request).getParameterAtIndex(0).equals("artist") ) {
+    			((TextView)findViewById(R.id.artistText)).setText("Artist: " + obj.get("name").toString() );
+    		} else if ( ((GeaGETRequest)request).getParameterAtIndex(0).equals("album") ) {
+    			((TextView)findViewById(R.id.albumText)).setText("Album: " + obj.get("title").toString() );
+    		}
+    			
     	}
     	
     	
