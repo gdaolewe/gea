@@ -1,6 +1,7 @@
 package net.kenpowers.gea;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class GeaPOSTRequest implements GeaServerRequest {
 	private String baseURL;
@@ -11,15 +12,19 @@ public class GeaPOSTRequest implements GeaServerRequest {
 		this.baseURL = baseURL;
 		this.parameters = parameters;
 		
-			queryString += "?";
-			for (HashMap.Entry<String, String> entry : this.parameters.entrySet())
-				queryString += entry.getKey() + "=" + entry.getValue() + "&";
+			queryString = "?";
+			Iterator<HashMap.Entry<String, String>> entries = parameters.entrySet().iterator();
+			while (entries.hasNext()) {
+				HashMap.Entry<String, String> entry = (HashMap.Entry<String, String>) entries.next();
+				queryString += entry.getKey() + "=" + entry.getValue();	
+				if (entries.hasNext())
+					queryString += "&";
+			}
 		
 	}
 	
 	public String getParameterForKey(String key) {
-		//stub
-		return null;
+		return parameters.get(key);
 	}
 	
 	public String getURL() {
