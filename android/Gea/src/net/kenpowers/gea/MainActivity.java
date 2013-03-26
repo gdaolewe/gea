@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.app.Activity;
 import android.view.Menu;
+import android.view.View;
 import android.widget.*;
 
 public class MainActivity extends Activity implements RequestTaskCompleteListener {
@@ -13,6 +14,7 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 	static final String LOG_TAG = "Gea";
 	final String baseURL = "http://gea.kenpowers.net";
 	TextView serverResponseView;
+	MusicServiceWrapper music;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +26,10 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         //serverResponseView = (TextView)findViewById(R.id.titleText);
         
         String[] params = {"song","1"};
-        new RequestTask(this).execute(new GeaGETRequest(baseURL, params));   
+        new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
+        
+        music = new MusicServiceWrapper(this);
+        //music.search("Lethargica", "Song");
     }
 
 
@@ -33,6 +38,13 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+    
+    public void searchSubmitClicked(View view) {
+    	if (view.getId() == R.id.searchSubmit) {
+    		Log.d(LOG_TAG, ((EditText)findViewById(R.id.searchField)).getText().toString() );
+    		music.search( ((EditText)findViewById(R.id.searchField)).getText().toString(), "Artist");
+    	}
     }
     
     public void onTaskComplete(GeaServerRequest request, String result) {
