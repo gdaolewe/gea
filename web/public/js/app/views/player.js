@@ -1,7 +1,14 @@
 /*global define*/
-define(['backbone', 'util/jqr!'], function (bb) {
+define([
+  'backbone',
+  '../data/Song',
+  'util/jqr!'
+], function (
+  bb,
+  Song
+) {
   var playing = 1;
-  var song = 1;
+  var song = null;
   var playingText = ['Play', 'Pause'];
 
   return new (bb.View.extend({
@@ -19,7 +26,10 @@ define(['backbone', 'util/jqr!'], function (bb) {
       this.$progressBarFill = this.$('#fill');
       this.$metadata = this.$('#player-metadata');
       this.$('#player-art').text('Art loaded.');
-      this.getSong(song);
+      Song.get(1, $.proxy(function (s) {
+        song = s;
+        this.render();
+      }, this));
     },
     togglePlay: function (e) {
       e.stopPropagation();
@@ -32,18 +42,26 @@ define(['backbone', 'util/jqr!'], function (bb) {
     playNext: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      if (++song > 5) {
-        song = 1;
+      var songId = song.id;
+      if (++songId > 5) {
+        songId = 1;
       }
-      this.getSong(song);
+      Song.get(songId, $.proxy(function (s) {
+        song = s;
+        this.render();
+      }, this));
     },
     playPrevious: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      if (--song < 1) {
-        song = 5;
+      var songId = song.id;
+      if (--songId < 1) {
+        songId = 5;
       }
-      this.getSong(song);
+      Song.get(songId, $.proxy(function (s) {
+        song = s;
+        this.render();
+      }, this));
     },
     like: function (e) {
       e.stopPropagation();
@@ -55,14 +73,9 @@ define(['backbone', 'util/jqr!'], function (bb) {
       e.preventDefault();
       console.log('Dislike!');
     },
-    getSong: function (id) {
-      $.get('/song/' + id, $.proxy(function (song) {
-        $.when($.get('/artist/' + song.artistID), $.get('/album/' + song.albumID)).done($.proxy(function (artist, album) {
-          var albumText = album[0].title;
-          var titleText = song.title;
-          var artistText = artist[0].name;
-          this.$metadata.text(albumText + ' - ' + titleText + ' by ' + artistText);
-        }, this));
+    render: function () {
+      $.when($.get('/artist/' + song.get('artistID')), $.get('/album/' + song.get('albumID'))).done($.proxy(function (artist, album) {
+        this.$metadata.text(album[0].title + ' - ' + song.get('title') + ' by ' + artist[0].name);
       }, this));
     }
   }))();
