@@ -65,7 +65,8 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback {
 		try {
 			Log.d(MainActivity.LOG_TAG, result.toString(2));
 		} catch (Exception e) {
-			
+			Log.d(MainActivity.LOG_TAG,"Pretty printing JSON failed, printing without pretty print");
+			Log.d(MainActivity.LOG_TAG, result.toString());
 		}
 	}
 	

@@ -36,6 +36,9 @@ public class RequestTask extends AsyncTask<GeaServerRequest, String, String> {
                 }
                 br.close();
                 return sb.toString();
+        	} else {
+        		Log.e(MainActivity.LOG_TAG, "Error connecting to Gea server: " + statusCode);
+        		return null;
         	}
         	
         } catch (MalformedURLException e) {
@@ -44,7 +47,7 @@ public class RequestTask extends AsyncTask<GeaServerRequest, String, String> {
         	e.printStackTrace();
         }        
         
-        return "" + statusCode;
+        return null;
     }
 
     @Override

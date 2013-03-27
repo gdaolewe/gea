@@ -48,6 +48,10 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     }
     
     public void onTaskComplete(GeaServerRequest request, String result) {
+    	if (result==null || request==null) {
+    		Log.e(LOG_TAG, "Error fetching JSON");
+    		return;
+    	}
     	JSONObject obj = (JSONObject) JSONValue.parse(result);
     	
     	
