@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Function which gets a library if it doesn't exist
 function getLib {
   if [ ! -f $LIB_DIR/$1 ]; then
