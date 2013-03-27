@@ -43,7 +43,7 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     public void searchSubmitClicked(View view) {
     	if (view.getId() == R.id.searchSubmit) {
     		Log.d(LOG_TAG, ((EditText)findViewById(R.id.searchField)).getText().toString() );
-    		music.search( ((EditText)findViewById(R.id.searchField)).getText().toString(), "Artist");
+    		music.search( ((EditText)findViewById(R.id.searchField)).getText().toString(), "Song");
     	}
     }
     
