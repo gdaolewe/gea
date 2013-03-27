@@ -26,7 +26,7 @@ define([
       this.$progressBarFill = this.$('#fill');
       this.$metadata = this.$('#player-metadata');
       this.$('#player-art').text('Art loaded.');
-      Song.get(1, $.proxy(function (s) {
+      Song.get(0, $.proxy(function (s) {
         song = s;
         this.render();
       }, this));
@@ -43,8 +43,8 @@ define([
       e.stopPropagation();
       e.preventDefault();
       var songId = song.id;
-      if (++songId > 5) {
-        songId = 1;
+      if (++songId >= 5) {
+        songId = 0;
       }
       Song.get(songId, $.proxy(function (s) {
         song = s;
@@ -55,8 +55,8 @@ define([
       e.stopPropagation();
       e.preventDefault();
       var songId = song.id;
-      if (--songId < 1) {
-        songId = 5;
+      if (--songId <= 0) {
+        songId = 4;
       }
       Song.get(songId, $.proxy(function (s) {
         song = s;
@@ -74,7 +74,7 @@ define([
       console.log('Dislike!');
     },
     render: function () {
-      $.when($.get('/artist/' + song.get('artistID')), $.get('/album/' + song.get('albumID'))).done($.proxy(function (artist, album) {
+      $.when($.get('/artist/' + song.get('artist')), $.get('/album/' + song.get('album'))).done($.proxy(function (artist, album) {
         this.$metadata.text(album[0].title + ' - ' + song.get('title') + ' by ' + artist[0].name);
       }, this));
     }
