@@ -2,10 +2,17 @@
 var express = require('express'),
     routes = require('./routes'),
     http = require('http'),
-    path = require('path');
+    path = require('path'),
+    st = require('connect-static-transform');
 
 // Create express app
 var app = express();
+
+// Stylus config
+var stylusConfig = {
+  root: path.join(__dirname, 'assets/styl'),
+  path: '/css'
+};
 
 // General configuration
 app.configure(function () {
@@ -19,9 +26,18 @@ app.configure(function () {
   app.use(express.static(path.join(__dirname, 'public')));
 });
 
+// Production configuration
+app.configure('production', function () {
+  stylusConfig.compress = true;
+  stylusConfig.cache = true;
+  stylusConfig.maxage = 3600;
+  app.use(st.stylus(stylusConfig));
+});
+
 // Development configuration
 app.configure('development', function () {
   app.use(express.errorHandler());
+  app.use(st.stylus(stylusConfig));
 });
 
 // Set up routes
