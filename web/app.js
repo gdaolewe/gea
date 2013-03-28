@@ -28,7 +28,7 @@ app.configure('development', function () {
 app.get('/song/:id', routes.meta.song);
 app.get('/album/:id', routes.meta.album);
 app.get('/artist/:id', routes.meta.artist);
-app.get('/rdio', routes.service.rdioConfig);
+app.get('/rdio/getPlaybackToken', routes.service.rdio.getPlaybackToken);
 
 // Launch server
 http.createServer(app).listen(app.get('port'), function () {
