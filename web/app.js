@@ -1,10 +1,13 @@
+// Requirements
 var express = require('express'),
     routes = require('./routes'),
     http = require('http'),
     path = require('path');
 
+// Create express app
 var app = express();
 
+// General configuration
 app.configure(function () {
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
@@ -16,14 +19,18 @@ app.configure(function () {
   app.use(express.static(path.join(__dirname, 'public')));
 });
 
+// Development configuration
 app.configure('development', function () {
   app.use(express.errorHandler());
 });
 
-app.get('/song/:id', routes.song);
-app.get('/album/:id', routes.album);
-app.get('/artist/:id', routes.artist);
+// Set up routes
+app.get('/song/:id', routes.meta.song);
+app.get('/album/:id', routes.meta.album);
+app.get('/artist/:id', routes.meta.artist);
+app.get('/rdio', routes.service.rdioConfig);
 
+// Launch server
 http.createServer(app).listen(app.get('port'), function () {
   console.log('Express server listening on port %d!', app.get('port'));
 });
