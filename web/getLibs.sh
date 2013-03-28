@@ -18,5 +18,5 @@ getLib require.min.js http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.4/req
 getLib jquery.min.js http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js
 getLib lodash.min.js http://cdnjs.cloudflare.com/ajax/libs/lodash.js/1.0.0-rc.3/lodash.min.js
 getLib backbone.min.js http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min.js
-LIB_DIR='public/css/lib'
-getLib normalize.min.css http://cdnjs.cloudflare.com/ajax/libs/normalize/2.1.0/normalize.min.css
+LIB_DIR='assets/styl/lib'
+getLib normalize.styl https://raw.github.com/KenPowers/normalize.styl/master/normalize.styl
