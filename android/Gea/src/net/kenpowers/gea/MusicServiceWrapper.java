@@ -37,8 +37,6 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback {
 		params.add(new BasicNameValuePair("query", query));
 		params.add(new BasicNameValuePair("types", types));
 		rdio.apiCall("search", params, this);
-		
-		
 	}
 	
 	/*
@@ -86,10 +84,14 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback {
 	}
 	
 	public void mediaPlayerReady(MediaPlayer player) {
+		
 		this.player = player;
 		try {
-		player.prepare();
-		player.start();
+			player.prepare();
+			if (this.player != null) {
+				this.player.stop();
+			}
+			player.start();
 		} catch(Exception e) {
 			Log.e(MainActivity.LOG_TAG, e.toString());
 		}

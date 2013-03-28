@@ -7,7 +7,10 @@
     <string name="play_button_text">Play</string>
 	<string name="pause_button_text">Pause</string>
 	<string name="stop_button_text">Stop</string>
-	<string name="prev_button_text">Previous</string>
+	<string name="prev_button_text">Prev</string>
 	<string name="next_button_text">Next</string>
+	<string name="search_hint">search</string>
+	<string name="search_submit_button_text">Go</string>
+	<string name="song_info_placeholder_text">Nothing playing</string>
 	
 </resources>
