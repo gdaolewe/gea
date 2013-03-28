@@ -23,15 +23,11 @@ define([
       'click #dislike': 'dislike'
     },
     initialize: function () {
-      this.$('#api').rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
-      $('#api').bind('ready.rdio', function() {
-        $(this).rdio().play('a171827');//tr727566');
-      });
       this.$api = this.$('#api');
+      this.$api.rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
       this.$api.bind('ready.rdio', function() {
-        this.$api.rdio().play('a171827');//tr727566');
+        this.$api.rdio().play('a171827');
       });
-      //this.$api.rdio().play('a171827');
       this.$playPauseButton = this.$('#play-pause');
       this.$playPauseButton.text(playingText[playing]);
       this.$progressBarFill = this.$('#fill');
