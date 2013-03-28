@@ -14,6 +14,9 @@ require({
       '//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min',
       'lib/backbone.min'
     ],
+    'jqueryrdio': [
+      'lib/jquery.rdio'
+    ],
     'text': 'lib/text'
   },
   shim: {

@@ -1,10 +1,12 @@
 /*global define*/
 define([
   'backbone',
+  'jqueryrdio',
   '../data/Song',
   'util/jqr!'
 ], function (
   bb,
+  jqrdio,
   Song
 ) {
   var playing = 1;
@@ -21,6 +23,15 @@ define([
       'click #dislike': 'dislike'
     },
     initialize: function () {
+      this.$('#api').rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
+      $('#api').bind('ready.rdio', function() {
+        $(this).rdio().play('a171827');//tr727566');
+      });
+      this.$api = this.$('#api');
+      this.$api.bind('ready.rdio', function() {
+        this.$api.rdio().play('a171827');//tr727566');
+      });
+      //this.$api.rdio().play('a171827');
       this.$playPauseButton = this.$('#play-pause');
       this.$playPauseButton.text(playingText[playing]);
       this.$progressBarFill = this.$('#fill');
@@ -34,6 +45,7 @@ define([
     togglePlay: function (e) {
       e.stopPropagation();
       e.preventDefault();
+      this.$api.rdio().play();
       this.$playPauseButton.text(playingText[++playing % 2]);
       this.$progressBarFill.css('-webkit-animation-play-state', function (i, v) {
         return v === 'paused' ? 'running' : 'paused';
@@ -42,6 +54,7 @@ define([
     playNext: function (e) {
       e.stopPropagation();
       e.preventDefault();
+      this.$api.rdio().next();
       var songId = song.id;
       if (++songId >= 5) {
         songId = 0;
