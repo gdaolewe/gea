@@ -1,12 +1,11 @@
 /*global define*/
 define([
   'backbone',
-  'jqueryrdio',
   '../data/Song',
+  'jqueryrdio',
   'util/jqr!'
 ], function (
   bb,
-  jqrdio,
   Song
 ) {
   var playing = 1;
@@ -23,11 +22,19 @@ define([
       'click #dislike': 'dislike'
     },
     initialize: function () {
+      this.$el;//jquery object of the div
       this.$api = this.$('#api');
-      this.$api.rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
-      this.$api.bind('ready.rdio', function() {
+      this.$api.bind('ready.rdio', $.proxy(function() {
         this.$api.rdio().play('a171827');
-      });
+      }, this));
+      
+      $.get('/rdio/getPlaybackToken', $.proxy(function (data) {
+        //this.$api.rdio(data.result);
+        this.$api.rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
+      }, this));
+      /*this.$api.bind('ready.rdio', function() {
+        this.$api.rdio().play('a171827');
+      });*/
       this.$playPauseButton = this.$('#play-pause');
       this.$playPauseButton.text(playingText[playing]);
       this.$progressBarFill = this.$('#fill');

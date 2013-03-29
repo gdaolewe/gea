@@ -15,7 +15,7 @@ require({
       'lib/backbone.min'
     ],
     'jqueryrdio': [
-      'lib/jquery.rdio'
+      'lib/jquery.rdio.min'
     ],
     'text': 'lib/text'
   },
@@ -23,7 +23,8 @@ require({
     'backbone': {
       deps: ['jquery', 'util/_conf'],
       exports: 'Backbone'
-    }
+    },
+    'jqueryrdio': ['jquery']
   },
   deps: ['app']
 });
