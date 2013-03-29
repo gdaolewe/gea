@@ -29,7 +29,7 @@ define([
       }, this));
       
       // When the playing track has changed, adjust the album art, track, album, and artist info accordingly
-      this.$api.bind('playingTrackChanged.rdio', function(e, playingTrack, sourcePosition) {
+      this.$api.bind('playingTrackChanged.rdio', $.proxy(function(e, playingTrack, sourcePosition) {
         if (playingTrack) {
           this.$duration = playingTrack.duration;
           $('#player-art').attr('src', playingTrack.icon);
@@ -37,7 +37,13 @@ define([
           $('#artist').text('by ' + playingTrack.artist);
           $('#album').text('from ' + playingTrack.album);
         }
-      });
+      }, this));
+      
+      // Update the progress bar fill amount
+      this.$api.bind('positionChanged.rdio', $.proxy(function(e, position) {
+        this.$progressBarFill.css('width', Math.floor(100*position/this.$duration)+'%');
+      }, this));
+      
       $.get('/rdio/getPlaybackToken', $.proxy(function (data) {
         this.$api.rdio(data.result);
       }, this));
