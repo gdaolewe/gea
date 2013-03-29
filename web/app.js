@@ -28,6 +28,7 @@ app.configure(function () {
 
 // Production configuration
 app.configure('production', function () {
+  app.set('domain', 'gea.kenpowers.net');
   stylusConfig.compress = true;
   stylusConfig.cache = true;
   stylusConfig.maxage = 3600;
@@ -36,6 +37,7 @@ app.configure('production', function () {
 
 // Development configuration
 app.configure('development', function () {
+  app.set('domain', 'localhost');
   app.use(express.errorHandler());
   app.use(st.stylus(stylusConfig));
 });
@@ -44,7 +46,7 @@ app.configure('development', function () {
 app.get('/song/:id', routes.meta.song);
 app.get('/album/:id', routes.meta.album);
 app.get('/artist/:id', routes.meta.artist);
-app.get('/rdio/getPlaybackToken', routes.service.rdio.getPlaybackToken);
+app.get('/rdio/getPlaybackToken', routes.service.rdio.getPlaybackToken(app.get('domain')));
 app.get('/rdio/search', routes.service.rdio.search);
 
 // Launch server

@@ -21,9 +21,14 @@ var roa = new OAuth(
 
 // Rdio routes
 exports.rdio = {
-  getPlaybackToken: function (req, res) {
-    // Get playback token from rdio and respond to client
-    doUnauthenticatedRdioRequest({method: 'getPlaybackToken'}, basicResponder(res));
+  getPlaybackToken: function (domain) {
+    return function (req, res) {
+      // Get playback token from rdio and respond to client
+      doUnauthenticatedRdioRequest({
+        method: 'getPlaybackToken',
+        domain: domain
+      }, basicResponder(res));
+    }
   },
   search: function (req, res) {
     // Reference parameters
