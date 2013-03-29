@@ -54,25 +54,22 @@ define([
         this.$api.rdio(data.result);
       }, this));
       this.$playPauseButton = this.$('#play-pause');
-      this.$playPauseButton.text(playingText[playing]);
+      this.updatePlayPauseButton();
       this.$progressBarFill = this.$('#fill');
     },
     togglePlay: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      this.$playPauseButton.text(playingText[++playing % 2]);
+      ++playing;
+      this.updatePlayPauseButton();
       playing % 2 ? this.$api.rdio().play() : this.$api.rdio().pause() ;
-      this.$progressBarFill.css('-webkit-animation-play-state', function (i, v) {
-        return v === 'paused' ? 'running' : 'paused';
-      });
     },
     playNext: function (e) {
       e.stopPropagation();
       e.preventDefault();
       this.$api.rdio().next();
       playing = 1;
-      this.$playPauseButton.text(playingText[playing % 2]);
-      this.$progressBarFill.css('-webkit-animation-play-state', 'running');
+      this.updatePlayPauseButton();
       /*
       Song.get(songId, $.proxy(function (s) {
         song = s;
@@ -85,8 +82,7 @@ define([
       e.preventDefault();
       this.$api.rdio().previous();
       playing = 1;
-      this.$playPauseButton.text(playingText[playing % 2]);
-      this.$progressBarFill.css('-webkit-animation-play-state', 'running');
+      this.updatePlayPauseButton();
       /*
       Song.get(songId, $.proxy(function (s) {
         song = s;
@@ -108,6 +104,9 @@ define([
       /*$.when($.get('/artist/' + song.get('artist')), $.get('/album/' + song.get('album'))).done($.proxy(function (artist, album) {
         this.$metadata.text(album[0].title + ' - ' + song.get('title') + ' by ' + artist[0].name);
       }, this));*/
+    },
+    updatePlayPauseButton: function () {
+      this.$playPauseButton.text(playingText[playing % 2]);
     }
   }))();
 });
