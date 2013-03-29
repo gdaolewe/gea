@@ -1,12 +1,10 @@
 /*global define*/
 define([
   'backbone',
-  '../data/Song',
   'jqueryrdio',
   'util/jqr!'
 ], function (
-  bb,
-  Song
+  bb
 ) {
   var playing = 1;
   var song = null;
@@ -29,21 +27,13 @@ define([
       }, this));
       
       $.get('/rdio/getPlaybackToken', $.proxy(function (data) {
-        //this.$api.rdio(data.result);
-        this.$api.rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
+        this.$api.rdio(data.result);
       }, this));
-      /*this.$api.bind('ready.rdio', function() {
-        this.$api.rdio().play('a171827');
-      });*/
       this.$playPauseButton = this.$('#play-pause');
       this.$playPauseButton.text(playingText[playing]);
       this.$progressBarFill = this.$('#fill');
       this.$metadata = this.$('#player-metadata');
       this.$('#player-art').text('Art loaded.');
-      Song.get(0, $.proxy(function (s) {
-        song = s;
-        this.render();
-      }, this));
     },
     togglePlay: function (e) {
       e.stopPropagation();
@@ -62,10 +52,12 @@ define([
       if (++songId >= 5) {
         songId = 0;
       }
+      /*
       Song.get(songId, $.proxy(function (s) {
         song = s;
         this.render();
       }, this));
+      */
     },
     playPrevious: function (e) {
       e.stopPropagation();
@@ -74,10 +66,12 @@ define([
       if (--songId <= 0) {
         songId = 4;
       }
+      /*
       Song.get(songId, $.proxy(function (s) {
         song = s;
         this.render();
       }, this));
+      */
     },
     like: function (e) {
       e.stopPropagation();
@@ -90,9 +84,9 @@ define([
       console.log('Dislike!');
     },
     render: function () {
-      $.when($.get('/artist/' + song.get('artist')), $.get('/album/' + song.get('album'))).done($.proxy(function (artist, album) {
+      /*$.when($.get('/artist/' + song.get('artist')), $.get('/album/' + song.get('album'))).done($.proxy(function (artist, album) {
         this.$metadata.text(album[0].title + ' - ' + song.get('title') + ' by ' + artist[0].name);
-      }, this));
+      }, this));*/
     }
   }))();
 });

@@ -10,7 +10,6 @@ function getLib {
 
 # Create lib directories if necessary
 mkdir -p public/js/lib
-mkdir -p public/css/lib
 mkdir -p assets/styl/lib
 
 # Get libraries
