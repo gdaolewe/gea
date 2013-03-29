@@ -12,7 +12,7 @@ define([
   var song = null;
   var playingText = ['Play', 'Pause'];
   var loading = false;
-  var deferred = new $.Deferred();
+  var deferred = new promise.Promise();
 
   return new (bb.View.extend({
     el: '#player',
@@ -54,13 +54,14 @@ define([
           // Update the currently playing track's album name
           $('#album').text('from ' + playingTrack.album);
         }
-        loading = false;
       }, this));
       
       // When the play-state has changed, adjust the play/pause button appropriately
       this.$api.bind('playStateChanged.rdio', $.proxy(function(e, playState) {
         deferred.then($.proxy(function () {
             this.updatePlayPauseButton();
+            //If the playState is "playing" (==1), we are no longer waiting for the track to load
+            if (playState === 1) loading = false;
           }), this);
       }, this));
       
@@ -70,7 +71,7 @@ define([
         // scale according the percent played of the track's duration
         this.$progressBarFill.css('width', Math.floor(100*position/this.duration)+'%');
         this.trackPosition = position;
-        console.log(position + ', loading: ' + loading);
+        console.log('Position: ' + position + ', sourcePos: ' + this.sourcePosition + ', loading: ' + loading);
       }, this));
       
       $.get('/rdio/getPlaybackToken', $.proxy(function (data) {
@@ -84,8 +85,8 @@ define([
       e.stopPropagation();
       e.preventDefault();
       deferred.then($.proxy(function () {
-        console.log("Play/pause toggle.");
-        //if (loading) return;
+        //If we're still waiting to load from Rdio, don't handle this.
+        if (loading) return;
         ++playing;
         playing % 2 ? this.$api.rdio().play() : this.$api.rdio().pause();
       }, this));
@@ -94,22 +95,29 @@ define([
       e.stopPropagation();
       e.preventDefault();
       deferred.then($.proxy(function () { 
-        //if (loading) return;
+        //If we're still waiting to load from Rdio, don't handle this.
+        if (loading) return;
         playing = 1;
+        loading = true;
         this.$api.rdio().next();
-        //loading = true;
       }, this));
     },
     playPrevious: function (e) {
       e.stopPropagation();
       e.preventDefault();
       deferred.then($.proxy(function () { 
-        //if (loading) return;
-        playing = (this.sourcePosition === 0) ? 0 : 1;
-        this.$api.rdio().previous();
-        if (this.trackPosition === 0) {
-          console.log("Loading previous song. " + this.trackPosition);
-          //loading = true;
+        //If we're still waiting to load from Rdio, don't handle this.
+        if (loading) return;
+        playing = 1;
+        //If we've played more than 5 seconds (or this is the first track)
+        // manually seek to the beginning of the current track instead of changing to the previous track
+        if (this.trackPosition >= 5 || this.sourcePosition === 0) {
+          this.$api.rdio().seek(0);
+        } else {
+          //Otherwise, seek to the beginning of this track and then change to the previous (ensures the right behavior)
+          this.$api.rdio().seek(0);
+          loading = true;
+          this.$api.rdio().previous();
         }
       }, this));
     },
