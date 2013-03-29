@@ -20,8 +20,7 @@ define([
       'click #dislike': 'dislike'
     },
     initialize: function () {
-      this.$el;//jquery object of the div
-      this.$duration = 1;
+      this.duration = 1;
       this.$api = this.$('#api');
       // Start playing the album with id a171827 when ready
       this.$api.bind('ready.rdio', $.proxy(function() {
@@ -31,17 +30,24 @@ define([
       // When the playing track has changed, adjust the album art, track, album, and artist info accordingly
       this.$api.bind('playingTrackChanged.rdio', $.proxy(function(e, playingTrack, sourcePosition) {
         if (playingTrack) {
-          this.$duration = playingTrack.duration;
+          // Save the current track's duration for computing the percent remaining
+          this.duration = playingTrack.duration;
+          // Update the album art div to reflect the current track's art
           $('#player-art').attr('src', playingTrack.icon);
+          // Update the currently playing track name
           $('#track').text(playingTrack.name);
+          // Update the currently playing track's artist name
           $('#artist').text('by ' + playingTrack.artist);
+          // Update the currently playing track's album name
           $('#album').text('from ' + playingTrack.album);
         }
       }, this));
       
       // Update the progress bar fill amount
       this.$api.bind('positionChanged.rdio', $.proxy(function(e, position) {
-        this.$progressBarFill.css('width', Math.floor(100*position/this.$duration)+'%');
+        // When Rdio calls the positionChanged callback function, adjust the width of the progress bar's "fill" to 
+        // scale according the percent played of the track's duration
+        this.$progressBarFill.css('width', Math.floor(100*position/this.duration)+'%');
       }, this));
       
       $.get('/rdio/getPlaybackToken', $.proxy(function (data) {
@@ -55,7 +61,7 @@ define([
       e.stopPropagation();
       e.preventDefault();
       this.$playPauseButton.text(playingText[++playing % 2]);
-      playing % 2 === 0 ? this.$api.rdio().pause() : this.$api.rdio().play();
+      playing % 2 ? this.$api.rdio().play() : this.$api.rdio().pause() ;
       this.$progressBarFill.css('-webkit-animation-play-state', function (i, v) {
         return v === 'paused' ? 'running' : 'paused';
       });
