@@ -17,6 +17,7 @@ require({
     'jqueryrdio': [
       'lib/jquery.rdio.min'
     ],
+    'async': 'lib/async',
     'text': 'lib/text'
   },
   shim: {
