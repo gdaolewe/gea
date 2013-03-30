@@ -1,3 +1,6 @@
+// Set global __appDir variable
+__appDir = __dirname;
+
 // Requirements
 var express = require('express'),
     routes = require('./routes'),
