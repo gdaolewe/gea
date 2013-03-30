@@ -39,7 +39,6 @@ define([
         if (playingTrack) {
           this.sourcePosition = sourcePosition;
           //Update the play/pause button correctly
-          console.log("playing: "+playing);
           deferred.then($.proxy(function () {
             this.updatePlayPauseButton();
           }), this);
@@ -71,7 +70,6 @@ define([
         // scale according the percent played of the track's duration
         this.$progressBarFill.css('width', Math.floor(100*position/this.duration)+'%');
         this.trackPosition = position;
-        console.log('Position: ' + position + ', sourcePos: ' + this.sourcePosition + ', loading: ' + loading);
       }, this));
       
       $.get('/rdio/getPlaybackToken', $.proxy(function (data) {
