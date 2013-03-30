@@ -49,6 +49,7 @@ app.configure('development', function () {
 app.get('/rdio/getPlaybackToken', routes.service.rdio.getPlaybackToken(app.get('domain')));
 app.get('/rdio/search', routes.service.rdio.search);
 app.post('/rate', routes.rate.post);
+app.get('/rate', routes.rate.get);
 
 // Launch server
 http.createServer(app).listen(app.get('port'), function () {
