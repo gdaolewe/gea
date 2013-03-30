@@ -1,9 +1,28 @@
 /*global define*/
-define(['backbone', 'util/jqr!'], function (bb) {
+define([
+  'backbone',
+  'util/constants',
+  './widgets/Loading',
+  'util/jqr!'
+], function (
+  bb,
+  constants,
+  LoadingWidget
+) {
   return new (bb.View.extend({
-    el: '#results',
+    el: '#search',
+    events: {
+      'keyup #search-input': 'keyup'
+    },
     initialize: function () {
-      this.$el.text('Search loaded.');
+      this.$input = this.$('#search-input');
+    },
+    keyup: function (e) {
+      if (e.keyCode === constants.KEY_ENTER) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.$el.append(new LoadingWidget().$el);
+      }
     }
   }))();
 });

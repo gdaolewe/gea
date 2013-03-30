@@ -10,7 +10,7 @@ body
   max-height 100%
 
 body
-  background-color#D6FFC2
+  background-color #D6FFC2
 
 #right
   position absolute
@@ -89,7 +89,66 @@ body
   overflow hidden
   background #ccc
 
-h2
-  text-align center
-  font-family Tahoma
-  color #8B1C62
+#search-input
+  width 100%
+  border 0
+
+.loading-widget
+  margin auto
+  position relative
+  width 128px
+  height 128px
+  animation fade-in 0.05s linear
+  .circle
+    position absolute
+    background #85DB30
+    width 29px
+    height 29px
+    border-radius 19px
+    animation loading-bounce 0.8s linear infinite
+    &._1
+      left 0
+      top 50px
+      animation-delay 0.3s
+    &._2
+      left 14px
+      top 14px
+      animation-delay 0.4s
+    &._3
+      top 0
+      left 50px
+      animation-delay 0.5s
+    &._4
+      right 14px
+      top 14px
+      animation-delay 0.6s
+    &._5
+      right 0
+      top 50px
+      animation-delay 0.7s
+    &._6
+      right 14px
+      bottom 14px
+      animation-delay 0.8s
+    &._7
+      left 50px
+      bottom 0
+      animation-delay 0.9s
+    &._8
+      left 14px
+      bottom 14px
+      animation-delay 1s
+
+@keyframes loading-bounce
+  from
+    transform scale(1)
+    opacity 1
+  to
+    transform scale(0.3)
+    opacity 0.2
+
+@keyframes fade-in
+  from
+    opacity 0
+  to
+    opacity 1
