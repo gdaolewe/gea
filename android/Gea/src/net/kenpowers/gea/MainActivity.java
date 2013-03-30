@@ -105,11 +105,12 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     }
     
     public void onTrackChanged(Track track) {
-    	if (track== null) {
+    	if (track==null) {
     		((TextView)findViewById(R.id.songInfoText)).setText("Nothing playing");
         	((TextView)findViewById(R.id.durationText)).setText("");
         	((TextView)findViewById(R.id.play)).setText("Play");
     	} else {
+    		Log.d(LOG_TAG, track.toString());
     		currentTrack = track;
 	    	String trackInfo = String.format("%s - %s (%s)", currentTrack.getName(), 
 	    			currentTrack.getArtist(), currentTrack.getAlbum());

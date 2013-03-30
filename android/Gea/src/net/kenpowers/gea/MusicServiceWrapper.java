@@ -72,8 +72,9 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback,
 		}
 	}
 	
-	public void getPlayerForTrack(String trackKey, String sourceKey) {
-		new RdioMediaPlayerTask(this).execute(trackKey, sourceKey);
+	public void getPlayerForTrack(Track track) {
+		currentTrack = track;
+		new RdioMediaPlayerTask(this).execute(currentTrack.getKey(), null);
 	}
 	
 	public void search(String query, String types) {
@@ -135,12 +136,6 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback,
 			}
 			
 			notifySearchCompleteListeners(results);
-			
-			
-			//currentTrack = new Track(tracks.getString("key"), tracks.getString("name"),
-			//		tracks.getString("artist"), tracks.getString("album"), 
-			//		tracks.getString("icon"), tracks.getInt("duration"));
-			//new RdioMediaPlayerTask(this).execute(currentTrack.getKey(), null);
 			
 		} catch (JSONException e) {
 			Log.d(MainActivity.LOG_TAG,"JSON exception");

@@ -46,8 +46,6 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 		for (int i=0; i<results.length; i++)
 			resultsStrings[i] = results[i].toString();
 		
-		Log.d(MainActivity.LOG_TAG, "Hello from onsearchcomplete" + resultsStrings[0]);
-		
 		setListAdapter(new ArrayAdapter<String>(this, R.layout.search_result, resultsStrings));
 		
 		ListView listview = getListView();
@@ -56,8 +54,10 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 	
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		MusicServiceObject item = searchResults[position];
-		if (item.getType().equals("track"));
-			MusicServiceWrapper.getInstance(MainActivity.getAppContext()).getPlayerForTrack(item.getKey(), null);
+		if (item.getType().equals("track")) {
+			MusicServiceWrapper.getInstance(MainActivity.getAppContext()).getPlayerForTrack((Track)item);
+			finish();
+		}
 	}
 
 }
