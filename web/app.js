@@ -1,3 +1,6 @@
+// Set global __appDir variable
+__appDir = __dirname;
+
 // Requirements
 var express = require('express'),
     routes = require('./routes'),
@@ -43,11 +46,10 @@ app.configure('development', function () {
 });
 
 // Set up routes
-app.get('/song/:id', routes.meta.song);
-app.get('/album/:id', routes.meta.album);
-app.get('/artist/:id', routes.meta.artist);
 app.get('/rdio/getPlaybackToken', routes.service.rdio.getPlaybackToken(app.get('domain')));
 app.get('/rdio/search', routes.service.rdio.search);
+app.post('/rate', routes.rate.post);
+app.get('/rate', routes.rate.get);
 
 // Launch server
 http.createServer(app).listen(app.get('port'), function () {
