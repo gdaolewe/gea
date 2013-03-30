@@ -30,6 +30,9 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         
         music = new MusicServiceWrapper(this);
         //music.search("Lethargica", "Song");
+        
+        //MapFragment mf = MapFragment.newInstance();
+        
     }
 
 
