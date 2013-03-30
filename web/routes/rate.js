@@ -1,9 +1,14 @@
 // requirements
 var pg = require('pg'),
     async = require('async'),
-    q = require('q'),
+    fs = require('fs'),
+    path = require('path'),
     util = require('util'),
     config = require('../db/database.json')[process.env.NODE_ENV === 'production' ? 'prod' : 'dev'];
+
+// import sql queries
+const DML_DIR = path.join(__dirname, '../db/dml');
+const GET_SONG = fs.readFileSync(path.join(DML_DIR, 'getSong.sql'), 'utf8');
 
 // verdicts definition
 const VERDICTS = {
@@ -11,35 +16,35 @@ const VERDICTS = {
   dislike: -1
 };
 
-// Defer queries until we're ready
-var deferred = q.defer();
-
-// pg client
+// pg connection string
 var conString = util.format('tcp://%s:%s@%s:%d/%s', config.user, config.password, config.host, config.port, config.database);
-var client = new pg.Client(conString);
-
-// Connect and resolve deferred
-client.connect(function (err) {
-  if (err) {
-    throw err;
-  }
-  deferred.resolve();
-});
+pg.defaults.poolSize = config['max_connections'];
 
 // Queue for processing SQL queries
 var workQueue = async.queue(function (task, callback) {
-  deferred.promise.then(function () {
-    task.connected = true;
-    callback();
-  }, config['max_connections']);
+  pg.connect(conString, function (err, client, done) {
+    if (err) {
+      callback(err);
+      done(err);
+    }
+    client.query(task, callback);
+    done();
+  });
 });
 
 module.exports = {
   // POST /rate?from=<rdio>&id=<id>&verdict=<like|dislike>
   post: function (req, res) {
-    var task = {now: new Date().getTime(), query: req.query};
-    workQueue.push(task, function (err) {
-      res.json(task);
+    workQueue.push({
+      name: 'get_song',
+      text: GET_SONG,
+      values: [req.query.id]
+    }, function (err, result) {
+      if (err) {
+        res.json(err);
+        return;
+      }
+      res.json(result.rows);
     });
   }
 };
