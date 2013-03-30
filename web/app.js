@@ -43,11 +43,9 @@ app.configure('development', function () {
 });
 
 // Set up routes
-app.get('/song/:id', routes.meta.song);
-app.get('/album/:id', routes.meta.album);
-app.get('/artist/:id', routes.meta.artist);
 app.get('/rdio/getPlaybackToken', routes.service.rdio.getPlaybackToken(app.get('domain')));
 app.get('/rdio/search', routes.service.rdio.search);
+app.post('/rate', routes.rate.post);
 
 // Launch server
 http.createServer(app).listen(app.get('port'), function () {

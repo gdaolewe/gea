@@ -5,7 +5,8 @@
     "password": "gea",
     "host": "localhost",
     "port": 5432,
-    "database": "gea"
+    "database": "gea",
+    "max_connections": 5
   },
   "prod": {
     "driver": "pg",
@@ -13,6 +14,7 @@
     "password": "PRODUCTION PASSWORD HERE",
     "host": "PRODUCTION HOST HERE",
     "port": 5432,
-    "database": "PRODUCTION DATABASE HERE"
+    "database": "PRODUCTION DATABASE HERE",
+    "max_connections": null
   }
 }
