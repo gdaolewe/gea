@@ -12,5 +12,6 @@
 	<string name="search_hint">search</string>
 	<string name="search_submit_button_text">Go</string>
 	<string name="song_info_placeholder_text">Nothing playing</string>
+	<string name="search_label">search</string>
 	
 </resources>

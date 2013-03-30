@@ -11,21 +11,65 @@ import com.rdio.android.api.RdioListener;
 import com.rdio.android.api.services.RdioAuthorisationException;
 import com.rdio.android.api.RdioSubscriptionType;
 
+import java.util.List;
 import java.util.ArrayList;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.*;
 
 
 
-public class MusicServiceWrapper implements RdioListener, RdioApiCallback {
+public class MusicServiceWrapper implements RdioListener, RdioApiCallback, 
+											SearchCompletePublisher, TrackChangedPublisher {
+	private static final MusicServiceWrapper INSTANCE = new MusicServiceWrapper();
+	
+	
+	
 	private final String rdioKey = "9d3ayynanambvwxq5wpnw82y";
 	private final String rdioSecret = "CdNPjjcrPW";
 	private MediaPlayer player;
 	
-	private Rdio rdio;
 	
-	public MusicServiceWrapper (Context context) {
-		rdio = new Rdio(rdioKey, rdioSecret, null, null, context, this);
+	private Rdio rdio;
+	private Track currentTrack;
+	
+	private MusicServiceWrapper () {
+		searchCompleteListeners = new ArrayList<SearchCompleteListener>();
+		trackChangedListeners = new ArrayList<TrackChangedListener>();
+	}
+	
+	public static MusicServiceWrapper getInstance (Context context) {
+		if (INSTANCE.rdio == null)
+			INSTANCE.rdio = new Rdio(INSTANCE.rdioKey, INSTANCE.rdioSecret, null, null, context, INSTANCE);
+		return INSTANCE;
+	}
+	
+	private List<SearchCompleteListener> searchCompleteListeners;
+	
+	public void registerSearchCompleteListener(SearchCompleteListener listener) {
+		searchCompleteListeners.add(listener);
+	}
+	public void notifySearchCompleteListeners(MusicServiceObject[] results) {
+		for (SearchCompleteListener l : searchCompleteListeners)
+			l.onSearchComplete(results);
+	}
+	
+	private List<TrackChangedListener> trackChangedListeners;
+	
+	public void registerTrackChangedListener(TrackChangedListener listener) {
+		trackChangedListeners.add(listener);
+	}
+	public void notifyTrackChangedListeners(Track track) {
+		for (TrackChangedListener listener: trackChangedListeners)
+			listener.onTrackChanged(track);
+	}
+	
+	public void cleanup() {
+		rdio.cleanup();
+		if (player != null) {
+			player.reset();
+			player.release();
+			player = null;
+		}
 	}
 	
 	public void getPlayerForTrack(String trackKey, String sourceKey) {
@@ -65,33 +109,57 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback {
 	
 	public void onApiSuccess(JSONObject result) {
 		try {
-			Log.d(MainActivity.LOG_TAG, result.toString(2));
-			JSONObject resultsObject = (JSONObject) (result.getJSONObject("result")
-					.getJSONArray("results").get(0));
-			String trackKey = resultsObject.get("key").toString();
-			Log.d(MainActivity.LOG_TAG, "track name: " + resultsObject.get("name").toString() + 
-					"\nartist: " + resultsObject.get("artist") + "\nalbum: " + resultsObject.get("album")
-					+ "\ntrackKey: " + trackKey);
-			new RdioMediaPlayerTask(this).execute(trackKey, null);
+			//Log.d(MainActivity.LOG_TAG, result.toString(2));
+			JSONArray resultsJSON = result.getJSONObject("result").getJSONArray("results");
 			
-		} catch (Exception e) {
-			Log.d(MainActivity.LOG_TAG,"Pretty printing JSON failed, printing without pretty print");
-			Log.d(MainActivity.LOG_TAG, result.toString());
+			MusicServiceObject[] results = new MusicServiceObject[resultsJSON.length()];
+			for (int i=0; i<resultsJSON.length(); i++) {
+				JSONObject obj = resultsJSON.getJSONObject(i);
+				
+				String key = obj.getString("key");
+				String type = obj.getString("type");
+				
+				
+				if (type.equals("t")) {
+					results[i] = new Track(key, "track", obj.getString("name"), obj.getString("artist"),
+							obj.getString("album"), obj.getString("icon"), obj.getInt("duration"));
+					Log.d(MainActivity.LOG_TAG, results[i].toString());
+					
+				} else if (key.equals("r")) {
+					
+				} else if (key.equals("a")) {
+					
+				} else {
+					Log.e(MainActivity.LOG_TAG, "Invalid result type");
+				}
+			}
+			
+			notifySearchCompleteListeners(results);
 			
 			
+			//currentTrack = new Track(tracks.getString("key"), tracks.getString("name"),
+			//		tracks.getString("artist"), tracks.getString("album"), 
+			//		tracks.getString("icon"), tracks.getInt("duration"));
+			//new RdioMediaPlayerTask(this).execute(currentTrack.getKey(), null);
+			
+		} catch (JSONException e) {
+			Log.d(MainActivity.LOG_TAG,"JSON exception");
+				
 		}
 		
 	}
 	
 	public void mediaPlayerReady(MediaPlayer player) {
-		
-		this.player = player;
 		try {
 			player.prepare();
 			if (this.player != null) {
-				this.player.stop();
+				this.player.reset();
+				this.player.release();
+				this.player = null;
 			}
 			player.start();
+			this.player = player;
+			notifyTrackChangedListeners(currentTrack);
 		} catch(Exception e) {
 			Log.e(MainActivity.LOG_TAG, e.toString());
 		}
@@ -111,13 +179,11 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback {
 			return rdio.getPlayerForTrack(params[0], params[1], true);
 			
 		}
-		
+
 		@Override
 	    protected void onPostExecute(MediaPlayer result) {
 	        super.onPostExecute(result);
 	        callback.mediaPlayerReady(result);
 	    }
-		
-		
 	}
 }
