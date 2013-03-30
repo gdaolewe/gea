@@ -1,30 +1,15 @@
 // Requirements
-var OAuth = require('oauth').OAuth;
+var rdio = require('./util/rdio');
 
 // These routes deal with streaming services
 // Right now, we only support Rdio.
-
-// Read in Rdio config
-var rdioConfig = require('../config/rdio.json');
-rdioConfig.url = 'http://api.rdio.com/1/';
-
-// Create OAuth instance for rdio
-var roa = new OAuth(
-  'http://api.rdio.com/oauth/request_token',
-  'http://api.rdio.com/oauth/access_token',
-  rdioConfig.key,
-  rdioConfig.secret,
-  '1.0',
-  null,
-  'HMAC-SHA1'
-);
 
 // Rdio routes
 exports.rdio = {
   getPlaybackToken: function (domain) {
     return function (req, res) {
       // Get playback token from rdio and respond to client
-      doUnauthenticatedRdioRequest({
+      rdio.doUnauthenticatedRequest({
         method: 'getPlaybackToken',
         domain: domain
       }, basicResponder(res));
@@ -52,7 +37,7 @@ exports.rdio = {
       args.count = q.count;
     }
     // Search Rdio and respond to client
-    doUnauthenticatedRdioRequest(args, basicResponder(res));
+    rdio.doUnauthenticatedRequest(args, basicResponder(res));
   }
 };
 
@@ -65,23 +50,4 @@ function basicResponder(res) {
       res.json(data);
     }
   }
-}
-
-// Executes a signed request to rdio with no authentication
-// args is a hash with method set to the method and all other keys set to rdio arguments
-// callback should accept err and data
-function doUnauthenticatedRdioRequest(args, callback) {
-  roa.post(
-    rdioConfig.url,
-    null, // No auth token
-    null, // No auth secret
-    args,
-    function (err, data) {
-      if (err) {
-        callback(err);
-      } else {
-        callback(err, JSON.parse(data))
-      }
-    }
-  );
 }
