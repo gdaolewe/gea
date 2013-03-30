@@ -3,13 +3,14 @@ package net.kenpowers.gea;
 import org.json.simple.*;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.*;
 
-public class MainActivity extends Activity implements RequestTaskCompleteListener {
+public class MainActivity extends FragmentActivity implements RequestTaskCompleteListener {
 	
 	static final String LOG_TAG = "Gea";
 	final String baseURL = "http://gea.kenpowers.net";
@@ -27,6 +28,8 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         
         String[] params = {"song","1"};
         new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
+        
+        //MapFragment = MapFragment.newInstance();
         
         music = new MusicServiceWrapper(this);
         //music.search("Lethargica", "Song");

@@ -69,6 +69,7 @@
         </GridLayout>
     </LinearLayout>
 
+    
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="wrap_content"
@@ -83,7 +84,7 @@
             android:layout_height="wrap_content"
             android:text="Title: " />
     </LinearLayout>
-
+    
     <TextView
         android:id="@+id/artistText"
         android:layout_width="wrap_content"
@@ -99,6 +100,15 @@
         android:layout_below="@+id/artistText"
         android:layout_centerHorizontal="true"
         android:text="Album: " />
+    
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    
+        
+        
 
     <Button
         android:id="@+id/searchSubmit"
