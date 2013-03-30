@@ -1,0 +1,18 @@
+{
+  "dev": {
+    "driver": "pg",
+    "user": "gea",
+    "password": "gea",
+    "host": "localhost",
+    "port": 5432,
+    "database": "gea"
+  },
+  "prod": {
+    "driver": "pg",
+    "user": "PRODUCTION USERNAME HERE",
+    "password": "PRODUCTION PASSWORD HERE",
+    "host": "PRODUCTION HOST HERE",
+    "port": 5432,
+    "database": "PRODUCTION DATABASE HERE"
+  }
+}
