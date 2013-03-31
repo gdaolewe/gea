@@ -12,7 +12,6 @@ define([
 ) {
   var playing = 0;
   var song = null;
-  //var playingText = ['Play', 'Pause'];
   var playingImg = ['images/play.png', 'images/pause.png'];
   var loading = false;
   var deferred = new promise.Promise();
