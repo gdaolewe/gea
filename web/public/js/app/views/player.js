@@ -15,6 +15,7 @@ define([
   var playingText = ['Play', 'Pause'];
   var loading = false;
   var deferred = new promise.Promise();
+  var currentRdioId = 'a171827';
 
   return new (bb.View.extend({
     el: '#player',
@@ -36,11 +37,12 @@ define([
       this.trackPosition = 0;
       this.sourcePosition = 0;
       this.$api = this.$('#api');
-      // Queue the album with id a171827 when ready
+      // Queue the first album when ready
       this.$api.on('ready.rdio', $.proxy(function() {
-        this.$api.rdio().queue('a171827');
+        this.$api.rdio().queue(currentRdioId);
         // Listen for new songs to play
         vent.on('play-key', $.proxy(function (key) {
+          currentRdioId = key;
           this.$api.rdio().play(key);
         }, this));
       }, this));
@@ -136,12 +138,16 @@ define([
     like: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      console.log('Like!');
+      $.post('/rate?from=rdio&id=' + currentRdioId + '&verdict=like', function () {
+        alert('Like submitted! :D');
+      });
     },
     dislike: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      console.log('Dislike!');
+      $.post('/rate?from=rdio&id=' + currentRdioId + '&verdict=dislike', function () {
+        alert('Dislike submitted! >:(');
+      });
     },
     updatePlayPauseButton: function () {
       this.$playPauseButton.text(playingText[playing % 2]);
