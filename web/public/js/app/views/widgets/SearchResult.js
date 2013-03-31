@@ -20,7 +20,7 @@ define(['backbone', 'text!./SearchResult.html'], function (bb, html) {
         key: this.model.get('key'),
         name: this.model.get('name')
       }));
-
+      // Artist results don't have an artist field (ironically)
       if (this.$el.hasClass('r')) {
         this.$('.artist').remove();
       }
