@@ -103,6 +103,9 @@ module.exports = {
     });
   },
   // GET / recieve?artist=<artist>&album=<album>&title=<title>&pastHours=<pastHours>&timeStart=<timeStart>&timeEnd=<timeEnd>
+  // Artist is optional
+  // If artist is specified, then album || title can be specified.
+  // pastHours || (timeStart && timeEnd) are optional, pastHours takes precedent -- default is 24 hours
   get: function (req, res) {
     // Reference all parameters
     var artist = req.query.artist;
