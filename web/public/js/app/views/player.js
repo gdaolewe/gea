@@ -2,11 +2,13 @@
 define([
   'backbone',
   'promise',
+  'app/vent',
   'jqueryrdio',
   'util/jqr!'
 ], function (
   bb,
-  promise
+  promise,
+  vent
 ) {
   var playing = 0;
   var song = null;
@@ -34,13 +36,17 @@ define([
       this.trackPosition = 0;
       this.sourcePosition = 0;
       this.$api = this.$('#api');
-      // Start playing the album with id a171827 when ready
-      this.$api.bind('ready.rdio', $.proxy(function() {
+      // Queue the album with id a171827 when ready
+      this.$api.on('ready.rdio', $.proxy(function() {
         this.$api.rdio().queue('a171827');
+        // Listen for new songs to play
+        vent.on('play-key', $.proxy(function (key) {
+          this.$api.rdio().play(key);
+        }, this));
       }, this));
 
       // When the playing track has changed, adjust the album art, track, album, and artist info accordingly
-      this.$api.bind('playingTrackChanged.rdio', $.proxy(function(e, playingTrack, sourcePosition) {
+      this.$api.on('playingTrackChanged.rdio', $.proxy(function(e, playingTrack, sourcePosition) {
         deferred.done();
         if (playingTrack) {
           this.sourcePosition = sourcePosition;
@@ -64,7 +70,7 @@ define([
       }, this));
 
       // When the play-state has changed, adjust the play/pause button appropriately
-      this.$api.bind('playStateChanged.rdio', $.proxy(function(e, playState) {
+      this.$api.on('playStateChanged.rdio', $.proxy(function(e, playState) {
         deferred.then($.proxy(function () {
             this.updatePlayPauseButton();
             //If the playState is "playing" (==1), we are no longer waiting for the track to load
@@ -73,7 +79,7 @@ define([
       }, this));
 
       // Update the progress bar fill amount
-      this.$api.bind('positionChanged.rdio', $.proxy(function(e, position) {
+      this.$api.on('positionChanged.rdio', $.proxy(function(e, position) {
         // When Rdio calls the positionChanged callback function, adjust the width of the progress bar's "fill" to
         // scale according the percent played of the track's duration
         this.$progressBarFill.css('width', Math.floor(100*position/this.duration)+'%');

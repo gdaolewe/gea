@@ -1,5 +1,13 @@
 /*global define*/
-define(['backbone', 'text!./SearchResult.html'], function (bb, html) {
+define([
+  'backbone',
+  'text!./SearchResult.html',
+  'app/vent'
+], function (
+  bb,
+  html,
+  vent
+) {
   // Template
   var template = _.template(html);
 
@@ -20,13 +28,17 @@ define(['backbone', 'text!./SearchResult.html'], function (bb, html) {
         key: this.model.get('key'),
         name: this.model.get('name')
       }));
-      // Artist results don't have an artist field (ironically)
+
       if (this.$el.hasClass('r')) {
+        // Artist results don't have an artist field (ironically)
         this.$('.artist').remove();
+      } else if (this.$el.hasClass('a')) {
+        // Remove album from album results
+        this.$('.album').remove()
       }
     },
     click: function () {
-      console.log(this.model);
+      vent.trigger('play-key', this.model.get('key'));
     }
   });
 });
