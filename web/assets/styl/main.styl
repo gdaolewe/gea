@@ -19,6 +19,7 @@ body
   right 0
   width 300px
   height 100%
+  overflow hidden
 
 #player-art
   width 300px
@@ -89,9 +90,38 @@ body
   overflow hidden
   background #ccc
 
+#search
+  background #fff
+
 #search-input
   width 100%
-  border 0
+  border 2px solid #eee
+
+#search-results
+  overflow-y auto
+  .result
+    position relative
+    cursor pointer
+    opacity .75
+    transition opacity .4s
+    &:hover
+      opacity 1
+      transition opacity .2s
+    height 50px
+    &:nth-child(even)
+      background #fff
+    &:nth-child(odd)
+      background #eee
+    .icon
+      position absolute
+      left 0
+      img
+        width 50px
+        height 50px
+    .meta
+      width 245px
+      position absolute
+      left 55px
 
 .loading-widget
   margin auto
