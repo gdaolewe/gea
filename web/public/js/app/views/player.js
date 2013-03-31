@@ -2,11 +2,13 @@
 define([
   'backbone',
   'promise',
+  'app/vent',
   'jqueryrdio',
   'util/jqr!'
 ], function (
   bb,
-  promise
+  promise,
+  vent
 ) {
   var playing = 0;
   var song = null;
@@ -14,6 +16,7 @@ define([
   var playingImg = ['images/play.png', 'images/pause.png'];
   var loading = false;
   var deferred = new promise.Promise();
+  var currentRdioId = 'a171827';
 
   return new (bb.View.extend({
     el: '#player',
@@ -25,17 +28,28 @@ define([
       'click #dislike': 'dislike'
     },
     initialize: function () {
+      // Cache selectors
+      this.$art = this.$('#player-art');
+      this.$track = this.$('#track');
+      this.$artist = this.$('#artist');
+      this.$album = this.$('#album');
+      // Player parameters
       this.duration = 1;
       this.trackPosition = 0;
       this.sourcePosition = 0;
       this.$api = this.$('#api');
-      // Start playing the album with id a171827 when ready
-      this.$api.bind('ready.rdio', $.proxy(function() {
-        this.$api.rdio().queue('a171827');
+      // Queue the first album when ready
+      this.$api.on('ready.rdio', $.proxy(function() {
+        this.$api.rdio().queue(currentRdioId);
+        // Listen for new songs to play
+        vent.on('play-key', $.proxy(function (key) {
+          currentRdioId = key;
+          this.$api.rdio().play(key);
+        }, this));
       }, this));
-      
+
       // When the playing track has changed, adjust the album art, track, album, and artist info accordingly
-      this.$api.bind('playingTrackChanged.rdio', $.proxy(function(e, playingTrack, sourcePosition) {
+      this.$api.on('playingTrackChanged.rdio', $.proxy(function(e, playingTrack, sourcePosition) {
         deferred.done();
         if (playingTrack) {
           this.sourcePosition = sourcePosition;
@@ -46,33 +60,35 @@ define([
           // Save the current track's duration for computing the percent remaining
           this.duration = playingTrack.duration;
           // Update the album art div to reflect the current track's art
-          $('#player-art').attr('src', playingTrack.icon);
+          this.$art.attr('src', playingTrack.icon);
           // Update the currently playing track name
-          $('#track').text(playingTrack.name);
+          this.$track.text(playingTrack.name);
           // Update the currently playing track's artist name
-          $('#artist').text(playingTrack.artist);
+          this.$artist.text(playingTrack.artist);
           // Update the currently playing track's album name
-          $('#album').text(playingTrack.album);
+          this.$album.text(playingTrack.album);
+          // Trigger reflow event
+          this.$el.trigger('reflow');
         }
       }, this));
-      
+
       // When the play-state has changed, adjust the play/pause button appropriately
-      this.$api.bind('playStateChanged.rdio', $.proxy(function(e, playState) {
+      this.$api.on('playStateChanged.rdio', $.proxy(function(e, playState) {
         deferred.then($.proxy(function () {
             this.updatePlayPauseButton();
             //If the playState is "playing" (==1), we are no longer waiting for the track to load
             if (playState === 1) loading = false;
           }), this);
       }, this));
-      
+
       // Update the progress bar fill amount
-      this.$api.bind('positionChanged.rdio', $.proxy(function(e, position) {
-        // When Rdio calls the positionChanged callback function, adjust the width of the progress bar's "fill" to 
+      this.$api.on('positionChanged.rdio', $.proxy(function(e, position) {
+        // When Rdio calls the positionChanged callback function, adjust the width of the progress bar's "fill" to
         // scale according the percent played of the track's duration
         this.$progressBarFill.css('width', Math.floor(100*position/this.duration)+'%');
         this.trackPosition = position;
       }, this));
-      
+
       $.get('/rdio/getPlaybackToken', $.proxy(function (data) {
         this.$api.rdio(data.result);
       }, this));
@@ -94,7 +110,7 @@ define([
     playNext: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      deferred.then($.proxy(function () { 
+      deferred.then($.proxy(function () {
         //If we're still waiting to load from Rdio, don't handle this.
         if (loading) return;
         playing = 1;
@@ -105,7 +121,7 @@ define([
     playPrevious: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      deferred.then($.proxy(function () { 
+      deferred.then($.proxy(function () {
         //If we're still waiting to load from Rdio, don't handle this.
         if (loading) return;
         playing = 1;
@@ -124,19 +140,16 @@ define([
     like: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      console.log('Like!');
-	  this.$likeImg.disable();
-	  
+      $.post('/rate?from=rdio&id=' + currentRdioId + '&verdict=like', function () {
+        alert('Like submitted! :D');
+      });
     },
     dislike: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      console.log('Dislike!');
-    },
-    render: function () {
-      /*$.when($.get('/artist/' + song.get('artist')), $.get('/album/' + song.get('album'))).done($.proxy(function (artist, album) {
-        this.$metadata.text(album[0].title + ' - ' + song.get('title') + ' by ' + artist[0].name);
-      }, this));*/
+      $.post('/rate?from=rdio&id=' + currentRdioId + '&verdict=dislike', function () {
+        alert('Dislike submitted! >:(');
+      });
     },
     updatePlayPauseButton: function () {
       this.$playPauseButton.attr('src', playingImg[playing % 2]);//text(playingText[playing % 2]);
