@@ -105,28 +105,37 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     	if (track==null) {
     		((TextView)findViewById(R.id.songInfoText)).setText("Nothing playing");
         	((TextView)findViewById(R.id.durationText)).setText("");
-        	((TextView)findViewById(R.id.play)).setText("Play");
+        	((TextView)findViewById(R.id.play_pause_button)).setText("Play");
         	((TextView)findViewById(R.id.currentPositionText)).setText("0:00");
         	((TextView)findViewById(R.id.durationText)).setText("0:00");
         	trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
     	} else {
     		Log.d(LOG_TAG, track.toString());
     		currentTrack = track;
-	    	String trackInfo = String.format("%s - %s (%s)", currentTrack.getName(), 
-	    			currentTrack.getArtist(), currentTrack.getAlbum());
+	    	String trackInfo = String.format(currentTrack.toString());
 	    	((TextView)findViewById(R.id.songInfoText)).setText(trackInfo);
-	    	((TextView)findViewById(R.id.durationText)).setText(secondsToTimeFormat(track.getDuration()));
-	    	((TextView)findViewById(R.id.play)).setText("Pause");
+	    	((TextView)findViewById(R.id.play_pause_button)).setText("Pause");
+	    	String duration = secondsToTimeFormat(track.getDuration());
+	    	((TextView)findViewById(R.id.durationText)).setText(duration);
 	    	trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
     	}
     }
     
+    public void togglePaused(View view) {
+    	if (view.getId() == R.id.play_pause_button)
+    		music.togglePlayerPaused();
+    	TextView button = (TextView)findViewById(R.id.play_pause_button);
+    	if (button.getText().equals("Play"))
+    		button.setText("Pause");
+    	else
+    		button.setText("Play");
+    }
+    
     private Runnable updateTrackPositionTask = new Runnable() {
 	    public void run() {
-			int currentPosition = 0;
-			currentPosition = music.getPlayerPosition() / 1000;
-			((TextView)findViewById(R.id.currentPositionText)).setText(secondsToTimeFormat(currentPosition));
-			trackPositionUpdateHandler.postDelayed(this, 1000);
+			String currentPosition = secondsToTimeFormat(music.getPlayerPosition()/1000);
+			((TextView)findViewById(R.id.currentPositionText)).setText(currentPosition);
+			trackPositionUpdateHandler.postDelayed(this, 100);
 	    }
     };
     

@@ -26,6 +26,6 @@ public class Track extends MusicServiceObject {
 	}
 	
 	public String toString() {
-		return name + " - " + artist + " (" + album + ")";
+		return artist + " - " + name + " (" + album + ")";
 	}
 }

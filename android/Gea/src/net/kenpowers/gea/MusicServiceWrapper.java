@@ -92,6 +92,23 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 		}
 	}
 	
+	public int getPlayerDuration() {
+		if (player==null)
+			return 0;
+		else {
+			return player.getDuration();
+		}
+	}
+	
+	public void togglePlayerPaused() {
+		if (player != null) {
+			if (player.isPlaying())
+				player.pause();
+			else
+				player.start();
+		}
+	}
+	
 	public void search(String query, String types) {
 		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("query", query));

@@ -11,7 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class SearchActivity extends ListActivity implements SearchCompleteListener, AdapterView.OnItemClickListener {
+public class SearchActivity extends ListActivity implements SearchCompleteListener {
 	private MusicServiceObject searchResults[];
 	/** Called when the activity is first created. */
 	@Override
@@ -49,15 +49,29 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 		setListAdapter(new ArrayAdapter<String>(this, R.layout.search_result, resultsStrings));
 		
 		ListView listview = getListView();
-		listview.setOnItemClickListener(this);
+		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				listItemSelected(position);
+			}
+		});
+		listview.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				listItemSelected(position);
+			}
+			public void onNothingSelected(AdapterView<?> parent) {}
+		});
 	}
 	
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+	public void listItemSelected(int position) {
 		MusicServiceObject item = searchResults[position];
 		if (item.getType().equals("track")) {
 			MusicServiceWrapper.getInstance(MainActivity.getAppContext()).getPlayerForTrack((Track)item);
 			finish();
 		}
 	}
+	
+	
+	
+	
 
 }
