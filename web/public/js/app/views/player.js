@@ -10,7 +10,8 @@ define([
 ) {
   var playing = 0;
   var song = null;
-  var playingText = ['Play', 'Pause'];
+  //var playingText = ['Play', 'Pause'];
+  var playingImg = ['images/play.png', 'images/pause.png'];
   var loading = false;
   var deferred = new promise.Promise();
 
@@ -78,6 +79,7 @@ define([
       this.$playPauseButton = this.$('#play-pause');
       this.updatePlayPauseButton();
       this.$progressBarFill = this.$('#fill');
+	  this.$likeImg = this.$('#like'); //creates global var in initialized function
     },
     togglePlay: function (e) {
       e.stopPropagation();
@@ -123,6 +125,8 @@ define([
       e.stopPropagation();
       e.preventDefault();
       console.log('Like!');
+	  this.$likeImg.disable();
+	  
     },
     dislike: function (e) {
       e.stopPropagation();
@@ -135,7 +139,7 @@ define([
       }, this));*/
     },
     updatePlayPauseButton: function () {
-      this.$playPauseButton.text(playingText[playing % 2]);
+      this.$playPauseButton.attr('src', playingImg[playing % 2]);//text(playingText[playing % 2]);
     }
   }))();
 });
