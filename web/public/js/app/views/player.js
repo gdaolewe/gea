@@ -49,9 +49,9 @@ define([
           // Update the currently playing track name
           $('#track').text(playingTrack.name);
           // Update the currently playing track's artist name
-          $('#artist').text('by ' + playingTrack.artist);
+          $('#artist').text(playingTrack.artist);
           // Update the currently playing track's album name
-          $('#album').text('from ' + playingTrack.album);
+          $('#album').text(playingTrack.album);
         }
       }, this));
       
