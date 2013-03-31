@@ -36,6 +36,9 @@ module.exports = {
     pg.connect(function (err, client, done) {
       async.waterfall([
         function (next) {
+          if (err) {
+            return next(err);
+          }
           client.query({
             name: 'get_song',
             text: GET_SONG,
