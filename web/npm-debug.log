@@ -1,0 +1,89 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'install' ]
+2 info using npm@1.2.15
+3 info using node@v0.10.2
+4 verbose node symlink C:\Program Files\nodejs\\node.exe
+5 verbose read json C:\Users\Christine\Desktop\Stuff\GEA\gea\web\package.json
+6 warn package.json GEA@0.0.1a No README.md file found!
+7 verbose readDependencies using package.json deps
+8 verbose install where, deps [ 'C:\\Users\\Christine\\Desktop\\Stuff\\GEA\\gea\\web',
+8 verbose install   [ 'express',
+8 verbose install     'oauth',
+8 verbose install     'connect-static-transform',
+8 verbose install     'stylus',
+8 verbose install     'nib',
+8 verbose install     'pg',
+8 verbose install     'db-migrate',
+8 verbose install     'async' ] ]
+9 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\package.json
+10 info preinstall GEA@0.0.1a
+11 verbose read json C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\async\package.json
+12 verbose read json C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\connect-static-transform\package.json
+13 verbose read json C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\db-migrate\package.json
+14 verbose read json C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\express\package.json
+15 verbose read json C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\nib\package.json
+16 verbose read json C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\oauth\package.json
+17 verbose read json C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\pg\package.json
+18 verbose read json C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\stylus\package.json
+19 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\package.json
+20 verbose readDependencies using package.json deps
+21 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\async\package.json
+22 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\connect-static-transform\package.json
+23 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\db-migrate\package.json
+24 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\express\package.json
+25 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\nib\package.json
+26 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\oauth\package.json
+27 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\pg\package.json
+28 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\node_modules\stylus\package.json
+29 verbose already installed skipping express@3.0.0 C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+30 verbose already installed skipping oauth@0.9.10 C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+31 verbose already installed skipping connect-static-transform@0.5.1 C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+32 verbose already installed skipping stylus@0.32.1 C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+33 verbose already installed skipping nib@0.9.1 C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+34 verbose already installed skipping pg@0.15.1 C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+35 verbose already installed skipping db-migrate@0.4.1 C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+36 verbose already installed skipping async@0.2.6 C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+37 silly resolved []
+38 info build C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+39 verbose from cache C:\Users\Christine\Desktop\Stuff\GEA\gea\web\package.json
+40 verbose linkStuff [ false,
+40 verbose linkStuff   false,
+40 verbose linkStuff   false,
+40 verbose linkStuff   'C:\\Users\\Christine\\Desktop\\Stuff\\GEA\\gea' ]
+41 info linkStuff GEA@0.0.1a
+42 verbose linkBins GEA@0.0.1a
+43 verbose linkMans GEA@0.0.1a
+44 verbose rebuildBundles GEA@0.0.1a
+45 verbose rebuildBundles [ '.bin',
+45 verbose rebuildBundles   'async',
+45 verbose rebuildBundles   'connect-static-transform',
+45 verbose rebuildBundles   'db-migrate',
+45 verbose rebuildBundles   'express',
+45 verbose rebuildBundles   'nib',
+45 verbose rebuildBundles   'oauth',
+45 verbose rebuildBundles   'pg',
+45 verbose rebuildBundles   'stylus' ]
+46 info install GEA@0.0.1a
+47 verbose unsafe-perm in lifecycle true
+48 silly exec cmd "/c" "./getLibs.sh"
+49 silly cmd,/c,./getLibs.sh,C:\Users\Christine\Desktop\Stuff\GEA\gea\web spawning
+50 info GEA@0.0.1a Failed to exec install script
+51 error GEA@0.0.1a install: `./getLibs.sh`
+51 error `cmd "/c" "./getLibs.sh"` failed with 1
+52 error Failed at the GEA@0.0.1a install script.
+52 error This is most likely a problem with the GEA package,
+52 error not with npm itself.
+52 error Tell the author that this fails on your system:
+52 error     ./getLibs.sh
+52 error You can get their info via:
+52 error     npm owner ls GEA
+52 error There is likely additional logging output above.
+53 error System Windows_NT 6.1.7601
+54 error command "C:\\Program Files\\nodejs\\\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install"
+55 error cwd C:\Users\Christine\Desktop\Stuff\GEA\gea\web
+56 error node -v v0.10.2
+57 error npm -v 1.2.15
+58 error code ELIFECYCLE
+59 verbose exit [ 1, true ]
