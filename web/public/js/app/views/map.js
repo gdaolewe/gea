@@ -15,7 +15,6 @@ define([
           mapTypeId: google.maps.MapTypeId.ROADMAP
         };
         this.map = new google.maps.Map(this.el,this.mapOptions);
-        //google.maps.event.addDomListener(window, 'load', initialize);
     }
   }))();
 });
