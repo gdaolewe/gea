@@ -33,8 +33,21 @@ module.exports = {
   // POST /rate?from=<rdio>&id=<id>&verdict=<like|dislike>
   post: function (req, res) {
     var rdioId = req.query.id;
+    var verdict = req.query.verdict;
     pg.connect(function (err, client, done) {
       async.waterfall([
+        function (next) {
+          if (err) {
+            return next(err);
+          }
+          if (!rdioId) {
+            return next(new Error('id must be specified'));
+          }
+          if (!verdict) {
+            return next(new Error('verdict must be specified'));
+          }
+          next();
+        },
         function (next) {
           client.query({
             name: 'get_song',
@@ -90,6 +103,9 @@ module.exports = {
     });
   },
   // GET / recieve?artist=<artist>&album=<album>&title=<title>&pastHours=<pastHours>&timeStart=<timeStart>&timeEnd=<timeEnd>
+  // Artist is optional
+  // If artist is specified, then album || title can be specified.
+  // pastHours || (timeStart && timeEnd) are optional, pastHours takes precedent -- default is 24 hours
   get: function (req, res) {
     // Reference all parameters
     var artist = req.query.artist;
