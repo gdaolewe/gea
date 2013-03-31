@@ -1,13 +1,18 @@
 package net.kenpowers.gea;
 
+import java.io.InputStream;
+
 import org.json.simple.*;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.Menu;
 import android.view.View;
 import android.widget.*;
@@ -29,7 +34,41 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         
         Log.d(MainActivity.LOG_TAG, "activity started");
                 
+        ((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
+        		new SeekBar.OnSeekBarChangeListener() {
+        			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+        			public void onStartTrackingTouch(SeekBar seekBar) {
+        				trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
+        			}
+        			public void onStopTrackingTouch(SeekBar seekBar) {
+        				music.seekPlayerTo(getSecondsFromProgress(seekBar.getProgress(),
+        							music.getPlayerDuration()/1000));
+        				trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
+        			}
+        });
         
+        ((SeekBar)findViewById(R.id.volumeSeekBar)).setOnSeekBarChangeListener(
+        		new SeekBar.OnSeekBarChangeListener() {
+					
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {
+						
+					}
+					
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress,
+							boolean fromUser) {
+						if (fromUser)
+							music.setPlayerVolume(progress);
+						
+					}
+				});
         
         String[] params = {"song","1"};
         new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
@@ -44,7 +83,6 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        
         
      // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(this.SEARCH_SERVICE);
@@ -75,20 +113,7 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     	JSONObject obj = (JSONObject) JSONValue.parse(result);
     	
     	
-    	/*if ( request.getRequestMethod().equals("GET") ) {
-    		if ( ((GeaGETRequest)request).getParameterAtIndex(0).equals("song") ) {
-    			((TextView)findViewById(R.id.titleText)).setText("Title: " + obj.get("title"));
-        		String[] params = {"artist", obj.get("artistID").toString() };
-        		new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
-        		params = new String[]{"album", (String)obj.get("albumID").toString() };
-        		new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
-    		} else if ( ((GeaGETRequest)request).getParameterAtIndex(0).equals("artist") ) {
-    			((TextView)findViewById(R.id.artistText)).setText("Artist: " + obj.get("name").toString() );
-    		} else if ( ((GeaGETRequest)request).getParameterAtIndex(0).equals("album") ) {
-    			((TextView)findViewById(R.id.albumText)).setText("Album: " + obj.get("title").toString() );
-    		}
-    			
-    	}*/
+    	
     	
     	
     }
@@ -103,20 +128,16 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     
     public void onTrackChanged(Track track) {
     	if (track==null) {
-    		((TextView)findViewById(R.id.songInfoText)).setText("Nothing playing");
-        	((TextView)findViewById(R.id.durationText)).setText("");
-        	((TextView)findViewById(R.id.play_pause_button)).setText("Play");
-        	((TextView)findViewById(R.id.currentPositionText)).setText("0:00");
-        	((TextView)findViewById(R.id.durationText)).setText("0:00");
+    		((TextView)findViewById(R.id.play_pause_button)).setText("Play");
         	trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
     	} else {
     		Log.d(LOG_TAG, track.toString());
     		currentTrack = track;
+    		downloadAlbumArt(currentTrack.getAlbumArtURL());
 	    	String trackInfo = String.format(currentTrack.toString());
 	    	((TextView)findViewById(R.id.songInfoText)).setText(trackInfo);
 	    	((TextView)findViewById(R.id.play_pause_button)).setText("Pause");
-	    	String duration = secondsToTimeFormat(track.getDuration());
-	    	((TextView)findViewById(R.id.durationText)).setText(duration);
+	    	
 	    	trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
     	}
     }
@@ -125,19 +146,70 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     	if (view.getId() == R.id.play_pause_button)
     		music.togglePlayerPaused();
     	TextView button = (TextView)findViewById(R.id.play_pause_button);
-    	if (button.getText().equals("Play"))
+    	if (music.playerIsPlaying()) {
+    		trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
     		button.setText("Pause");
-    	else
+    	}
+    	else {
+    		trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
     		button.setText("Play");
+    	}
+    }
+    
+    private int getProgressPercent(int position, int duration) {
+    	double progress = ((double)position/duration)*100;
+    	return (int)progress;
+    }
+    
+    private int getSecondsFromProgress(int progress, int duration) {
+    	double seconds = (double)progress*duration / 100;
+    	return (int)seconds;
     }
     
     private Runnable updateTrackPositionTask = new Runnable() {
 	    public void run() {
-			String currentPosition = secondsToTimeFormat(music.getPlayerPosition()/1000);
-			((TextView)findViewById(R.id.currentPositionText)).setText(currentPosition);
+	    	int durationSeconds = music.getPlayerDuration()/1000;
+	    	String durationString = secondsToTimeFormat(durationSeconds);
+	    	((TextView)findViewById(R.id.durationText)).setText(durationString);
+	    	
+			int currentPositionSeconds = music.getPlayerPosition()/1000;
+	    	String currentPositionString = secondsToTimeFormat(currentPositionSeconds);
+			((TextView)findViewById(R.id.currentPositionText)).setText(currentPositionString);
 			trackPositionUpdateHandler.postDelayed(this, 100);
+			
+			int progress = getProgressPercent(currentPositionSeconds, durationSeconds);
+			//Log.d(LOG_TAG, ""+progress);
+			((SeekBar)findViewById(R.id.progressSeekBar)).setProgress(progress);
 	    }
     };
+    
+    private void downloadAlbumArt(String url) {
+    	new DownloadImageTask((ImageView)findViewById(R.id.playerAlbumArt)).execute(url);
+    }
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+	    ImageView image;
+
+	    public DownloadImageTask(ImageView image) {
+	        this.image = image;
+	    }
+
+	    protected Bitmap doInBackground(String... urls) {
+	        String url = urls[0];
+	        Bitmap result = null;
+	        try {
+	            InputStream in = new java.net.URL(url).openStream();
+	            result = BitmapFactory.decodeStream(in);
+	        } catch (Exception e) {
+	            Log.e("Error", e.getMessage());
+	            e.printStackTrace();
+	        }
+	        return result;
+	    }
+
+	    protected void onPostExecute(Bitmap result) {
+	        image.setImageBitmap(result);
+	    }
+	}
     
 }
 

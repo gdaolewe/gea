@@ -9,12 +9,6 @@
     tools:context=".MainActivity" >
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,11 +37,12 @@
 
             <Button
                 android:id="@+id/play_pause_button"
+                android:layout_width="wrap_content"
                 android:layout_column="0"
                 android:layout_gravity="left|top"
                 android:layout_row="1"
-                android:text="@string/play_button_text"
-                android:onClick="togglePaused" />
+                android:onClick="togglePaused"
+                android:text="@string/play_button_text" />
 
             <LinearLayout
                 android:layout_column="2"
@@ -58,38 +53,43 @@
                 <Button
                     android:id="@+id/button2"
                     style="?android:attr/buttonStyleSmall"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.50"
-                    android:text="Up" />
+                    android:text="Up"
+                    android:textSize="@dimen/approval_button" />
 
                 <Button
                     android:id="@+id/button1"
                     style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.50"
-                    android:text="Down" />
-            </LinearLayout>
+                    android:text="Dn"
+                    android:textSize="@dimen/approval_button" />
 
-            <TextView
-                android:id="@+id/durationText"
-                android:layout_column="1"
-                android:layout_gravity="right|top"
-                android:layout_row="1" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/currentPositionText"
                 android:layout_column="1"
                 android:layout_gravity="left|top"
-                android:layout_row="1" />
+                android:layout_row="1"
+                android:text="0:00" />
 
             <TextView
                 android:id="@+id/position_durationTextSeparator"
                 android:layout_column="1"
                 android:layout_gravity="center_horizontal|top"
                 android:layout_row="1"
-                android:text="/" />
+                android:text=" / " />
+
+            <TextView
+                android:id="@+id/durationText"
+                android:layout_column="1"
+                android:layout_gravity="right|top"
+                android:layout_row="1"
+                android:text="0:00" />
 
         </GridLayout>
 
@@ -108,9 +108,10 @@
             <Button
                 android:id="@+id/button5"
                 android:layout_column="0"
-                android:layout_gravity="right|top"
+                android:layout_gravity="center_horizontal|top"
                 android:layout_row="1"
                 android:text="@string/next_button_text" />
+
         </GridLayout>
 
         <LinearLayout
@@ -120,7 +121,8 @@
             <SeekBar
                 android:id="@+id/volumeSeekBar"
                 android:layout_width="138dp"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:progress="100" />
 
         </LinearLayout>
     </LinearLayout>
@@ -129,8 +131,8 @@
         android:id="@+id/playerAlbumArt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/linearLayout1"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:src="@drawable/ic_launcher" />
+        android:src="@drawable/albumart_placeholder_black" />
 
 </RelativeLayout>

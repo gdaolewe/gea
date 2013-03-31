@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 public class SearchActivity extends ListActivity implements SearchCompleteListener {
 	private MusicServiceObject searchResults[];
+	private MusicServiceWrapper music = MusicServiceWrapper.getInstance(MainActivity.getAppContext());
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -27,7 +28,8 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 	      performSearch(query);
 	    }
 	    
-	    MusicServiceWrapper.getInstance(MainActivity.getAppContext()).registerSearchCompleteListener(this);
+	    music.togglePlayerPaused();
+	    music.registerSearchCompleteListener(this);
 	}
 	
 	public void performSearch(String query) {
@@ -36,7 +38,7 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 			return;
 		}
 		Log.d(MainActivity.LOG_TAG, query);
-		MusicServiceWrapper.getInstance(MainActivity.getAppContext()).search(query, "Song");
+		music.search(query, "Song");
 	}
 	
 	public void onSearchComplete(MusicServiceObject[] results) {

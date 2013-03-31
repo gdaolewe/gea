@@ -93,9 +93,14 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 	}
 	
 	public int getPlayerDuration() {
-		if (player==null)
+		if (player == null)
 			return 0;
-		else {
+		else if (rdio.canUserPlayFullStreams()==false) {
+		/*	TODO MediaPlayer.getDuration() returns 0 when playing streaming media 
+		 *	Replace hardcoded duration when playing 30-second clips
+		 */
+			return 30000;
+		} else {
 			return player.getDuration();
 		}
 	}
@@ -107,6 +112,24 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 			else
 				player.start();
 		}
+	}
+	
+	public boolean playerIsPlaying() {
+		if (player==null)
+			return false;
+		else
+			return player.isPlaying();
+	}
+	
+	public void seekPlayerTo(int seconds) {
+		player.seekTo(seconds*1000);
+	}
+	
+	private final static int MAX_VOLUME = 100;
+	
+	public void setPlayerVolume(int volumePercent) {
+		float volume = (float) (1 - (Math.log(MAX_VOLUME - volumePercent) / Math.log(MAX_VOLUME)));
+		player.setVolume(volume, volume);
 	}
 	
 	public void search(String query, String types) {
