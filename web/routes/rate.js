@@ -33,12 +33,22 @@ module.exports = {
   // POST /rate?from=<rdio>&id=<id>&verdict=<like|dislike>
   post: function (req, res) {
     var rdioId = req.query.id;
+    var verdict = req.query.verdict;
     pg.connect(function (err, client, done) {
       async.waterfall([
         function (next) {
           if (err) {
             return next(err);
           }
+          if (!rdioId) {
+            return next(new Error('id must be specified'));
+          }
+          if (!verdict) {
+            return next(new Error('verdict must be specified'));
+          }
+          next();
+        },
+        function (next) {
           client.query({
             name: 'get_song',
             text: GET_SONG,
