@@ -1,5 +1,6 @@
 package net.kenpowers.gea;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.os.AsyncTask;
 import android.content.Intent;
 import android.content.Context;
@@ -18,8 +19,8 @@ import org.json.*;
 
 
 
-public class MusicServiceWrapper implements RdioListener, RdioApiCallback, 
-											SearchCompletePublisher, TrackChangedPublisher {
+public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePublisher, 
+											TrackChangedPublisher {
 	private static final MusicServiceWrapper INSTANCE = new MusicServiceWrapper();
 	
 	
@@ -39,7 +40,13 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback,
 	
 	public static MusicServiceWrapper getInstance (Context context) {
 		if (INSTANCE.rdio == null)
-			INSTANCE.rdio = new Rdio(INSTANCE.rdioKey, INSTANCE.rdioSecret, null, null, context, INSTANCE);
+			INSTANCE.rdio = new Rdio(INSTANCE.rdioKey, INSTANCE.rdioSecret, null, null, context, 
+					new RdioListener() {
+						public void onRdioAuthorised(String accessToken, String accessTokenSecret) {}
+						public void onRdioReady() {}
+						public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {}
+						public void onRdioUserPlayingElsewhere() {}
+					});
 		return INSTANCE;
 	}
 	
@@ -77,6 +84,14 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback,
 		new RdioMediaPlayerTask(this).execute(currentTrack.getKey(), null);
 	}
 	
+	public int getPlayerPosition() {
+		if (player == null)
+			return 0;
+		else {
+			return player.getCurrentPosition();
+		}
+	}
+	
 	public void search(String query, String types) {
 		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("query", query));
@@ -85,32 +100,11 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback,
 	}
 	
 	/*
-	 * RdioListener methods
-	 */
-	
-	public void onRdioAuthorised(String accessToken, String accessTokenSecret) {
-		
-	}
-	
-	public void onRdioReady() {
-		
-	}
-	
-	public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {
-		
-	}
-	
-	public void onRdioUserPlayingElsewhere() {
-		
-	}
-	
-	/*
 	 * RdioApiCallback methods
 	 */
 	
 	public void onApiSuccess(JSONObject result) {
 		try {
-			//Log.d(MainActivity.LOG_TAG, result.toString(2));
 			JSONArray resultsJSON = result.getJSONObject("result").getJSONArray("results");
 			
 			MusicServiceObject[] results = new MusicServiceObject[resultsJSON.length()];
@@ -119,7 +113,6 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback,
 				
 				String key = obj.getString("key");
 				String type = obj.getString("type");
-				
 				
 				if (type.equals("t")) {
 					results[i] = new Track(key, "track", obj.getString("name"), obj.getString("artist"),
@@ -138,10 +131,12 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback,
 			notifySearchCompleteListeners(results);
 			
 		} catch (JSONException e) {
-			Log.d(MainActivity.LOG_TAG,"JSON exception");
-				
-		}
-		
+			Log.d(MainActivity.LOG_TAG,"JSON exception");		
+		}	
+	}
+	
+	public void onApiFailure(String methodName, Exception e) {
+		Log.e(MainActivity.LOG_TAG, "Rdio API call failed");
 	}
 	
 	public void mediaPlayerReady(MediaPlayer player) {
@@ -153,15 +148,16 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback,
 				this.player = null;
 			}
 			player.start();
+			player.setOnCompletionListener(new OnCompletionListener() {
+				public void onCompletion(MediaPlayer player) {
+					currentTrack = null;
+					notifyTrackChangedListeners(currentTrack);
+				} });
 			this.player = player;
 			notifyTrackChangedListeners(currentTrack);
 		} catch(Exception e) {
 			Log.e(MainActivity.LOG_TAG, e.toString());
 		}
-	}
-	
-	public void onApiFailure(String methodName, Exception e) {
-		Log.e(MainActivity.LOG_TAG, "Rdio API call failed");
 	}
 	
 	private class RdioMediaPlayerTask extends AsyncTask<String, String, MediaPlayer> {
@@ -171,8 +167,7 @@ public class MusicServiceWrapper implements RdioListener, RdioApiCallback,
 		}
 		
 		protected MediaPlayer doInBackground(String... params) {
-			return rdio.getPlayerForTrack(params[0], params[1], true);
-			
+			return rdio.getPlayerForTrack(params[0], params[1], true);	
 		}
 
 		@Override
