@@ -24,6 +24,12 @@ define([
       'click #dislike': 'dislike'
     },
     initialize: function () {
+      // Cache selectors
+      this.$art = this.$('#player-art');
+      this.$track = this.$('#track');
+      this.$artist = this.$('#artist');
+      this.$album = this.$('#album');
+      // Player parameters
       this.duration = 1;
       this.trackPosition = 0;
       this.sourcePosition = 0;
@@ -45,13 +51,13 @@ define([
           // Save the current track's duration for computing the percent remaining
           this.duration = playingTrack.duration;
           // Update the album art div to reflect the current track's art
-          $('#player-art').attr('src', playingTrack.icon);
+          this.$art.attr('src', playingTrack.icon);
           // Update the currently playing track name
-          $('#track').text(playingTrack.name);
+          this.$track.text(playingTrack.name);
           // Update the currently playing track's artist name
-          $('#artist').text('by ' + playingTrack.artist);
+          this.$artist.text(playingTrack.artist);
           // Update the currently playing track's album name
-          $('#album').text('from ' + playingTrack.album);
+          this.$album.text(playingTrack.album);
           // Trigger reflow event
           this.$el.trigger('reflow');
         }
@@ -130,11 +136,6 @@ define([
       e.stopPropagation();
       e.preventDefault();
       console.log('Dislike!');
-    },
-    render: function () {
-      /*$.when($.get('/artist/' + song.get('artist')), $.get('/album/' + song.get('album'))).done($.proxy(function (artist, album) {
-        this.$metadata.text(album[0].title + ' - ' + song.get('title') + ' by ' + artist[0].name);
-      }, this));*/
     },
     updatePlayPauseButton: function () {
       this.$playPauseButton.text(playingText[playing % 2]);
