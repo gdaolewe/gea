@@ -24,9 +24,11 @@ define([
   return new (bb.View.extend({
     el: '#search',
     events: {
-      'keyup #search-input': 'keyup'
+      'keyup #search-input': 'keyup',
+      'click #top-trending': 'topTrendingClick'
     },
     initialize: function () {
+      this.$topTrending = this.$('#top-trending');
       this.$input = this.$('#search-input');
       this.$results = this.$('#search-results');
       this.listenTo(searchResults, 'reset', this.render);
@@ -51,6 +53,25 @@ define([
         searchResults.reset(data.result.results);
       });
     },
+    topTrendingClick: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      $.get('/rate?limit=10', function (data) {
+        var alertText = '';
+        var counter = 1;
+        data.forEach($.proxy(function (d) {
+          var result = '';
+          if (d.title) result += '\'' + d.title + '\'';
+          if (d.artist) result += ' by ' + d.artist;
+          if (d.album) result += ' from \'' + d.album + '\'';
+          if (result) {
+            alertText += counter + '. ' + result + '\n';
+            counter++;
+          }
+        }, this));
+        alert(alertText);
+      });
+    },
     render: function () {
       // Remove loading indicator
       this.loadingWidget.remove();
@@ -73,7 +94,7 @@ define([
     // Set the height of the results
     resizeResults: function () {
       // New height is height of the right bar minus the player and input heights
-      this.$results.height($right.height() - player.$el.height() - this.$input.height());
+      this.$results.height($right.height() - player.$el.height() - this.$input.height() - this.$topTrending.height());
     }
   }))();
 });
