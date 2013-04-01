@@ -11,19 +11,13 @@ CREATE TABLE songs
   CONSTRAINT "uq_rdioId" UNIQUE ("rdioId")
 );
 
--- Index: idx_album
-
-CREATE INDEX idx_album
+-- Index: idx_stat_group
+-- Used for
+CREATE INDEX idx_stat_group
   ON songs
-  USING hash
-  (album COLLATE pg_catalog."default");
-
--- Index: idx_artist
-
-CREATE INDEX idx_artist
-  ON songs
-  USING hash
-  (artist COLLATE pg_catalog."default");
+  USING btree
+  (artist COLLATE pg_catalog."default", album COLLATE pg_catalog."default");
+ALTER TABLE songs CLUSTER ON idx_stat_group;
 
 -- Index: idx_title
 
