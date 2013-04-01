@@ -2,11 +2,17 @@ package net.kenpowers.gea;
 
 import java.io.InputStream;
 
+import java.util.HashMap;
+
 import org.json.simple.*;
 
 import android.os.AsyncTask;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.app.Activity;
 import android.app.SearchManager;
@@ -24,8 +30,12 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 	private static Context context;
 	static final String LOG_TAG = "Gea";
 	final String baseURL = "http://gea.kenpowers.net";
-	private MusicServiceWrapper music;
+	
+	
+	MusicServiceWrapper music;
 	private Track currentTrack;
+	
+	private GoogleMap gmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +84,20 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         
         String[] params = {"song","1"};
         new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
+        
+        //example for how to format HashMap for POST request
+        HashMap<String, String> examplePOSTRequest = new HashMap<String, String>();
+        examplePOSTRequest.put("from", "rdio");
+        examplePOSTRequest.put("id", "t2491851");
+        examplePOSTRequest.put("verdict", "like");
+        
+        //uncomment this code to add Google MapFragment
+        //gmap = ((MapFragment)getFragmentManager().findFragmentById(R.layout.fragment1).getMap());
+        
+        
+        //music.search("Lethargica", "Song");
+        
+        //MapFragment mf = MapFragment.newInstance();
         
         music = MusicServiceWrapper.getInstance(this);
         music.registerTrackChangedListener(this);
