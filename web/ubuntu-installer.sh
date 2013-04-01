@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Assumes a clean installation of Ubuntu 12.10
+
 # Install:
 #	git
 #	curl
@@ -48,6 +50,9 @@ npm install -g pg db-migrate
 
 # Initialize the database
 cd db; db-migrate up
+
+# Insert sample database data
+psql -d gea -f sample-data.sql
 
 # Create the config folder in which the rdio.json file will be stored
 cd ..; mkdir config
