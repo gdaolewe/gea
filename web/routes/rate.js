@@ -61,7 +61,6 @@ module.exports = {
             console.log('exists');
             next(null, data);
           } else {
-            console.log('inserting song');
             // get information from rdio
             rdio.doUnauthenticatedRequest({
               method: 'get',
@@ -102,10 +101,12 @@ module.exports = {
       });
     });
   },
-  // GET / recieve?artist=<artist>&album=<album>&title=<title>&pastHours=<pastHours>&timeStart=<timeStart>&timeEnd=<timeEnd>
+  // GET / recieve?[artist=<artist>[&album=<album>&title=<title>]][[&pastHours=<pastHours>]|[&timeStart=<timeStart>&timeEnd=<timeEnd>]][&limit=<limit>&offset=<offset>]
   // Artist is optional
   // If artist is specified, then album || title can be specified.
   // pastHours || (timeStart && timeEnd) are optional, pastHours takes precedent -- default is 24 hours
+  // limit will limit the number of results (defaults to 10, maximum 100)
+  // offset will skip the first given number of results, useful for pagination
   get: function (req, res) {
     // Reference all parameters
     var artist = req.query.artist;
@@ -114,25 +115,28 @@ module.exports = {
     var pastHours = req.query.pastHours;
     var timeStart = req.query.timeStart;
     var timeEnd = req.query.timeEnd;
+    var limit = req.query.limit || '10';
+    var offset = req.query.offset || '0';
+    var order = req.query.asc ? 'ASC' : 'DESC';
 
     // Construct extra part of query
     var p = 0;
-    var extra = ''; // Extra query stuff
+    var extraWhere = ''; // Extra where query stuff
     var queryName = 'get_ratings';
     var vals = [];
 
     // Construct meta part of query
     if (artist) {
-      extra += util.format(' AND LOWER(artist) = LOWER($%d) ', ++p);
+      extraWhere += util.format(' AND LOWER(artist) = LOWER($%d) ', ++p);
       vals.push(artist);
       queryName += '_artist';
       if (album) {
-        extra += util.format(' AND LOWER(album) = LOWER($%d) ', ++p);
+        extraWhere += util.format(' AND LOWER(album) = LOWER($%d) ', ++p);
         vals.push(album);
         queryName += '_album';
       }
       if (title) {
-        extra += util.format(' AND LOWER(title) = LOWER($%d) ', ++p);
+        extraWhere += util.format(' AND LOWER(title) = LOWER($%d) ', ++p);
         vals.push(title);
         queryName += '_title';
       }
@@ -145,9 +149,9 @@ module.exports = {
         return res.json(500, {err: 'pastHours must be a number!'});
       }
       // pastHours is guaranteed to be a number, no risk of SQL injection
-      extra += util.format(' AND time > NOW() - INTERVAL \'%d HOURS\'', pastHours);
+      extraWhere += util.format(' AND time > NOW() - INTERVAL \'%d HOURS\'', pastHours);
     } else if (timeStart && timeEnd) {
-      extra += util.format(' AND time BETWEEN $%d AND $%d', ++p, ++p);
+      extraWhere += util.format(' AND time BETWEEN $%d AND $%d', ++p, ++p);
       var timeStartInt = parseInt(timeStart);
       var timeEndInt = parseInt(timeEnd);
       var start, end;
@@ -161,13 +165,17 @@ module.exports = {
       vals.push(start);
       vals.push(end);
       queryName += '_startTime_endTime';
-    } else {
-      // Default to last 24 hours
-      extra += ' AND time > NOW() - INTERVAL \'24 HOUR\'';
     }
 
-    // Insert extra into query
-    var query = GET_RATINGS.replace('{EXTRA}', extra);
+    // Insert extra stuff into query
+    var query = GET_RATINGS
+                .replace('{EXTRA_WHERE}', extraWhere)
+                .replace('{LIM}', '$' + ++p)
+                .replace('{OFF}', '$' + ++p)
+                .replace('{ORDER}', order);
+    vals.push(limit);
+    vals.push(offset);
+    queryName += '_' + order;
 
     // execute query
     pg.connect(function (err, client, done) {
