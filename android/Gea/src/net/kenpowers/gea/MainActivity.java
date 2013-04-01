@@ -1,6 +1,11 @@
 package net.kenpowers.gea;
 
+import java.util.HashMap;
+
 import org.json.simple.*;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -16,6 +21,7 @@ public class MainActivity extends FragmentActivity implements RequestTaskComplet
 	final String baseURL = "http://gea.kenpowers.net";
 	TextView serverResponseView;
 	MusicServiceWrapper music;
+	private GoogleMap gmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +35,14 @@ public class MainActivity extends FragmentActivity implements RequestTaskComplet
         String[] params = {"song","1"};
         new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
         
-        //MapFragment = MapFragment.newInstance();
+        //example for how to format HashMap for POST request
+        HashMap<String, String> examplePOSTRequest = new HashMap<String, String>();
+        examplePOSTRequest.put("from", "rdio");
+        examplePOSTRequest.put("id", "t2491851");
+        examplePOSTRequest.put("verdict", "like");
+        
+        //uncomment this code to add Google MapFragment
+        //gmap = ((MapFragment)getFragmentManager().findFragmentById(R.layout.fragment1).getMap());
         
         music = new MusicServiceWrapper(this);
         //music.search("Lethargica", "Song");

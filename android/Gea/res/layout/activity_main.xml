@@ -9,6 +9,7 @@
     tools:context=".MainActivity" >
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -69,7 +70,6 @@
         </GridLayout>
     </LinearLayout>
 
-    
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="wrap_content"
@@ -77,38 +77,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/titleText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Title: " />
     </LinearLayout>
-    
-    <TextView
-        android:id="@+id/artistText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/linearLayout1"
-        android:layout_centerHorizontal="true"
-        android:text="Artist: " />
-
-    <TextView
-        android:id="@+id/albumText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/artistText"
-        android:layout_centerHorizontal="true"
-        android:text="Album: " />
-    
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.MapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    
-        
-        
 
     <Button
         android:id="@+id/searchSubmit"
@@ -117,19 +86,56 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/searchField"
         android:layout_alignParentRight="true"
-        android:text="Go" 
-        android:onClick="searchSubmitClicked"/>
-    	
+        android:onClick="searchSubmitClicked"
+        android:text="Go" />
 
     <EditText
         android:id="@+id/searchField"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/albumText"
-        android:layout_marginTop="39dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="51dp"
         android:layout_toLeftOf="@+id/searchSubmit"
         android:ems="10"
         android:hint="search"
-        android:inputType="text" />
+        android:inputType="text" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/albumText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/artistText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="17dp"
+        android:text="Album: " />
+
+    <TextView
+        android:id="@+id/artistText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linearLayout1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="38dp"
+        android:text="Artist: " />
+
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/artistText"
+        android:layout_centerHorizontal="true"
+        android:text="Title: " />
+
+    <!-- layout for Google MapFragment -->
+    <fragment
+        android:id="@+id/fragment1"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/linearLayout1"
+        android:layout_alignLeft="@+id/linearLayout2" />
 
 </RelativeLayout>

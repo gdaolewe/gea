@@ -23,7 +23,7 @@ public class RequestTask extends AsyncTask<GeaServerRequest, String, String> {
         try {
         	URL url = new URL(this.request.getURL());
         	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        	connection.setRequestMethod("GET");
+        	connection.setRequestMethod(this.request.getRequestMethod());
         	connection.setRequestProperty("Content-length", "0");
         	connection.connect();
         	statusCode = connection.getResponseCode();
