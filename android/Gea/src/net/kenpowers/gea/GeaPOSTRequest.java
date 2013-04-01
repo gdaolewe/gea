@@ -12,7 +12,7 @@ public class GeaPOSTRequest implements GeaServerRequest {
 		this.baseURL = baseURL;
 		this.parameters = parameters;
 		
-			queryString = "/rate?";
+			queryString = "";
 			Iterator<HashMap.Entry<String, String>> entries = parameters.entrySet().iterator();
 			while (entries.hasNext()) {
 				HashMap.Entry<String, String> entry = (HashMap.Entry<String, String>) entries.next();

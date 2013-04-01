@@ -64,22 +64,25 @@
                 android:orientation="vertical" >
 
                 <Button
-                    android:id="@+id/button2"
+                    android:id="@+id/approval_up_button"
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.50"
+                    android:onClick="onUpButtonClicked"
                     android:text="Up"
                     android:textSize="@dimen/approval_button" />
 
                 <Button
-                    android:id="@+id/button1"
+                    android:id="@+id/approval_down_button"
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.50"
+                    android:onClick="onDownButtonClicked"
                     android:text="Dn"
                     android:textSize="@dimen/approval_button" />
+
             </LinearLayout>
 
             <SeekBar

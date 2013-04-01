@@ -29,8 +29,9 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 	
 	private static Context context;
 	static final String LOG_TAG = "Gea";
-	final String baseURL = "http://gea.kenpowers.net";
-	
+	//final String baseURL = "http://gea.kenpowers.net";
+	final String baseURL = "http://10.0.2.2:3000";
+	final String baseRateQuery = "/rate?";
 	
 	MusicServiceWrapper music;
 	private Track currentTrack;
@@ -82,21 +83,8 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 					}
 				});
         
-        String[] params = {"song","1"};
-        new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
-        
-        //example for how to format HashMap for POST request
-        HashMap<String, String> examplePOSTRequest = new HashMap<String, String>();
-        examplePOSTRequest.put("from", "rdio");
-        examplePOSTRequest.put("id", "t2491851");
-        examplePOSTRequest.put("verdict", "like");
-        
         //uncomment this code to add Google MapFragment
         //gmap = ((MapFragment)getFragmentManager().findFragmentById(R.layout.fragment1).getMap());
-        
-        
-        //music.search("Lethargica", "Song");
-        
         //MapFragment mf = MapFragment.newInstance();
         
         music = MusicServiceWrapper.getInstance(this);
@@ -130,13 +118,34 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     	return MainActivity.context;
     }
     
+    public void onUpButtonClicked(View view) {
+    	if (view.getId() != R.id.approval_up_button || currentTrack == null)
+    		return;
+    	Log.d(LOG_TAG, "up button clicked");  
+    	sendApprovalRequest(true);
+    }
+    public void onDownButtonClicked(View view) {
+    	if (view.getId() != R.id.approval_down_button || currentTrack == null)
+    		return;
+    	Log.d(LOG_TAG, "down button clicked");	
+    	sendApprovalRequest(false);
+    }
+    
+    public void sendApprovalRequest(boolean trackLiked) {
+    	HashMap<String, String> params = new HashMap<String, String>();
+        params.put("from", "rdio");
+        params.put("id", currentTrack.getKey());
+        params.put("verdict", trackLiked? "like" : "dislike");
+        
+        new RequestTask(this).execute(new GeaPOSTRequest(baseURL + baseRateQuery, params));
+    }
     
     public void onTaskComplete(GeaServerRequest request, String result) {
     	if (result==null || request==null) {
     		Log.e(LOG_TAG, "Error fetching JSON");
     		return;
     	}
-    	JSONObject obj = (JSONObject) JSONValue.parse(result);
+    	//JSONObject obj = (JSONObject) JSONValue.parse(result);
     	
     	
     	
