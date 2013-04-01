@@ -20,7 +20,6 @@ public class GeaPOSTRequest implements GeaServerRequest {
 				if (entries.hasNext())
 					queryString += "&";
 			}
-		
 	}
 	
 	public String getParameterForKey(String key) {
@@ -31,7 +30,7 @@ public class GeaPOSTRequest implements GeaServerRequest {
 		return baseURL + queryString;
 	}
 	
-	public String getRequestMethod() {
-		return "POST";
+	public RequestMethod getRequestMethod() {
+		return RequestMethod.POST;
 	}
 }

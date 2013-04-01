@@ -26,8 +26,8 @@ public class GeaGETRequest implements GeaServerRequest {
 		return baseURL + queryString;
 	}
 	
-	public String getRequestMethod() {
-		return "GET";
+	public RequestMethod getRequestMethod() {
+		return RequestMethod.GET;
 	}
 	
 	

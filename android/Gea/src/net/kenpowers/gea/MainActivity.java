@@ -4,7 +4,7 @@ import java.io.InputStream;
 
 import java.util.HashMap;
 
-import org.json.simple.*;
+import org.json.*;
 
 import android.os.AsyncTask;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,6 +18,7 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.Menu;
@@ -29,9 +30,7 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 	
 	private static Context context;
 	static final String LOG_TAG = "Gea";
-	//final String baseURL = "http://gea.kenpowers.net";
-	final String baseURL = "http://10.0.2.2:3000";
-	final String baseRateQuery = "/rate?";
+	private String baseURL;
 	
 	MusicServiceWrapper music;
 	private Track currentTrack;
@@ -42,10 +41,16 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
         MainActivity.context = getApplicationContext();
         
-        
         Log.d(MainActivity.LOG_TAG, "MainActivity started");
+        
+        boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
+        if (isDebuggable)
+        	baseURL = GeaServerConstants.LOCALHOST_BASE_URL;
+        else
+        	baseURL = GeaServerConstants.NET_BASE_URL;
                 
         ((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
@@ -64,22 +69,16 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         		new SeekBar.OnSeekBarChangeListener() {
 					
 					@Override
-					public void onStopTrackingTouch(SeekBar seekBar) {
-						
-					}
+					public void onStopTrackingTouch(SeekBar seekBar) {}
 					
 					@Override
-					public void onStartTrackingTouch(SeekBar seekBar) {
-						// TODO Auto-generated method stub
-						
-					}
+					public void onStartTrackingTouch(SeekBar seekBar) {}
 					
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress,
 							boolean fromUser) {
 						if (fromUser)
 							music.setPlayerVolume(progress);
-						
 					}
 				});
         
@@ -137,7 +136,8 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         params.put("id", currentTrack.getKey());
         params.put("verdict", trackLiked? "like" : "dislike");
         
-        new RequestTask(this).execute(new GeaPOSTRequest(baseURL + baseRateQuery, params));
+        new RequestTask(this).execute(
+        		new GeaPOSTRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
     }
     
     public void onTaskComplete(GeaServerRequest request, String result) {
@@ -145,12 +145,7 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     		Log.e(LOG_TAG, "Error fetching JSON");
     		return;
     	}
-    	//JSONObject obj = (JSONObject) JSONValue.parse(result);
-    	
-    	
-    	
-    	
-    	
+    		
     }
     
     private String secondsToTimeFormat(int time) {
