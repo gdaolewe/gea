@@ -12,7 +12,7 @@ define([
 ) {
   var playing = 0;
   var song = null;
-  var playingImg = ['images/play.png', 'images/pause.png'];
+  var playingClass = 'play-button pause-button';
   var loading = false;
   var deferred = new promise.Promise();
   var currentRdioId = 'a171827';
@@ -92,7 +92,6 @@ define([
         this.$api.rdio(data.result);
       }, this));
       this.$playPauseButton = this.$('#play-pause');
-      this.updatePlayPauseButton();
       this.$progressBarFill = this.$('#fill');
 	  this.$likeImg = this.$('#like'); //creates global var in initialized function
     },
@@ -151,7 +150,7 @@ define([
       });
     },
     updatePlayPauseButton: function () {
-      this.$playPauseButton.attr('src', playingImg[playing % 2]);//text(playingText[playing % 2]);
+      this.$playPauseButton.toggleClass(playingClass);
     }
   }))();
 });
