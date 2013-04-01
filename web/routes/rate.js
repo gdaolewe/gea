@@ -61,7 +61,6 @@ module.exports = {
             console.log('exists');
             next(null, data);
           } else {
-            console.log('inserting song');
             // get information from rdio
             rdio.doUnauthenticatedRequest({
               method: 'get',

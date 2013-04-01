@@ -18,15 +18,9 @@ CREATE TABLE ratings
 
 CREATE INDEX idx_sid
   ON ratings
-  USING hash
+  USING btree
   (sid);
-
--- Index: idx_rating
-
-CREATE INDEX idx_rating
-  ON ratings
-  USING hash
-  (rating);
+ALTER TABLE ratings CLUSTER ON idx_sid;
 
 -- Index: idx_time
 
