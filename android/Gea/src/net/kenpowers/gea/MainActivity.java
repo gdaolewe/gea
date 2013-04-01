@@ -11,6 +11,7 @@ import android.util.Log;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.Menu;
@@ -32,7 +33,8 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         setContentView(R.layout.activity_main);
         MainActivity.context = getApplicationContext();
         
-        Log.d(MainActivity.LOG_TAG, "activity started");
+        
+        Log.d(MainActivity.LOG_TAG, "MainActivity started");
                 
         ((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {

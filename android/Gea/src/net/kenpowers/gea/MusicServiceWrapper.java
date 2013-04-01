@@ -36,17 +36,20 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 	private MusicServiceWrapper () {
 		searchCompleteListeners = new ArrayList<SearchCompleteListener>();
 		trackChangedListeners = new ArrayList<TrackChangedListener>();
+		musicServiceReadyListeners = new ArrayList<MusicServiceReadyListener>();
 	}
 	
 	public static MusicServiceWrapper getInstance (Context context) {
 		if (INSTANCE.rdio == null)
 			INSTANCE.rdio = new Rdio(INSTANCE.rdioKey, INSTANCE.rdioSecret, null, null, context, 
-					new RdioListener() {
-						public void onRdioAuthorised(String accessToken, String accessTokenSecret) {}
-						public void onRdioReady() {}
-						public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {}
-						public void onRdioUserPlayingElsewhere() {}
-					});
+				new RdioListener() {
+					public void onRdioAuthorised(String accessToken, String accessTokenSecret) {}
+					public void onRdioReady() {
+						INSTANCE.notifyMusicServiceReadyListeners();
+					}
+					public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {}
+					public void onRdioUserPlayingElsewhere() {}
+			});
 		return INSTANCE;
 	}
 	
@@ -56,8 +59,9 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 		searchCompleteListeners.add(listener);
 	}
 	public void notifySearchCompleteListeners(MusicServiceObject[] results) {
-		for (SearchCompleteListener l : searchCompleteListeners)
-			l.onSearchComplete(results);
+		if (searchCompleteListeners.size() > 0)
+			for (SearchCompleteListener l : searchCompleteListeners)
+				l.onSearchComplete(results);
 	}
 	
 	private List<TrackChangedListener> trackChangedListeners;
@@ -66,17 +70,20 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 		trackChangedListeners.add(listener);
 	}
 	public void notifyTrackChangedListeners(Track track) {
-		for (TrackChangedListener listener: trackChangedListeners)
-			listener.onTrackChanged(track);
+		if (trackChangedListeners.size() > 0)
+			for (TrackChangedListener listener: trackChangedListeners)
+				listener.onTrackChanged(track);
 	}
 	
-	public void cleanup() {
-		rdio.cleanup();
-		if (player != null) {
-			player.reset();
-			player.release();
-			player = null;
-		}
+	private List<MusicServiceReadyListener> musicServiceReadyListeners;
+	
+	public void registerMusicServiceReadyListener(MusicServiceReadyListener listener) {
+		musicServiceReadyListeners.add(listener);
+	}
+	public void notifyMusicServiceReadyListeners() {
+		if (musicServiceReadyListeners.size() > 0)
+			for (MusicServiceReadyListener listener: musicServiceReadyListeners)
+				listener.onMusicServiceReady();
 	}
 	
 	public void getPlayerForTrack(Track track) {
@@ -197,6 +204,16 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 			notifyTrackChangedListeners(currentTrack);
 		} catch(Exception e) {
 			Log.e(MainActivity.LOG_TAG, e.toString());
+		}
+	}
+	
+	public void cleanup() {
+		rdio.cleanup();
+		if (player != null) {
+			player.stop();
+			player.reset();
+			player.release();
+			player = null;
 		}
 	}
 	
