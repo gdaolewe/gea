@@ -1,12 +1,28 @@
-#Issue Tracking System Instructions
-####Prerequisite: 
-**Developer and Customer must have Eclipse and Android SDK**
+Building for Android with Ant
+=============================
 
-To create a GitHub account, go to <https://github.com/> and follow the instructions to sign up for a free account.
+Navigate to the android directory:
 
-1. Go to <https://github.com/OpenGea/gea>.
-2. Download source and documentation.
-3. Download and install the Android SDK and ADT plugin for Eclipse from <http://developer.android.com/tools/sdk/eclipse-adt.html>
-4. Create a new Android Virtual Device using the Android Virtual Device Manager
-5. Build the source from the supplied Ant build file
-6. Install the application on the emulator and start using Pangea
+`cd gea/android/`
+
+Prepare the project for building:
+
+`android update project -p Gea`
+
+To prepare tests:
+
+`android update test-project -m ../Gea - p GeaTest`
+
+Now run `ant clean Gea debug`
+
+To run tests:
+
+`ant clean GeaTest debug install test`
+
+To run the application:
+
+`ant clean Gea debug install`
+
+The application is now installed on the device, but hasn't been started. To start it, type
+
+`adb shell am start -a android.intent.action.MAIN -n net.kenpowers.gea/.MainActivity`
