@@ -4,7 +4,7 @@ import java.io.InputStream;
 
 import java.util.HashMap;
 
-import org.json.simple.*;
+import org.json.*;
 
 import android.os.AsyncTask;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,9 +18,11 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
@@ -29,8 +31,7 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 	
 	private static Context context;
 	static final String LOG_TAG = "Gea";
-	final String baseURL = "http://gea.kenpowers.net";
-	
+	private String baseURL;
 	
 	MusicServiceWrapper music;
 	private Track currentTrack;
@@ -41,14 +42,27 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getActionBar().setDisplayShowHomeEnabled(true);
+        
         MainActivity.context = getApplicationContext();
         
-        
         Log.d(MainActivity.LOG_TAG, "MainActivity started");
+        
+        boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
+        if (isDebuggable)
+        	baseURL = GeaServerConstants.LOCALHOST_BASE_URL;
+        else
+        	baseURL = GeaServerConstants.NET_BASE_URL;
                 
         ((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
-        			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+        			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        				if (!fromUser)
+        					return;
+        				int seconds = getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
+        				String position = getFormattedTimeFromSeconds(seconds);
+        				((TextView) findViewById(R.id.currentPositionText)).setText(position);
+        			}
         			public void onStartTrackingTouch(SeekBar seekBar) {
         				trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
         			}
@@ -61,42 +75,20 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         
         ((SeekBar)findViewById(R.id.volumeSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
-					
 					@Override
-					public void onStopTrackingTouch(SeekBar seekBar) {
-						
-					}
-					
+					public void onStopTrackingTouch(SeekBar seekBar) {}
 					@Override
-					public void onStartTrackingTouch(SeekBar seekBar) {
-						// TODO Auto-generated method stub
-						
-					}
-					
+					public void onStartTrackingTouch(SeekBar seekBar) {}
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress,
 							boolean fromUser) {
 						if (fromUser)
 							music.setPlayerVolume(progress);
-						
 					}
 				});
         
-        String[] params = {"song","1"};
-        new RequestTask(this).execute(new GeaGETRequest(baseURL, params));
-        
-        //example for how to format HashMap for POST request
-        HashMap<String, String> examplePOSTRequest = new HashMap<String, String>();
-        examplePOSTRequest.put("from", "rdio");
-        examplePOSTRequest.put("id", "t2491851");
-        examplePOSTRequest.put("verdict", "like");
-        
         //uncomment this code to add Google MapFragment
         //gmap = ((MapFragment)getFragmentManager().findFragmentById(R.layout.fragment1).getMap());
-        
-        
-        //music.search("Lethargica", "Song");
-        
         //MapFragment mf = MapFragment.newInstance();
         
         music = MusicServiceWrapper.getInstance(this);
@@ -130,24 +122,65 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     	return MainActivity.context;
     }
     
+    public void onUpButtonClicked(View view) {
+    	if (view.getId() != R.id.approval_up_button || currentTrack == null)
+    		return;
+    	Log.d(LOG_TAG, "up button clicked");  
+    	sendApprovalRequest(true);
+    }
+    public void onDownButtonClicked(View view) {
+    	if (view.getId() != R.id.approval_down_button || currentTrack == null)
+    		return;
+    	Log.d(LOG_TAG, "down button clicked");	
+    	sendApprovalRequest(false);
+    }
+    
+    public void sendApprovalRequest(boolean trackLiked) {
+    	HashMap<String, String> params = new HashMap<String, String>();
+        params.put("from", "rdio");
+        params.put("id", currentTrack.getKey());
+        params.put("verdict", trackLiked? "like" : "dislike");
+        
+        new RequestTask(this).execute(
+        		new GeaPOSTRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
+    }
     
     public void onTaskComplete(GeaServerRequest request, String result) {
     	if (result==null || request==null) {
     		Log.e(LOG_TAG, "Error fetching JSON");
     		return;
     	}
-    	JSONObject obj = (JSONObject) JSONValue.parse(result);
-    	
-    	
-    	
-    	
-    	
+    		
     }
     
-    private String secondsToTimeFormat(int time) {
-    	int seconds = time % 60;
-    	int minutes = time / 60;
-    	return "" + (minutes<10 ? "0":"") + minutes + ":" + (seconds<10? "0":"") + seconds;
+    public void togglePaused(View view) {
+    	if (view.getId() == R.id.play_pause_button)
+    		music.togglePlayerPaused();
+    	TextView button = (TextView)findViewById(R.id.play_pause_button);
+    	if (music.playerIsPlaying()) {
+    		trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
+    		button.setText(R.string.pause_button_text);
+    	}
+    	else {
+    		trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
+    		button.setText(R.string.play_button_text);
+    	}
+    }
+    
+    private int getProgressPercent(int position, int duration) {
+    	double progress = ((double)position/duration)*100;
+    	return (int)progress;
+    }
+    
+    private int getSecondsFromProgress(int progress, int duration) {
+    	double seconds = (double)progress*duration / 100;
+    	return (int)seconds;
+    }
+    
+    private String getFormattedTimeFromSeconds(int seconds) {
+    	int secs = seconds % 60;
+    	int minutes = seconds / 60;
+    	return "" + (minutes<10 ? "0":"") + minutes + ":" + (secs<10? "0":"") + secs;
     }
     
     private Handler trackPositionUpdateHandler = new Handler();
@@ -168,38 +201,16 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     	}
     }
     
-    public void togglePaused(View view) {
-    	if (view.getId() == R.id.play_pause_button)
-    		music.togglePlayerPaused();
-    	TextView button = (TextView)findViewById(R.id.play_pause_button);
-    	if (music.playerIsPlaying()) {
-    		trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
-    		button.setText("Pause");
-    	}
-    	else {
-    		trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
-    		button.setText("Play");
-    	}
-    }
     
-    private int getProgressPercent(int position, int duration) {
-    	double progress = ((double)position/duration)*100;
-    	return (int)progress;
-    }
-    
-    private int getSecondsFromProgress(int progress, int duration) {
-    	double seconds = (double)progress*duration / 100;
-    	return (int)seconds;
-    }
     
     private Runnable updateTrackPositionTask = new Runnable() {
 	    public void run() {
 	    	int durationSeconds = music.getPlayerDuration()/1000;
-	    	String durationString = secondsToTimeFormat(durationSeconds);
+	    	String durationString = getFormattedTimeFromSeconds(durationSeconds);
 	    	((TextView)findViewById(R.id.durationText)).setText(durationString);
 	    	
 			int currentPositionSeconds = music.getPlayerPosition()/1000;
-	    	String currentPositionString = secondsToTimeFormat(currentPositionSeconds);
+	    	String currentPositionString = getFormattedTimeFromSeconds(currentPositionSeconds);
 			((TextView)findViewById(R.id.currentPositionText)).setText(currentPositionString);
 			trackPositionUpdateHandler.postDelayed(this, 100);
 			
@@ -235,6 +246,14 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 	    protected void onPostExecute(Bitmap result) {
 	        image.setImageBitmap(result);
 	    }
+	}
+    
+    public boolean onOptionsItemSelected (MenuItem item) {
+		Log.d(MainActivity.LOG_TAG, "mainactivity got this far");
+		
+			
+		return true;
+		
 	}
     
 }

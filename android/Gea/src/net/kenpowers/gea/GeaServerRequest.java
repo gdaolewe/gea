@@ -4,5 +4,5 @@ public interface GeaServerRequest {
 
 	public String getURL();
 	
-	public String getRequestMethod();
+	public RequestMethod getRequestMethod();
 }

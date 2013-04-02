@@ -15,5 +15,11 @@
     <string name="searchOptions">Search Options</string>
     <string name="title_activity_launch">LaunchActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="up_button_text">Up</string>
+    <string name="down_button_text">Dn</string>
+    <string name="default_position_display">0:00</string>
+    <string name="default_duration_display">0:00</string>
+    <string name="position_duration_separator_display">/</string>
+    <string name="album_art_content_description">Album Art</string>
 
 </resources>
