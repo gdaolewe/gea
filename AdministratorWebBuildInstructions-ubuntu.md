@@ -1,4 +1,4 @@
-#Web Build Instructions for Ubuntu (Administrator)
+#Administrator Web Build Instructions for Ubuntu
 ####Tested with a clean install of Ubuntu 12.10
 
 
