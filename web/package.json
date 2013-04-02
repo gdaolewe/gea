@@ -1,0 +1,19 @@
+{
+  "name": "GEA",
+  "version": "0.0.1b",
+  "private": true,
+  "scripts": {
+    "start": "node app",
+    "install": "./getLibs.sh"
+  },
+  "dependencies": {
+    "express": "3.0.0",
+    "oauth": "0.9.10",
+    "connect-static-transform": "0.5.1",
+    "stylus": "0.32.1",
+    "nib": "0.9.1",
+    "pg": "0.15.1",
+    "db-migrate": "0.4.1",
+    "async": "0.2.6"
+  }
+}

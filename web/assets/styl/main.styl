@@ -1,0 +1,251 @@
+@import 'lib/normalize'
+@import 'nib'
+@import 'functions'
+
+html
+body
+  width 100%
+  height 100%
+  max-width 100%
+  max-height 100%
+
+body
+  background-color #D6FFC2
+
+#api
+  visibility hidden
+  height 0
+
+#right
+  position absolute
+  top 0
+  bottom 0
+  right 0
+  width 300px
+  height 100%
+  overflow hidden
+
+#player-art
+  width 200px
+  height 200px
+  background #fff
+
+#progress-bar
+  width 300px
+  height 10px
+  background #bbb
+
+#controls
+#top-trending
+  height 30px
+  position relative
+  user-select(none)
+
+#top-trending
+  background #eee
+  width 300px
+  height 30px
+  line-height 30px
+  text-align center
+  position relative
+  cursor pointer
+  &:hover
+    background #fff
+
+#previous
+#next
+#play-pause
+  display inline-block
+  width 100px
+  height 30px
+  line-height 30px
+  text-align center
+  position absolute
+  cursor pointer
+
+#next
+  left 200px
+  background #eee
+  background-image url(/img/next.png)
+  background-repeat no-repeat
+  background-position:center;
+  &:hover
+    background-image url(/img/next-over.png)
+
+#previous
+  background #eee
+  background-image url(/img/prev.png)
+  background-repeat no-repeat
+  background-position:center;
+  &:hover
+    background-image url(/img/prev-over.png)
+
+#play-pause
+  left 100px
+
+.play-button
+  background #eee
+  background-image url(/img/play.png)
+  background-repeat no-repeat
+  background-position:center;
+  &:hover
+    background-image url(/img/play-over.png)
+
+.pause-button
+  background #eee
+  background-image url(/img/pause.png)
+  background-repeat no-repeat
+  background-position:center;
+  &:hover
+    background-image url(/img/pause-over.png)
+
+#social
+  height 200px
+  user-select(none)
+
+#like
+#dislike
+  display inline-block
+  background #eee
+  width 100px
+  height 100px
+  line-height 100px
+  text-align center
+  position absolute
+  cursor pointer
+
+#like
+  top 0
+  right 0
+  background-image url(/img/thumbup.png)
+  background-repeat no-repeat
+  background-position:center;
+  &:hover
+    background-image url(/img/thumbup-over.png)
+
+#dislike
+  top 100px
+  right 0
+  background-image url(/img/thumbdown.png)
+  background-repeat no-repeat
+  background-position:center;
+  &:hover
+    background-image url(/img/thumbdown-over.png)
+
+#fill
+  height 100%
+  background #80C7E3
+
+#track-header
+#album-header
+#artist-header
+  font-family Tahoma
+  color: #009900
+  font-weight bold
+
+#map
+  width calc(100% \- 300px)
+  height 100%
+  position fixed
+  top 0
+  left 0
+  right 300px
+  bottom 0
+  overflow hidden
+  background #ccc
+
+#search
+  background #fff
+
+#search-input
+  width 100%
+  border 2px solid #eee
+
+#search-results
+  overflow-y auto
+  .result
+    position relative
+    cursor pointer
+    opacity .75
+    transition opacity .4s
+    overflow hidden
+    &:hover
+      opacity 1
+      transition opacity .2s
+    height 50px
+    &:nth-child(even)
+      background #fff
+    &:nth-child(odd)
+      background #eee
+    .icon
+      position absolute
+      left 0
+      img
+        width 50px
+        height 50px
+    .meta
+      width 245px
+      position absolute
+      left 55px
+
+.loading-widget
+  margin auto
+  position relative
+  width 128px
+  height 128px
+  animation scale-fade-in 0.05s linear
+  .circle
+    position absolute
+    background #85DB30
+    width 29px
+    height 29px
+    border-radius 19px
+    animation loading-bounce 0.8s linear infinite
+    &._1
+      left 0
+      top 50px
+      animation-delay 0.3s
+    &._2
+      left 14px
+      top 14px
+      animation-delay 0.4s
+    &._3
+      top 0
+      left 50px
+      animation-delay 0.5s
+    &._4
+      right 14px
+      top 14px
+      animation-delay 0.6s
+    &._5
+      right 0
+      top 50px
+      animation-delay 0.7s
+    &._6
+      right 14px
+      bottom 14px
+      animation-delay 0.8s
+    &._7
+      left 50px
+      bottom 0
+      animation-delay 0.9s
+    &._8
+      left 14px
+      bottom 14px
+      animation-delay 1s
+
+@keyframes loading-bounce
+  from
+    transform scale(1)
+    opacity 1
+  to
+    transform scale(0.3)
+    opacity 0.2
+
+@keyframes scale-fade-in
+  from
+    opacity 0
+    transform scale(.5)
+  to
+    opacity 1
+    transform scale(1)

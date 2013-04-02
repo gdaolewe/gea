@@ -14,13 +14,17 @@ require({
       '//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min',
       'lib/backbone.min'
     ],
+    'jqueryrdio': 'lib/jquery.rdio.min',
+    'promise': 'lib/promise',
+	'async': 'lib/async',
     'text': 'lib/text'
   },
   shim: {
     'backbone': {
       deps: ['jquery', 'util/_conf'],
       exports: 'Backbone'
-    }
+    },
+    'jqueryrdio': ['jquery']
   },
   deps: ['app']
 });
