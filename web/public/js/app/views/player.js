@@ -18,7 +18,7 @@ define([
   var loading = false;
   var deferred = new promise.Promise();
   var streamerPromise = new promise.Promise();
-  var currentRdioId = 'a171827';
+  var currentStreamId = 'a171827';
 
   return new (bb.View.extend({
     el: '#player',
@@ -43,11 +43,11 @@ define([
       this.$streamer = rdio;
       // Queue the first album when ready
       streamerPromise.then($.proxy(function () {
-        this.$streamer.bind('ready.rdio', $.proxy(function() {
-          this.$streamer.queue(currentRdioId);
+        this.$streamer.bind('ready', $.proxy(function() {
+          this.$streamer.queue(currentStreamId);
           // Listen for new songs to play
           vent.on('play-key', $.proxy(function (key) {
-            currentRdioId = key;
+            currentStreamId = key;
             this.$streamer.play(key);
           }, this));
         }, this));
@@ -55,7 +55,7 @@ define([
 
       // When the playing track has changed, adjust the album art, track, album, and artist info accordingly
       streamerPromise.then($.proxy(function () {
-        this.$streamer.bind('playingTrackChanged.rdio', $.proxy(function(e, playingTrack, sourcePosition) {
+        this.$streamer.bind('playingTrackChanged', $.proxy(function(e, playingTrack, sourcePosition) {
           deferred.done();
           if (playingTrack) {
             this.sourcePosition = sourcePosition;
@@ -81,7 +81,7 @@ define([
 
       // When the play-state has changed, adjust the play/pause button appropriately
       streamerPromise.then($.proxy(function () {
-        this.$streamer.bind('playStateChanged.rdio', $.proxy(function(e, playState) {
+        this.$streamer.bind('playStateChanged', $.proxy(function(e, playState) {
           deferred.then($.proxy(function () {
               this.updatePlayPauseButton();
               //If the playState is "playing" (==1), we are no longer waiting for the track to load
@@ -92,14 +92,16 @@ define([
 
       // Update the progress bar fill amount
       streamerPromise.then($.proxy(function () {
-        this.$streamer.bind('positionChanged.rdio', $.proxy(function(e, position) {
-          // When Rdio calls the positionChanged callback function, adjust the width of the progress bar's "fill" to
-          // scale according the percent played of the track's duration
+        this.$streamer.bind('positionChanged', $.proxy(function(e, position) {
+          /* When the streaming service calls the positionChanged callback function,
+             adjust the width of the progress bar's "fill" to
+             scale according the percent played of the track's duration
+          */
           this.$progressBarFill.css('width', Math.floor(100*position/this.duration)+'%');
           this.trackPosition = position;
         }, this));
       }, this));
-      $.get('/rdio/getPlaybackToken', $.proxy(function (data) {
+      $.get('/' + this.$streamer.name + '/getPlaybackToken', $.proxy(function (data) {
         this.$streamer.setup(this.$('#api'), data.result);
         streamerPromise.done();
       }, this));
@@ -111,7 +113,7 @@ define([
       e.stopPropagation();
       e.preventDefault();
       deferred.then($.proxy(function () {
-        //If we're still waiting to load from Rdio, don't handle this.
+        //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
         ++playing;
         playing % 2 ? this.$streamer.play() : this.$streamer.pause();
@@ -121,7 +123,7 @@ define([
       e.stopPropagation();
       e.preventDefault();
       deferred.then($.proxy(function () {
-        //If we're still waiting to load from Rdio, don't handle this.
+        //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
         playing = 1;
         loading = true;
@@ -132,7 +134,7 @@ define([
       e.stopPropagation();
       e.preventDefault();
       deferred.then($.proxy(function () {
-        //If we're still waiting to load from Rdio, don't handle this.
+        //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
         playing = 1;
         //If we've played more than 5 seconds (or this is the first track)
@@ -150,14 +152,14 @@ define([
     like: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      $.post('/rate?from=rdio&id=' + currentRdioId + '&verdict=like', function () {
+      $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=like', function () {
         alert('Like submitted! :D');
       });
     },
     dislike: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      $.post('/rate?from=rdio&id=' + currentRdioId + '&verdict=dislike', function () {
+      $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=dislike', function () {
         alert('Dislike submitted! >:(');
       });
     },

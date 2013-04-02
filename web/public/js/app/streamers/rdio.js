@@ -4,16 +4,17 @@ define([
 	'jqueryrdio',
 	'util/jqr!'
 ], function (vent) {
-  //var $api = null;
 
   return {
+  	name: 'rdio',
+
   	setup: function (api, playBackToken) {
   		// Cache the Rdio API object
   		this.$api = api;
   		this.$api.rdio(playBackToken);
   	},
   	bind: function (apiEvent, apiFunction) {
-  		this.$api.bind(apiEvent, apiFunction);
+  		this.$api.bind(apiEvent + '.rdio', apiFunction);
   	},
   	play: function (key) {
   		if (key) this.$api.rdio().play(key);
