@@ -15,6 +15,9 @@ Once the SDK tools are installed, add the install directory to your PATH environ
 Configure an emulator: `android create avd -n <emulator-name> -t android-17`
 Take note of the name you chose for the emulator.
 
+Building
+---------
+
 Now navigate to the android directory:
 
 `cd gea/android/`
