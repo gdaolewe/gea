@@ -28,7 +28,7 @@
 
 To see the web client, open a browser (currently only the latest versions of Firefox and Google Chrome are supported) and navigate to <http://localhost:3000>. 
 
-**NOTE: In order to be able to use the web client, you must have the Adobe Flash plugin installed for your browser. The installer script will install this, if you choose to use the script.**
+**NOTE: In order to be able to use the web client, you must have the Adobe Flash plugin installed for your browser. The installer script will install the Flash plugin. Web client is supported on Google Chrome (version 26+) and Mozilla Firefox (version 19+).**
 
 #####More Information
 
