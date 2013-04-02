@@ -56,7 +56,6 @@ This project uses the GitHub issue tracker. To access the issue tracker for this
 - Play button is occasionally inconsistent
 - No indication when a user is at the end of a song queue (pressing the 'Next' button gives no feedback)
 - Rdio logo is not displayed
-- Dislike button shifts down to overlap song progress bar in Firefox (19.0+)
 
 ### Android App
 - Playback stops when searching during playback
