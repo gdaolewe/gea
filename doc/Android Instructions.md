@@ -1,9 +1,24 @@
-Building for Android with Ant
+Building for Android
 =============================
 
-Navigate to the android directory:
+Installing Android SDK
+-----------------------
+
+You must have Java installed, as well as the Android SDK. The Android SDK can be obtained here: 
+http://developer.android.com/sdk/index.html
+
+Choose 'Use an existing IDE' and download the SDK tools. Follow the instructions for installing them here:
+http://developer.android.com/sdk/installing/index.html
+
+Once the SDK tools are installed, add the install directory to your PATH environment variable, open a console and type `android` to launch the SDK Manager. Use it to install the following packages: Android 4.2 API 17 -> SDK Platform and Extras -> Google Play Services.
+
+Now navigate to the android directory:
 
 `cd gea/android/`
+
+Copy the google-play-services_lib from [androidsdk location]/extras/google/ to gea/android.
+
+Type `android update project --target "android-17" --path Gea --library ../google_play_services`
 
 Prepare the project for building:
 
