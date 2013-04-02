@@ -8,6 +8,10 @@ define([
   html,
   vent
 ) {
+  /* This is the View aspect of the Model-View-Collection design pattern.
+   * When the collection fires the event to notify that it is has changed,
+   * this view updates the elements appropriately.
+  */
   // Template
   var template = _.template(html);
 
