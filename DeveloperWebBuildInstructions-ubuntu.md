@@ -44,8 +44,8 @@ To see the web client, open a browser (currently only the latest versions of Fir
 
 **NOTE: In order to be able to use the web client, you must have the Adobe Flash plugin installed for your browser. The installer script will install this, if you choose to use the script.**
 
-#####For More Information
+#####More Information
 
-For more information on using git with GitHub, visit <https://help.github.com/>
-
-For more information on the Rdio API, visit <http://developer.rdio.com/docs>
+For more information on using:
+* git with GitHub, visit <https://help.github.com/>
+* the Rdio API, visit <http://developer.rdio.com/docs>
