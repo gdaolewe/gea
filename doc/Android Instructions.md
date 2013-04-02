@@ -12,31 +12,36 @@ http://developer.android.com/sdk/installing/index.html
 
 Once the SDK tools are installed, add the install directory to your PATH environment variable, open a console and type `android` to launch the SDK Manager. Use it to install the following packages: Android 4.2 API 17 -> SDK Platform and Extras -> Google Play Services.
 
+Configure an emulator: `android create avd -n <emulator-name> -t android-17`
+Take note of the name you chose for the emulator.
+
 Now navigate to the android directory:
 
 `cd gea/android/`
 
-Copy the google-play-services_lib from [androidsdk location]/extras/google/ to gea/android.
-
-Type `android update project --target "android-17" --path Gea --library ../google_play_services`
+Copy the google-play-services_lib from [androidsdk location]/extras/google/google-play-services/libproject to gea/android. 
 
 Prepare the project for building:
 
-`android update project -p Gea`
+Prepare the google-play-services_lib: `android update project -t "android-17" -p google-play-services_lib/`
+
+Prepare the project itself: `android update project -p Gea`
 
 To prepare tests:
 
 `android update test-project -m ../Gea - p GeaTest`
 
-Now run `ant clean Gea debug`
+Before building, start the emulator: `emulator "@<emulator-name>"`
+
+To build, `cd gea/android/Gea` and run `ant clean Gea debug`
 
 To run tests:
 
-`ant clean GeaTest debug install test`
+`cd android/GeaTest/` and run `ant clean debug install test`
 
 To run the application:
 
-`ant clean Gea debug install`
+cd `android/Gea` and run `ant clean debug install`
 
 The application is now installed on the device, but hasn't been started. To start it, type
 
