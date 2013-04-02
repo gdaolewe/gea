@@ -186,7 +186,7 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 		Log.e(MainActivity.LOG_TAG, "Rdio API call failed");
 	}
 	
-	public void mediaPlayerReady(MediaPlayer player) {
+	private void mediaPlayerReady(MediaPlayer player) {
 		try {
 			player.prepare();
 			if (this.player != null) {

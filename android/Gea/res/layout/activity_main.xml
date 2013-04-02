@@ -14,20 +14,22 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:contentDescription="@string/album_art_content_description"
         android:maxHeight="@dimen/albumart_size"
         android:maxWidth="@dimen/albumart_size"
         android:src="@drawable/albumart_placeholder_black" />
 
-    <!-- layout for Google MapFragment -->
+    <!-- layout for Google MapFragment 
+    	 commented out as Google Maps Android API v2 will *not* run on emulator per docs	-->
 
-    <!-- <fragment
-        android:id="@+id/fragment1"
+     <!-- <fragment
+        android:id="@+id/map"
         android:name="com.google.android.gms.maps.MapFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/linearLayout1"
         android:layout_marginTop="66dp" /> -->
-
+    
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
@@ -35,6 +37,7 @@
         android:layout_alignBottom="@+id/playerAlbumArt"
         android:layout_alignRight="@+id/playerAlbumArt"
         android:layout_marginBottom="60dp"
+        android:contentDescription="@string/album_art_content_description"
         android:orientation="vertical" >
 
         <TextView
@@ -70,7 +73,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.50"
                     android:onClick="onUpButtonClicked"
-                    android:text="Up"
+                    android:text="@string/up_button_text"
                     android:textSize="@dimen/approval_button" />
 
                 <Button
@@ -80,7 +83,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.50"
                     android:onClick="onDownButtonClicked"
-                    android:text="Dn"
+                    android:text="@string/down_button_text"
                     android:textSize="@dimen/approval_button" />
 
             </LinearLayout>
@@ -98,21 +101,21 @@
                 android:layout_column="1"
                 android:layout_gravity="left|top"
                 android:layout_row="1"
-                android:text="0:00" />
+                android:text="@string/default_position_display" />
 
             <TextView
                 android:id="@+id/position_durationTextSeparator"
                 android:layout_column="1"
                 android:layout_gravity="center_horizontal|top"
                 android:layout_row="1"
-                android:text=" / " />
+                android:text="@string/position_duration_separator_display" />
 
             <TextView
                 android:id="@+id/durationText"
                 android:layout_column="1"
                 android:layout_gravity="right|top"
                 android:layout_row="1"
-                android:text="0:00" />
+                android:text="@string/default_duration_display" />
 
         </GridLayout>
 
@@ -122,14 +125,14 @@
             android:columnCount="1" >
 
             <Button
-                android:id="@+id/button4"
+                android:id="@+id/prevButton"
                 android:layout_column="0"
                 android:layout_gravity="left|top"
                 android:layout_row="1"
                 android:text="@string/prev_button_text" />
 
             <Button
-                android:id="@+id/button5"
+                android:id="@+id/nextButton"
                 android:layout_column="0"
                 android:layout_gravity="center_horizontal|top"
                 android:layout_row="1"

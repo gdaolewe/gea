@@ -1,7 +1,7 @@
 package net.kenpowers.gea;
 
 public class Track extends MusicServiceObject {
-	private String key, artist, album, albumArtURL;
+	private String artist, album, albumArtURL;
 	private int duration;
 	public Track(String key, String type, String name, String artist, 
 			String album, String albumArtURL, int duration) {
@@ -26,6 +26,6 @@ public class Track extends MusicServiceObject {
 	}
 	
 	public String toString() {
-		return artist + " - " + name + " (" + album + ")";
+		return artist + " - " + super.toString() + " (" + album + ")";
 	}
 }

@@ -22,6 +22,7 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
@@ -41,6 +42,7 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getActionBar().setDisplayShowHomeEnabled(true);
         
         MainActivity.context = getApplicationContext();
         
@@ -54,7 +56,13 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
                 
         ((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
-        			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+        			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        				if (!fromUser)
+        					return;
+        				int seconds = getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
+        				String position = getFormattedTimeFromSeconds(seconds);
+        				((TextView) findViewById(R.id.currentPositionText)).setText(position);
+        			}
         			public void onStartTrackingTouch(SeekBar seekBar) {
         				trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
         			}
@@ -67,13 +75,10 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         
         ((SeekBar)findViewById(R.id.volumeSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
-					
 					@Override
 					public void onStopTrackingTouch(SeekBar seekBar) {}
-					
 					@Override
 					public void onStartTrackingTouch(SeekBar seekBar) {}
-					
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress,
 							boolean fromUser) {
@@ -148,10 +153,34 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     		
     }
     
-    private String secondsToTimeFormat(int time) {
-    	int seconds = time % 60;
-    	int minutes = time / 60;
-    	return "" + (minutes<10 ? "0":"") + minutes + ":" + (seconds<10? "0":"") + seconds;
+    public void togglePaused(View view) {
+    	if (view.getId() == R.id.play_pause_button)
+    		music.togglePlayerPaused();
+    	TextView button = (TextView)findViewById(R.id.play_pause_button);
+    	if (music.playerIsPlaying()) {
+    		trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
+    		button.setText(R.string.pause_button_text);
+    	}
+    	else {
+    		trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
+    		button.setText(R.string.play_button_text);
+    	}
+    }
+    
+    private int getProgressPercent(int position, int duration) {
+    	double progress = ((double)position/duration)*100;
+    	return (int)progress;
+    }
+    
+    private int getSecondsFromProgress(int progress, int duration) {
+    	double seconds = (double)progress*duration / 100;
+    	return (int)seconds;
+    }
+    
+    private String getFormattedTimeFromSeconds(int seconds) {
+    	int secs = seconds % 60;
+    	int minutes = seconds / 60;
+    	return "" + (minutes<10 ? "0":"") + minutes + ":" + (secs<10? "0":"") + secs;
     }
     
     private Handler trackPositionUpdateHandler = new Handler();
@@ -172,38 +201,16 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     	}
     }
     
-    public void togglePaused(View view) {
-    	if (view.getId() == R.id.play_pause_button)
-    		music.togglePlayerPaused();
-    	TextView button = (TextView)findViewById(R.id.play_pause_button);
-    	if (music.playerIsPlaying()) {
-    		trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
-    		button.setText("Pause");
-    	}
-    	else {
-    		trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
-    		button.setText("Play");
-    	}
-    }
     
-    private int getProgressPercent(int position, int duration) {
-    	double progress = ((double)position/duration)*100;
-    	return (int)progress;
-    }
-    
-    private int getSecondsFromProgress(int progress, int duration) {
-    	double seconds = (double)progress*duration / 100;
-    	return (int)seconds;
-    }
     
     private Runnable updateTrackPositionTask = new Runnable() {
 	    public void run() {
 	    	int durationSeconds = music.getPlayerDuration()/1000;
-	    	String durationString = secondsToTimeFormat(durationSeconds);
+	    	String durationString = getFormattedTimeFromSeconds(durationSeconds);
 	    	((TextView)findViewById(R.id.durationText)).setText(durationString);
 	    	
 			int currentPositionSeconds = music.getPlayerPosition()/1000;
-	    	String currentPositionString = secondsToTimeFormat(currentPositionSeconds);
+	    	String currentPositionString = getFormattedTimeFromSeconds(currentPositionSeconds);
 			((TextView)findViewById(R.id.currentPositionText)).setText(currentPositionString);
 			trackPositionUpdateHandler.postDelayed(this, 100);
 			
@@ -239,6 +246,14 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 	    protected void onPostExecute(Bitmap result) {
 	        image.setImageBitmap(result);
 	    }
+	}
+    
+    public boolean onOptionsItemSelected (MenuItem item) {
+		Log.d(MainActivity.LOG_TAG, "mainactivity got this far");
+		
+			
+		return true;
+		
 	}
     
 }

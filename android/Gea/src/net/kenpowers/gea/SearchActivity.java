@@ -5,6 +5,8 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
@@ -20,6 +22,7 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 	    super.onCreate(savedInstanceState);
 	
 	    setContentView(R.layout.search);
+	    getActionBar().setHomeButtonEnabled(true);
 
 	    // Get the intent, verify the action and get the query
 	    Intent intent = getIntent();
@@ -28,9 +31,18 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 	      performSearch(query);
 	    }
 	    
-	    music.togglePlayerPaused();
+	    //music.togglePlayerPaused();
 	    music.registerSearchCompleteListener(this);
 	}
+	
+	 @Override
+	    public boolean onCreateOptionsMenu(Menu menu) {
+	        // Inflate the menu; this adds items to the action bar if it is present.
+	        getMenuInflater().inflate(R.menu.main, menu);
+	        return true;
+	 }
+	
+	
 	
 	public void performSearch(String query) {
 		if (query.length() < 1) {
@@ -72,8 +84,14 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 		}
 	}
 	
+	public boolean onOptionsItemSelected (MenuItem item) {
+		
+		if (item.getItemId() == android.R.id.home) {
+			finish();	
+			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
+		}
+	}
 	
-	
-	
-
 }
