@@ -101,7 +101,7 @@ module.exports = {
       });
     });
   },
-  // GET / recieve?[artist=<artist>[&album=<album>&title=<title>]][[&pastHours=<pastHours>]|[&timeStart=<timeStart>&timeEnd=<timeEnd>]][&limit=<limit>&offset=<offset>]
+  // GET /rate?[artist=<artist>[&album=<album>&title=<title>]][[&pastHours=<pastHours>]|[&timeStart=<timeStart>&timeEnd=<timeEnd>]][&limit=<limit>&offset=<offset>]
   // Artist is optional
   // If artist is specified, then album || title can be specified.
   // pastHours || (timeStart && timeEnd) are optional, pastHours takes precedent -- default is 24 hours
