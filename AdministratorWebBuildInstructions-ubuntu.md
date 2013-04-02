@@ -1,4 +1,4 @@
-#Web Build Instructions for Ubuntu (Administrator)
+#Administrator Web Build Instructions for Ubuntu
 ####Tested with a clean install of Ubuntu 12.10
 
 
@@ -26,9 +26,9 @@
 
 #####Opening the Web Client
 
-To see the web client, open a browser (currently only the latest versions of Firefox and Google Chrome are supported) and navigate to <http://localhost:3000>. 
+To see the web client, open a browser (currently only the latest versions of Firefox (19.0+) and Google Chrome (26+) are supported) and navigate to <http://localhost:3000>. 
 
-**NOTE: In order to be able to use the web client, you must have the Adobe Flash plugin installed for your browser. The installer script will install this, if you choose to use the script.**
+**NOTE: In order to be able to use the web client, you must have the Adobe Flash plugin installed for your browser. The installer script will install the Flash plugin.**
 
 #####More Information
 
