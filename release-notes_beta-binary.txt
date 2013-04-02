@@ -1,0 +1,59 @@
+########## Beta Release - April 2, 2013 ##########
+
+##### Installation and Setup Instructions
+
+### Web Client
+Installation and Setup instructions for the web client and server are available in the same folder as these release notes.
+An online version of these instructions are also provided at https://github.com/OpenGea/gea/AdministratorWebBuildInstructions-ubuntu.md
+
+### Android App
+
+------------------------------------------------------------------------
+##### Usage
+
+### Web Client
+See the end of the Installation and Setup instructions for usage.
+
+### Android App
+
+------------------------------------------------------------------------
+##### Features
+
+### Web Client
++Added search capability for songs and albums
++Added control playback (play, pause, next, previous)
++Added display of song metadata
++Added ability to pull top 10 songs from server
++Added display of track position and duration
++Added album art display
++Added song approval communication
++Added plain map
+
+### Android App
++Added search capability for songs
++Added control playback (play, pause, next, previous)
++Added volume control
++Added scrubbing
++Added display of song metadata
++Added display of track position and duration
++Added album art display
++Added song approval communication
+
+------------------------------------------------------------------------
+##### Bugs and Issues
+
+### Web Client
+- Scrubbing not yet implemented
+- Clicking on artists in search results does nothing
+- Play button is occasionally inconsistent
+- No indication when a user is at the end of a song queue (pressing the 'Next' button gives no feedback)
+- Rdio logo is not displayed
+- Dislike button shifts down to overlap song progress bar in Firefox (19.0+)
+
+### Android App
+- Playback stops when searching during playback
+- No launch screen
+- Does not yet retrieve statistical data from server
+- Search for albums or artists is not yet implemented
+- Rdio logo not displayed
+- No map displayed
