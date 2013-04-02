@@ -1,4 +1,4 @@
-#Web Build Instructions for Ubuntu (Developer)
+#Developer Web Build Instructions for Ubuntu
 ####Tested with a clean install of Ubuntu 12.10
 
 1. To download the package, you can use git. To install git, open a terminal window and run: 
