@@ -21,14 +21,20 @@
 
 		./ubuntu-installer.sh
 
+7. If you do not have an Rdio API key, go to <http://developer.rdio.com/> and follow the section labeled "How to Get Started". Then create a text file named `rdio.json` with the following content:
 
-11. Copy your rdio.json file containing your Rdio API key and secret in JSON format into the folder `gea/web/config/`.
+		{
+  			"key": "YOUR_RDIO_KEY",
+  			"secret": "YOUR_RDIO_SECRET"
+		}
 
-12. Close all terminal windows to reload your bash environment OR run the following to initialize your bash environment **(NOTE: there is a space between `.` and `~`)**:
+8. Copy your rdio.json file containing your Rdio API key and secret in JSON format into the folder `gea/web/config/`.
+
+9. Close all terminal windows to reload your bash environment OR run the following to initialize your bash environment **(NOTE: there is a space between `.` and `~`)**:
 
 		. ~/.nvm/nvm.sh
 
-13. To start the server, run the following command in a terminal from the `gea/web` folder:
+10. To start the server, run the following command in a terminal from the `gea/web` folder:
 
 		node app
  
