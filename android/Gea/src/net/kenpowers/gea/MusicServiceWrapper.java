@@ -187,14 +187,30 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 	}
 	
 	private void mediaPlayerReady(MediaPlayer player) {
+		if (this.player != null) {
+			this.player.reset();
+			this.player.release();
+			this.player = null;
+		}
+		
 		try {
-			player.prepare();
-			if (this.player != null) {
-				this.player.reset();
-				this.player.release();
-				this.player = null;
-			}
-			player.start();
+			this.player = player;
+			player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+				@Override
+				public void onPrepared(MediaPlayer mp) {
+					mp.start();
+					mp.setOnCompletionListener(new OnCompletionListener() {
+						public void onCompletion(MediaPlayer player) {
+							currentTrack = null;
+							notifyTrackChangedListeners(currentTrack);
+						}
+					});
+					notifyTrackChangedListeners(currentTrack);
+				}
+			});
+			player.prepareAsync();
+			
+			/*player.start();
 			player.setOnCompletionListener(new OnCompletionListener() {
 				public void onCompletion(MediaPlayer player) {
 					currentTrack = null;
@@ -202,6 +218,7 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 				} });
 			this.player = player;
 			notifyTrackChangedListeners(currentTrack);
+			*/
 		} catch(Exception e) {
 			Log.e(MainActivity.LOG_TAG, e.toString());
 		}

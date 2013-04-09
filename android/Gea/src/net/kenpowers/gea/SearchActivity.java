@@ -31,7 +31,6 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 	      performSearch(query);
 	    }
 	    
-	    //music.togglePlayerPaused();
 	    music.registerSearchCompleteListener(this);
 	}
 	
