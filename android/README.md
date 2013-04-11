@@ -8,7 +8,7 @@ http://developer.android.com/sdk/index.html
 Choose 'Use an existing IDE' and download the SDK tools. Follow the instructions for installing them here:
 http://developer.android.com/sdk/installing/index.html
 
-Once the SDK tools are installed, add the install directory to your PATH environment variable, open a console and type `android` to launch the SDK Manager. Use it to install the following packages: Android 4.2 API 17 -> SDK Platform and Extras -> Google Play Services.
+Once the SDK tools are installed, add the `tools` and `platform-tools` directories to your PATH environment variable. Open a console and type `android` to launch the SDK Manager. Use it to install the following packages: Android 4.2 API 17 -> SDK Platform and Extras -> Google Play Services.
 
 Configure an emulator: `android create avd -n <emulator-name> -t android-17`
 Take note of the name you chose for the emulator.
