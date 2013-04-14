@@ -14,16 +14,11 @@
     	 commented out as Google Maps Android API v2 will *not* run on emulator per docs
     -->
 
-
-    <!--
-        <fragment
+    <fragment
         android:id="@+id/map"
-        android:name="com.google.android.gms.maps.MapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/linearLayout1"
-        android:layout_marginTop="66dp" />
-    -->
+        android:layout_height="200dp" />
 
     <TextView
         android:id="@+id/songInfoText"
@@ -35,6 +30,7 @@
         android:id="@+id/player_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/map"
         android:baselineAligned="false" >
 
         <LinearLayout
@@ -94,6 +90,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/approval_buttons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
@@ -132,7 +129,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/controls_bottom"
+        android:id="@+id/player_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/player_top"
@@ -145,6 +142,7 @@
             android:orientation="vertical" >
 
             <LinearLayout
+                android:id="@+id/seek_buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:columnCount="1"

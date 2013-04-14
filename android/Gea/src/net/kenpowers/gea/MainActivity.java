@@ -8,7 +8,7 @@ import org.json.*;
 
 import android.os.AsyncTask;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,7 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
-public class MainActivity extends Activity implements RequestTaskCompleteListener, 
+public class MainActivity extends FragmentActivity implements RequestTaskCompleteListener, 
 														TrackChangedListener {
 	
 	private static Context context;
@@ -88,8 +88,8 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 				});
         
         //uncomment this code to add Google MapFragment
-        //gmap = ((MapFragment)getFragmentManager().findFragmentById(R.layout.fragment1).getMap());
-        //MapFragment mf = MapFragment.newInstance();
+        gmap = ((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+        SupportMapFragment mf = SupportMapFragment.newInstance();
         
         music = MusicServiceWrapper.getInstance(this);
         music.registerTrackChangedListener(this);
