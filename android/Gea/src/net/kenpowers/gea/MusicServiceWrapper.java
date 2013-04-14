@@ -1,7 +1,11 @@
 package net.kenpowers.gea;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.IBinder;
+import android.os.PowerManager;
+import android.app.Service;
 import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
@@ -28,7 +32,8 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 	private final String rdioKey = "9d3ayynanambvwxq5wpnw82y";
 	private final String rdioSecret = "CdNPjjcrPW";
 	private MediaPlayer player;
-	
+
+	private WifiManager.WifiLock wifiLock;
 	
 	private Rdio rdio;
 	private Track currentTrack;
@@ -52,6 +57,10 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 			});
 		return INSTANCE;
 	}
+	
+	/*public IBinder onBind(Intent intent) {
+		return null;
+	}*/
 	
 	private List<SearchCompleteListener> searchCompleteListeners;
 	
@@ -194,7 +203,10 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 		}
 		
 		try {
-			this.player = player;
+			//wifiLock = ((WifiManager)getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+
+			//wifiLock.acquire();
+			//player.setWakeMode(MainActivity.getAppContext(), PowerManager.PARTIAL_WAKE_LOCK);
 			player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 				@Override
 				public void onPrepared(MediaPlayer mp) {
@@ -209,6 +221,7 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 				}
 			});
 			player.prepareAsync();
+			this.player = player;
 			
 			/*player.start();
 			player.setOnCompletionListener(new OnCompletionListener() {

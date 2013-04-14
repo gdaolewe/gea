@@ -123,16 +123,36 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     }
     
     public void onUpButtonClicked(View view) {
-    	if (view.getId() != R.id.approval_up_button || currentTrack == null)
+    	ImageButton upButton = (ImageButton)view;
+    	if (upButton.getId() != R.id.approval_up_button)
     		return;
-    	Log.d(LOG_TAG, "up button clicked");  
-    	sendApprovalRequest(true);
+    	//show clicked icon
+    	upButton.setImageResource(R.drawable.thumbup_over);
+    	//return to unclicked icon after delay
+    	new Handler().postDelayed(new Runnable() {
+    		public void run() {
+    			ImageButton upButton = ((ImageButton)findViewById(R.id.approval_up_button));
+    			upButton.setImageResource(R.drawable.thumbup);
+    		}
+    	}, 100);
+    	if (currentTrack != null)
+    		sendApprovalRequest(true);
     }
     public void onDownButtonClicked(View view) {
-    	if (view.getId() != R.id.approval_down_button || currentTrack == null)
+    	ImageButton downButton = (ImageButton)view;
+    	if (downButton.getId() != R.id.approval_down_button)
     		return;
-    	Log.d(LOG_TAG, "down button clicked");	
-    	sendApprovalRequest(false);
+    	//show clicked icon
+    	downButton.setImageResource(R.drawable.thumbdown_over);
+    	//return to unclicked icon after delay
+    	new Handler().postDelayed(new Runnable() {
+    		public void run() {
+    			ImageButton downButton = ((ImageButton)findViewById(R.id.approval_down_button));
+    			downButton.setImageResource(R.drawable.thumbdown);
+    		}
+    	}, 100);
+    	if (currentTrack != null)
+    		sendApprovalRequest(false);
     }
     
     public void sendApprovalRequest(boolean trackLiked) {
@@ -156,14 +176,16 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     public void togglePaused(View view) {
     	if (view.getId() == R.id.play_pause_button)
     		music.togglePlayerPaused();
-    	TextView button = (TextView)findViewById(R.id.play_pause_button);
+    	ImageButton button = (ImageButton)findViewById(R.id.play_pause_button);
     	if (music.playerIsPlaying()) {
     		trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
-    		button.setText(R.string.pause_button_text);
+    		
+    		//button.setText(R.string.pause_button_text);
+    		button.setImageResource(R.drawable.pause);
     	}
     	else {
     		trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
-    		button.setText(R.string.play_button_text);
+    		button.setImageResource(R.drawable.play);
     	}
     }
     
@@ -187,7 +209,7 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     
     public void onTrackChanged(Track track) {
     	if (track==null) {
-    		((TextView)findViewById(R.id.play_pause_button)).setText("Play");
+    		((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.play);
         	trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
     	} else {
     		Log.d(LOG_TAG, track.toString());
@@ -195,7 +217,8 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     		downloadAlbumArt(currentTrack.getAlbumArtURL());
 	    	String trackInfo = String.format(currentTrack.toString());
 	    	((TextView)findViewById(R.id.songInfoText)).setText(trackInfo);
-	    	((TextView)findViewById(R.id.play_pause_button)).setText("Pause");
+	    	//((TextView)findViewById(R.id.play_pause_button)).setText("Pause");
+	    	((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.pause);
 	    	
 	    	trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
     	}
