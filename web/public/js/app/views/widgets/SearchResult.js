@@ -42,7 +42,9 @@ define([
       }
     },
     click: function () {
-      vent.trigger('play-key', this.model.get('key'));
+      // If the type is 'r', the selection is an artist.
+      // Since the artist key is not a 'playable' key, we need to use the topSongsKey to actually initiate playback for artists
+      vent.trigger('play-key', (this.model.get('type') === 'r') ? this.model.get('topSongsKey') : this.model.get('key'));
     }
   });
 });
