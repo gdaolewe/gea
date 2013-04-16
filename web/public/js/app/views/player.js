@@ -16,6 +16,7 @@ define([
   var song = null;
   var playingClass = 'play-button pause-button';
   var loading = false;
+  var dragging = false;
   var deferred = new promise.Promise();
   var streamerPromise = new promise.Promise();
   var currentStreamId = 'a171827';
@@ -27,7 +28,10 @@ define([
       'click #next': 'playNext',
       'click #previous': 'playPrevious',
       'click #like': 'like',
-      'click #dislike': 'dislike'
+      'click #dislike': 'dislike',
+      'mousedown #progress-bar': 'drag',
+      'mouseup #progress-bar': 'undrag',
+      'mousemove #progress-bar': 'seek'
     },
     initialize: function () {
       // Cache selectors
@@ -97,6 +101,7 @@ define([
              adjust the width of the progress bar's "fill" to
              scale according the percent played of the track's duration
           */
+          console.log(position);
           this.$progressBarFill.css('width', Math.floor(100*position/this.duration)+'%');
           this.trackPosition = position;
         }, this));
@@ -106,6 +111,7 @@ define([
         streamerPromise.done();
       }, this));
       this.$playPauseButton = this.$('#play-pause');
+      this.$progressBar = this.$('#progress-bar');
       this.$progressBarFill = this.$('#fill');
 	    this.$likeImg = this.$('#like'); //creates global var in initialized function
     },
@@ -162,6 +168,39 @@ define([
       $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=dislike', function () {
         alert('Dislike submitted! >:(');
       });
+    },
+    drag: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      dragging = true;
+      this.updateProgressBar(e.pageX);
+    },
+    undrag: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      if (dragging) {
+        dragging = false;
+        this.updateProgressBar(e.pageX);
+      }
+    },
+    seek: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      if (dragging) {
+        this.updateProgressBar(e.pageX);
+      }
+    },
+    updateProgressBar: function (x) {
+      var clickPosition = x - this.$progressBar.offset().left;
+      var percentage = clickPosition / this.$progressBar.width();
+      // Ensure percentage is at most 100%
+      percentage = (percentage > 1) ? 1 : percentage;
+      // Ensure percentage is at least 0%
+      percentage = (percentage < 0) ? 0 : percentage;
+      // Get the 'seconds' into the song that the percentage translates to
+      var seconds = percentage * this.duration;
+      // Tell the streaming service to seek to that position
+      this.$streamer.seek(seconds);
     },
     updatePlayPauseButton: function () {
       this.$playPauseButton.toggleClass(playingClass);
