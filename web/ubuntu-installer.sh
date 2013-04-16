@@ -12,14 +12,6 @@
 
 sudo apt-get -y install git curl postgresql postgresql-client-9.1 postgresql-common postgresql-9.1 libpq-dev build-essential
 
-#echo "Would you like to have the Adobe Flash plugin installed automatically?"
-#select yn in "Yes" "No"; do
-#    case $yn in
-#        Yes ) sudo apt-get -y install flashplugin-installer; break;;
-#        No ) ;;
-#    esac
-#done
-
 # Download and run 'nvm' to simplify setup process
 wget -qO- https://raw.github.com/creationix/nvm/master/install.sh | sh
 
