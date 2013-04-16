@@ -8,7 +8,7 @@
 #	postgresql
 #	libpq-dev
 #	build-essential
-#	flashplugin-installer
+#	flashplugin-installer (if viewing the webapp in a browser)
 
 sudo apt-get -y install git curl postgresql postgresql-client-9.1 postgresql-common postgresql-9.1 libpq-dev build-essential
 
