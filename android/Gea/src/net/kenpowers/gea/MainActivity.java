@@ -7,26 +7,31 @@ import java.util.HashMap;
 import org.json.*;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import android.app.SearchManager;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import android.view.View;
+import android.widget.*;
+import com.actionbarsherlock.widget.SearchView;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.app.Activity;
-import android.app.SearchManager;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.*;
 
-public class MainActivity extends FragmentActivity implements RequestTaskCompleteListener, 
+
+public class MainActivity extends SherlockFragmentActivity implements RequestTaskCompleteListener, 
 														TrackChangedListener {
 	
 	private static Context context;
@@ -42,7 +47,7 @@ public class MainActivity extends FragmentActivity implements RequestTaskComplet
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         
         MainActivity.context = getApplicationContext();
         
@@ -87,24 +92,39 @@ public class MainActivity extends FragmentActivity implements RequestTaskComplet
 					}
 				});
         
-        //uncomment this code to add Google MapFragment
         gmap = ((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         SupportMapFragment mf = SupportMapFragment.newInstance();
+        
+        setUpMapIfNeeded();
         
         music = MusicServiceWrapper.getInstance(this);
         music.registerTrackChangedListener(this);
         
+    }
+    
+    private void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (gmap == null) {
+            gmap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+                                .getMap();
+            // Check if we were successful in obtaining the map.
+            if (gmap != null) {
+                // The Map is verified. It is now safe to manipulate the map.
+
+            }
+        }
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getSupportMenuInflater().inflate(R.menu.main, menu);
         
      // Get the SearchView and set the searchable configuration
-        SearchManager searchManager = (SearchManager) getSystemService(this.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.searchField).getActionView();
+        SearchManager searchManager = (SearchManager) getSystemService(MainActivity.SEARCH_SERVICE);
+        com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) menu.findItem(R.id.searchField)
+        																								   .getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         searchView.setSubmitButtonEnabled(true);

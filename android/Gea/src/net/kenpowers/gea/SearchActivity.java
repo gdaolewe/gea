@@ -1,19 +1,22 @@
 package net.kenpowers.gea;
 
-import android.app.ListActivity;
+//import android.app.ListActivity;
+import com.actionbarsherlock.app.SherlockListActivity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+//import android.view.Menu;
+//import android.view.MenuItem;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class SearchActivity extends ListActivity implements SearchCompleteListener {
+public class SearchActivity extends SherlockListActivity implements SearchCompleteListener {
 	private MusicServiceObject searchResults[];
 	private MusicServiceWrapper music = MusicServiceWrapper.getInstance(MainActivity.getAppContext());
 	/** Called when the activity is first created. */
@@ -22,7 +25,7 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 	    super.onCreate(savedInstanceState);
 	
 	    setContentView(R.layout.search);
-	    getActionBar().setHomeButtonEnabled(true);
+	    getSupportActionBar().setHomeButtonEnabled(true);
 
 	    // Get the intent, verify the action and get the query
 	    Intent intent = getIntent();
@@ -37,7 +40,7 @@ public class SearchActivity extends ListActivity implements SearchCompleteListen
 	 @Override
 	    public boolean onCreateOptionsMenu(Menu menu) {
 	        // Inflate the menu; this adds items to the action bar if it is present.
-	        getMenuInflater().inflate(R.menu.main, menu);
+	        getSupportMenuInflater().inflate(R.menu.main, menu);
 	        return true;
 	 }
 	
