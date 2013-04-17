@@ -101,7 +101,6 @@ define([
              adjust the width of the progress bar's "fill" to
              scale according the percent played of the track's duration
           */
-          console.log(position);
           this.$progressBarFill.css('width', Math.floor(100*position/this.duration)+'%');
           this.trackPosition = position;
         }, this));
