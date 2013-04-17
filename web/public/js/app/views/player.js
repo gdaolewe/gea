@@ -172,14 +172,18 @@ define([
     drag: function (e) {
       e.stopPropagation();
       e.preventDefault();
+      // User has begun seeking by pressing the mouse button down on the progress bar
       dragging = true;
+      // Update the progress bar position (i.e. seek)
       this.updateProgressBar(e.pageX);
     },
     undrag: function (e) {
       e.stopPropagation();
       e.preventDefault();
       if (dragging) {
+        // User has completed seeking by releasing the mouse button
         dragging = false;
+        // Update the progress bar position (i.e. seek)
         this.updateProgressBar(e.pageX);
       }
     },
@@ -187,15 +191,18 @@ define([
       e.stopPropagation();
       e.preventDefault();
       if (dragging) {
+        // If the user is in the process of dragging (i.e. seeking), update the progress bar position
         this.updateProgressBar(e.pageX);
       }
     },
     updateProgressBar: function (x) {
+      // Get the position of the click in the progress bar
       var clickPosition = x - this.$progressBar.offset().left;
+      // Turn it into a percentage (0 to 1)
       var percentage = clickPosition / this.$progressBar.width();
-      // Ensure percentage is at most 100%
+      // Ensure percentage is at most 1 (=100%)
       percentage = (percentage > 1) ? 1 : percentage;
-      // Ensure percentage is at least 0%
+      // Ensure percentage is at least 0 (=0%)
       percentage = (percentage < 0) ? 0 : percentage;
       // Get the 'seconds' into the song that the percentage translates to
       var seconds = percentage * this.duration;
