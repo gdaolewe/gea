@@ -43,7 +43,8 @@
                 android:name="android.app.default_searchable"
                 android:value="net.kenpowers.gea.SearchActivity" />
         </activity>
-        <activity android:name="net.kenpowers.gea.SearchActivity" >
+        <activity android:name="net.kenpowers.gea.SearchActivity"
+            	  android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>

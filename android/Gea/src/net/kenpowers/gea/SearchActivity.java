@@ -23,7 +23,7 @@ import android.widget.TextView;
 public class SearchActivity extends SherlockListActivity implements SearchCompleteListener {
 	private MusicServiceObject searchResults[];
 	private MusicServiceWrapper music;
-	private boolean musicServiceBound = false;
+	String query;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -33,25 +33,38 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	    getSupportActionBar().setHomeButtonEnabled(true);
 
 	    // Get the intent, verify the action and get the query
-	    Intent searchIntent = getIntent();
-	    if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
-	      music = MusicServiceWrapper.getInstance();
-	      music.registerSearchCompleteListener(this);
-	      String query = searchIntent.getStringExtra(SearchManager.QUERY);
-	      performSearch(query);
-	    }
+	    handleIntent(getIntent());
 	}
 	
 	 @Override
 	    public boolean onCreateOptionsMenu(Menu menu) {
 	        // Inflate the menu; this adds items to the action bar if it is present.
 	        getSupportMenuInflater().inflate(R.menu.main, menu);
+	        
+	        SearchManager searchManager = (SearchManager) getSystemService(MainActivity.SEARCH_SERVICE);
+	        com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) menu.findItem(R.id.searchField)
+					   .getActionView();
+	        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+	        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+	        searchView.setSubmitButtonEnabled(true);
+	        searchView.setQueryRefinementEnabled(true);
+	        searchView.setQuery(query, false);
 	        return true;
 	 }
 	 
 	 @Override
-	 protected void onStop() {
-		 super.onStop();
+	 protected void onNewIntent(Intent intent) {
+	     setIntent(intent);
+	     handleIntent(intent);
+	 }
+	 
+	 private void handleIntent(Intent intent) {
+		 if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+		      music = MusicServiceWrapper.getInstance();
+		      music.registerSearchCompleteListener(this);
+		      query = intent.getStringExtra(SearchManager.QUERY);
+		      performSearch(query);
+		    }
 	 }
 	
 	public void performSearch(String query) {
