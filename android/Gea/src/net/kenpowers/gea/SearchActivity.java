@@ -35,33 +35,12 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	    // Get the intent, verify the action and get the query
 	    Intent searchIntent = getIntent();
 	    if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
+	      music = MusicServiceWrapper.getInstance();
+	      music.registerSearchCompleteListener(this);
 	      String query = searchIntent.getStringExtra(SearchManager.QUERY);
-	    
-	    Intent bindIntent = new Intent(this, MusicServiceWrapper.class);
-	    bindService(bindIntent, msConnection, Context.BIND_AUTO_CREATE);
-	    
+	      performSearch(query);
 	    }
-	    
-	    
 	}
-	
-	private ServiceConnection msConnection = new ServiceConnection() {
-    	@Override
-        public void onServiceConnected(ComponentName className,
-                IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MusicServiceWrapper.MusicBinder binder = (MusicServiceWrapper.MusicBinder) service;
-            music = binder.getService();
-            music.registerSearchCompleteListener(SearchActivity.this);
-            musicServiceBound = true;
-            Intent searchIntent = SearchActivity.this.getIntent();
-            SearchActivity.this.performSearch(searchIntent.getStringExtra(SearchManager.QUERY));
-    	}
-    	@Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            musicServiceBound = false;
-        }
-    };
 	
 	 @Override
 	    public boolean onCreateOptionsMenu(Menu menu) {
@@ -73,10 +52,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	 @Override
 	 protected void onStop() {
 		 super.onStop();
-		 unbindService(msConnection);
 	 }
-	
-	
 	
 	public void performSearch(String query) {
 		if (query.length() < 1) {

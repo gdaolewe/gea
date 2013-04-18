@@ -52,8 +52,6 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 	
 	private GoogleMap gmap;
 	
-	private boolean musicServiceBound = false;
-	
 	private int volume;
 
     @Override
@@ -66,56 +64,28 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         
         Log.i(MainActivity.LOG_TAG, "MainActivity started");
         
+        //If in debug mode, connect to Gea server running on localhost, else connect to production server
         boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
         if (isDebuggable)
         	baseURL = GeaServerConstants.LOCALHOST_BASE_URL;
         else
         	baseURL = GeaServerConstants.NET_BASE_URL;
         
-        volume = 100;        
+        volume = 100;
+        music = MusicServiceWrapper.getInstance();
+        music.registerTrackChangedListener(MainActivity.this);
         setUpSeekBarListeners();
         
-        /*gmap = ((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
-        SupportMapFragment mf = SupportMapFragment.newInstance();*/
-        
         setUpMapIfNeeded();
-        
-        
-        
-        
-        
-    }
-    
-    @Override
-    protected void onStart() {
-    	super.onStart();
-        Intent intent = new Intent(this, MusicServiceWrapper.class);
-        bindService(intent, msConnection, Context.BIND_AUTO_CREATE);
-        
     }
     
     @Override
     protected void onResume() {
     	((SeekBar)findViewById(R.id.volumeSeekBar)).setProgress(volume);
+    	music = MusicServiceWrapper.getInstance();
+    	music.setPlayerVolume(volume);
     	super.onResume();
     }
-    
-    private ServiceConnection msConnection = new ServiceConnection() {
-    	@Override
-        public void onServiceConnected(ComponentName className,
-                IBinder service) {
-            // We've bound to MusicServiceWrapper, cast the IBinder and get MusicServiceWrapper instance
-            MusicServiceWrapper.MusicBinder binder = (MusicServiceWrapper.MusicBinder) service;
-            music = binder.getService();
-            music.registerTrackChangedListener(MainActivity.this);
-            music.setPlayerVolume(volume);
-            musicServiceBound = true;
-    	}
-    	@Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            musicServiceBound = false;
-        }
-    };
     
     private void setUpSeekBarListeners() {
     	//set up change listener for song progress seek bar
@@ -197,14 +167,16 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     @Override
 	public void onDestroy() {
     	super.onDestroy();
+    	//music.cleanup();
 	}
     
     @Override
     protected void onStop() {
     	super.onStop();
-    	if (musicServiceBound)
+    	/*if (musicServiceBound)
     		unbindService(msConnection);
-    	musicServiceBound = false;
+    	musicServiceBound = false;*/
+    	
     }
     
     public static Context getAppContext() {

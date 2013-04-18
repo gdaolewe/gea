@@ -32,8 +32,9 @@ import org.json.*;
 
 
 
-public class MusicServiceWrapper extends Service implements RdioApiCallback, SearchCompletePublisher, 
+public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePublisher, 
 											TrackChangedPublisher {
+	
 	private static final MusicServiceWrapper INSTANCE = new MusicServiceWrapper();
 	
 	private final String LOG_TAG = "Gea Music Service";
@@ -47,9 +48,30 @@ public class MusicServiceWrapper extends Service implements RdioApiCallback, Sea
 	private Rdio rdio;
 	private Track currentTrack;
 		
-	private final IBinder musicBinder = new MusicBinder();
+	//private final IBinder musicBinder = new MusicBinder();
 	
-	@Override
+	private MusicServiceWrapper() {
+		if (rdio == null) {
+			rdio = new Rdio(rdioKey, rdioSecret, null, null, MainActivity.getAppContext(), 
+				new RdioListener() {
+					public void onRdioAuthorised(String accessToken, String accessTokenSecret) {}
+					public void onRdioReady() {
+						notifyMusicServiceReadyListeners();
+					}
+					public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {}
+					public void onRdioUserPlayingElsewhere() {}
+			});
+		}
+		searchCompleteListeners = new ArrayList<SearchCompleteListener>();
+		trackChangedListeners = new ArrayList<TrackChangedListener>();
+		musicServiceReadyListeners = new ArrayList<MusicServiceReadyListener>();
+	}
+	
+	public static MusicServiceWrapper getInstance() {
+		return INSTANCE;
+	}
+	
+	/*@Override
 	public IBinder onBind(Intent intent) {
 		return musicBinder;
 	}
@@ -71,22 +93,8 @@ public class MusicServiceWrapper extends Service implements RdioApiCallback, Sea
 		wifiLock = wifi.createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
 		notiMgr = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		
-		if (rdio == null) {
-			rdio = new Rdio(rdioKey, rdioSecret, null, null, getApplicationContext(), 
-				new RdioListener() {
-					public void onRdioAuthorised(String accessToken, String accessTokenSecret) {}
-					public void onRdioReady() {
-						notifyMusicServiceReadyListeners();
-					}
-					public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {}
-					public void onRdioUserPlayingElsewhere() {}
-			});
-		}
-		searchCompleteListeners = new ArrayList<SearchCompleteListener>();
-		trackChangedListeners = new ArrayList<TrackChangedListener>();
-		musicServiceReadyListeners = new ArrayList<MusicServiceReadyListener>();
-		Log.d(LOG_TAG, "musicservicewrapper service created");
 		
+		Log.d(LOG_TAG, "musicservicewrapper service created");	
 	}
 	
 	@Override
@@ -100,9 +108,9 @@ public class MusicServiceWrapper extends Service implements RdioApiCallback, Sea
 	public boolean onUnbind(Intent intent) {
 		cleanup();
 		return super.onUnbind(intent);
-	}
+	}*/
 	
-	private void cleanup() {
+	public void cleanup() {
 		Log.i(LOG_TAG, "Cleaning up..");
 		rdio.cleanup();
 		if (player != null) {
@@ -176,22 +184,22 @@ public class MusicServiceWrapper extends Service implements RdioApiCallback, Sea
 		if (player != null) {
 			if (player.isPlaying()) {
 				player.pause();
-				if (wifiLock != null) {
+				/*if (wifiLock != null) {
 					try {
 						wifiLock.release();
 					} catch (Throwable th) {
 						//wifiLock may already have been released
 					}
-				}
-				stopForeground(true);
+				}*/
+				
 				
 			}
 			else {
 				player.start();
-				if (wifiLock == null) {
+				/*if (wifiLock == null) {
 					wifiLock = ((WifiManager)getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
 				}
-				wifiLock.acquire();
+				wifiLock.acquire();*/
 			}
 		}
 	}
@@ -271,7 +279,7 @@ public class MusicServiceWrapper extends Service implements RdioApiCallback, Sea
 			this.player = null;
 		}
 		
-		Resources res = getApplicationContext().getResources();
+		/*Resources res = getApplicationContext().getResources();
 		PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0,
 				 new Intent(getApplicationContext(), MainActivity.class),
 				 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -289,7 +297,7 @@ public class MusicServiceWrapper extends Service implements RdioApiCallback, Sea
 		
 		notiMgr.notify(0, notification);
 		startForeground(0, notification);
-		wifiLock.acquire();
+		wifiLock.acquire();*/
 		
 		try {
 			player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
