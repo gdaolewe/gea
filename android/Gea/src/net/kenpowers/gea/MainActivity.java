@@ -170,15 +170,6 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     	//music.cleanup();
 	}
     
-    @Override
-    protected void onStop() {
-    	super.onStop();
-    	/*if (musicServiceBound)
-    		unbindService(msConnection);
-    	musicServiceBound = false;*/
-    	
-    }
-    
     public static Context getAppContext() {
     	return MainActivity.context;
     }
@@ -272,7 +263,7 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     		((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.play);
         	trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
     	} else {
-    		Log.d(LOG_TAG, track.toString());
+    		Log.d(LOG_TAG, "Now playing " + track.toString());
     		currentTrack = track;
     		downloadAlbumArt(currentTrack.getAlbumArtURL());
 	    	String trackInfo = String.format(currentTrack.toString());
