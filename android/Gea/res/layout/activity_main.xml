@@ -9,29 +9,26 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <!--
-         layout for Google MapFragment 
-    	 commented out as Google Maps Android API v2 will *not* run on emulator per docs
-    -->
-
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="wrap_content"
-        android:layout_height="200dp"
-        android:layout_alignParentTop="true" />
+        android:layout_height="150dp"
+        android:layout_gravity="top"
+        android:layout_alignParentBottom="false" />
 
     <TextView
         android:id="@+id/songInfoText"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/map"
         android:text="@string/song_info_placeholder_text" />
 
     <LinearLayout
         android:id="@+id/player_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/map"
+        android:layout_below="@id/songInfoText"
         android:baselineAligned="false" >
 
         <LinearLayout

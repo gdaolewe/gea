@@ -3,8 +3,12 @@ package net.kenpowers.gea;
 //import android.app.ListActivity;
 import com.actionbarsherlock.app.SherlockListActivity;
 import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 //import android.view.Menu;
 //import android.view.MenuItem;
@@ -18,7 +22,8 @@ import android.widget.TextView;
 
 public class SearchActivity extends SherlockListActivity implements SearchCompleteListener {
 	private MusicServiceObject searchResults[];
-	private MusicServiceWrapper music = MusicServiceWrapper.getInstance(MainActivity.getAppContext());
+	private MusicServiceWrapper music;
+	String query;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -28,23 +33,39 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	    getSupportActionBar().setHomeButtonEnabled(true);
 
 	    // Get the intent, verify the action and get the query
-	    Intent intent = getIntent();
-	    if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-	      String query = intent.getStringExtra(SearchManager.QUERY);
-	      performSearch(query);
-	    }
-	    
-	    music.registerSearchCompleteListener(this);
+	    handleIntent(getIntent());
 	}
 	
 	 @Override
 	    public boolean onCreateOptionsMenu(Menu menu) {
 	        // Inflate the menu; this adds items to the action bar if it is present.
 	        getSupportMenuInflater().inflate(R.menu.main, menu);
+	        
+	        SearchManager searchManager = (SearchManager) getSystemService(MainActivity.SEARCH_SERVICE);
+	        com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) menu.findItem(R.id.searchField)
+					   .getActionView();
+	        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+	        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+	        searchView.setSubmitButtonEnabled(true);
+	        searchView.setQueryRefinementEnabled(true);
+	        searchView.setQuery(query, false);
 	        return true;
 	 }
-	
-	
+	 
+	 @Override
+	 protected void onNewIntent(Intent intent) {
+	     setIntent(intent);
+	     handleIntent(intent);
+	 }
+	 
+	 private void handleIntent(Intent intent) {
+		 if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+		      music = MusicServiceWrapper.getInstance();
+		      music.registerSearchCompleteListener(this);
+		      query = intent.getStringExtra(SearchManager.QUERY);
+		      performSearch(query);
+		    }
+	 }
 	
 	public void performSearch(String query) {
 		if (query.length() < 1) {
@@ -81,7 +102,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	public void listItemSelected(int position) {
 		MusicServiceObject item = searchResults[position];
 		if (item.getType().equals("track")) {
-			MusicServiceWrapper.getInstance(MainActivity.getAppContext()).getPlayerForTrack((Track)item);
+			music.getPlayerForTrack((Track)item);
 			finish();
 		}
 	}

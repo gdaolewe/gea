@@ -1,13 +1,22 @@
 package net.kenpowers.gea;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.v4.app.NotificationCompat;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.rdio.android.api.Rdio;
@@ -25,9 +34,10 @@ import org.json.*;
 
 public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePublisher, 
 											TrackChangedPublisher {
+	
 	private static final MusicServiceWrapper INSTANCE = new MusicServiceWrapper();
 	
-	
+	private final String LOG_TAG = "Gea Music Service";
 	
 	private final String rdioKey = "9d3ayynanambvwxq5wpnw82y";
 	private final String rdioSecret = "CdNPjjcrPW";
@@ -37,30 +47,79 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 	
 	private Rdio rdio;
 	private Track currentTrack;
+		
+	//private final IBinder musicBinder = new MusicBinder();
 	
-	private MusicServiceWrapper () {
+	private MusicServiceWrapper() {
+		if (rdio == null) {
+			rdio = new Rdio(rdioKey, rdioSecret, null, null, MainActivity.getAppContext(), 
+				new RdioListener() {
+					public void onRdioAuthorised(String accessToken, String accessTokenSecret) {}
+					public void onRdioReady() {
+						notifyMusicServiceReadyListeners();
+					}
+					public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {}
+					public void onRdioUserPlayingElsewhere() {}
+			});
+		}
 		searchCompleteListeners = new ArrayList<SearchCompleteListener>();
 		trackChangedListeners = new ArrayList<TrackChangedListener>();
 		musicServiceReadyListeners = new ArrayList<MusicServiceReadyListener>();
 	}
 	
-	public static MusicServiceWrapper getInstance (Context context) {
-		if (INSTANCE.rdio == null)
-			INSTANCE.rdio = new Rdio(INSTANCE.rdioKey, INSTANCE.rdioSecret, null, null, context, 
-				new RdioListener() {
-					public void onRdioAuthorised(String accessToken, String accessTokenSecret) {}
-					public void onRdioReady() {
-						INSTANCE.notifyMusicServiceReadyListeners();
-					}
-					public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {}
-					public void onRdioUserPlayingElsewhere() {}
-			});
+	public static MusicServiceWrapper getInstance() {
 		return INSTANCE;
 	}
 	
-	/*public IBinder onBind(Intent intent) {
-		return null;
+	/*@Override
+	public IBinder onBind(Intent intent) {
+		return musicBinder;
+	}
+	
+	public class MusicBinder extends Binder {
+		MusicServiceWrapper getService() {
+			return MusicServiceWrapper.this;
+		}
+	}
+	
+	private Notification notification;
+	private NotificationManager notiMgr;
+	
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		
+		WifiManager wifi = (WifiManager)getSystemService(WIFI_SERVICE);
+		wifiLock = wifi.createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+		notiMgr = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		
+		
+		Log.d(LOG_TAG, "musicservicewrapper service created");	
+	}
+	
+	@Override
+	public void onDestroy() {
+		cleanup();
+		stopForeground(true);
+		super.onDestroy();
+	}
+	
+	@Override
+	public boolean onUnbind(Intent intent) {
+		cleanup();
+		return super.onUnbind(intent);
 	}*/
+	
+	public void cleanup() {
+		Log.i(LOG_TAG, "Cleaning up..");
+		rdio.cleanup();
+		if (player != null) {
+			player.stop();
+			player.reset();
+			player.release();
+			player = null;
+		}
+	}
 	
 	private List<SearchCompleteListener> searchCompleteListeners;
 	
@@ -123,10 +182,25 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 	
 	public void togglePlayerPaused() {
 		if (player != null) {
-			if (player.isPlaying())
+			if (player.isPlaying()) {
 				player.pause();
-			else
+				/*if (wifiLock != null) {
+					try {
+						wifiLock.release();
+					} catch (Throwable th) {
+						//wifiLock may already have been released
+					}
+				}*/
+				
+				
+			}
+			else {
 				player.start();
+				/*if (wifiLock == null) {
+					wifiLock = ((WifiManager)getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+				}
+				wifiLock.acquire();*/
+			}
 		}
 	}
 	
@@ -138,14 +212,17 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 	}
 	
 	public void seekPlayerTo(int seconds) {
-		player.seekTo(seconds*1000);
+		if (player != null)
+			player.seekTo(seconds*1000);
 	}
 	
 	private final static int MAX_VOLUME = 100;
 	
 	public void setPlayerVolume(int volumePercent) {
-		float volume = (float) (1 - (Math.log(MAX_VOLUME - volumePercent) / Math.log(MAX_VOLUME)));
-		player.setVolume(volume, volume);
+		if (player != null) {
+			float volume = (float) (1 - (Math.log(MAX_VOLUME - volumePercent) / Math.log(MAX_VOLUME)));
+			player.setVolume(volume, volume);
+		}
 	}
 	
 	public void search(String query, String types) {
@@ -173,26 +250,26 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 				if (type.equals("t")) {
 					results[i] = new Track(key, "track", obj.getString("name"), obj.getString("artist"),
 							obj.getString("album"), obj.getString("icon"), obj.getInt("duration"));
-					Log.d(MainActivity.LOG_TAG, results[i].toString());
+					Log.d(LOG_TAG, results[i].toString());
 					
 				} else if (key.equals("r")) {
 					
 				} else if (key.equals("a")) {
 					
 				} else {
-					Log.e(MainActivity.LOG_TAG, "Invalid result type");
+					Log.e(LOG_TAG, "Invalid result type");
 				}
 			}
 			
 			notifySearchCompleteListeners(results);
 			
 		} catch (JSONException e) {
-			Log.d(MainActivity.LOG_TAG,"JSON exception");		
+			Log.d(LOG_TAG,"JSON exception");		
 		}	
 	}
 	
 	public void onApiFailure(String methodName, Exception e) {
-		Log.e(MainActivity.LOG_TAG, "Rdio API call failed");
+		Log.e(LOG_TAG, "Rdio API call failed");
 	}
 	
 	private void mediaPlayerReady(MediaPlayer player) {
@@ -202,15 +279,35 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 			this.player = null;
 		}
 		
+		/*Resources res = getApplicationContext().getResources();
+		PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0,
+				 new Intent(getApplicationContext(), MainActivity.class),
+				 PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		notification = new Notification.Builder(getApplicationContext())
+        .setContentTitle("Gea")
+        .setContentText(currentTrack.toString())
+        .setSmallIcon(R.drawable.ic_launcher)
+        .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_launcher))
+        .setWhen(System.currentTimeMillis())
+        .setAutoCancel(true)
+        .setTicker(currentTrack.toString())
+        .setContentIntent(pi)
+        .build();
+		
+		notiMgr.notify(0, notification);
+		startForeground(0, notification);
+		wifiLock.acquire();*/
+		
 		try {
-			//wifiLock = ((WifiManager)getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
-
-			//wifiLock.acquire();
-			//player.setWakeMode(MainActivity.getAppContext(), PowerManager.PARTIAL_WAKE_LOCK);
 			player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 				@Override
 				public void onPrepared(MediaPlayer mp) {
 					mp.start();
+					
+					
+					
+					mp.setWakeMode(MainActivity.getAppContext(), PowerManager.PARTIAL_WAKE_LOCK);
 					mp.setOnCompletionListener(new OnCompletionListener() {
 						public void onCompletion(MediaPlayer player) {
 							currentTrack = null;
@@ -222,30 +319,12 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 			});
 			player.prepareAsync();
 			this.player = player;
-			
-			/*player.start();
-			player.setOnCompletionListener(new OnCompletionListener() {
-				public void onCompletion(MediaPlayer player) {
-					currentTrack = null;
-					notifyTrackChangedListeners(currentTrack);
-				} });
-			this.player = player;
-			notifyTrackChangedListeners(currentTrack);
-			*/
 		} catch(Exception e) {
 			Log.e(MainActivity.LOG_TAG, e.toString());
 		}
 	}
 	
-	public void cleanup() {
-		rdio.cleanup();
-		if (player != null) {
-			player.stop();
-			player.reset();
-			player.release();
-			player = null;
-		}
-	}
+	
 	
 	private class RdioMediaPlayerTask extends AsyncTask<String, String, MediaPlayer> {
 		private MusicServiceWrapper callback;
