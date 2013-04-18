@@ -9,7 +9,6 @@ read -p "Press [Enter] key to begin installation... ([ctrl]+[c] to exit) "
 echo "Updating and installing packages..."
 echo
 
-exit
 # First update the package listings
 sudo apt-get update
 
