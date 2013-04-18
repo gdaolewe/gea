@@ -3,8 +3,12 @@ package net.kenpowers.gea;
 //import android.app.ListActivity;
 import com.actionbarsherlock.app.SherlockListActivity;
 import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 //import android.view.Menu;
 //import android.view.MenuItem;
@@ -18,7 +22,8 @@ import android.widget.TextView;
 
 public class SearchActivity extends SherlockListActivity implements SearchCompleteListener {
 	private MusicServiceObject searchResults[];
-	private MusicServiceWrapper music = MusicServiceWrapper.getInstance(MainActivity.getAppContext());
+	private MusicServiceWrapper music;
+	private boolean musicServiceBound = false;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -28,20 +33,47 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	    getSupportActionBar().setHomeButtonEnabled(true);
 
 	    // Get the intent, verify the action and get the query
-	    Intent intent = getIntent();
-	    if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-	      String query = intent.getStringExtra(SearchManager.QUERY);
-	      performSearch(query);
+	    Intent searchIntent = getIntent();
+	    if (Intent.ACTION_SEARCH.equals(searchIntent.getAction())) {
+	      String query = searchIntent.getStringExtra(SearchManager.QUERY);
+	    
+	    Intent bindIntent = new Intent(this, MusicServiceWrapper.class);
+	    bindService(bindIntent, msConnection, Context.BIND_AUTO_CREATE);
+	    
 	    }
 	    
-	    music.registerSearchCompleteListener(this);
+	    
 	}
+	
+	private ServiceConnection msConnection = new ServiceConnection() {
+    	@Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            MusicServiceWrapper.MusicBinder binder = (MusicServiceWrapper.MusicBinder) service;
+            music = binder.getService();
+            music.registerSearchCompleteListener(SearchActivity.this);
+            musicServiceBound = true;
+            Intent searchIntent = SearchActivity.this.getIntent();
+            SearchActivity.this.performSearch(searchIntent.getStringExtra(SearchManager.QUERY));
+    	}
+    	@Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            musicServiceBound = false;
+        }
+    };
 	
 	 @Override
 	    public boolean onCreateOptionsMenu(Menu menu) {
 	        // Inflate the menu; this adds items to the action bar if it is present.
 	        getSupportMenuInflater().inflate(R.menu.main, menu);
 	        return true;
+	 }
+	 
+	 @Override
+	 protected void onStop() {
+		 super.onStop();
+		 unbindService(msConnection);
 	 }
 	
 	
@@ -81,7 +113,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	public void listItemSelected(int position) {
 		MusicServiceObject item = searchResults[position];
 		if (item.getType().equals("track")) {
-			MusicServiceWrapper.getInstance(MainActivity.getAppContext()).getPlayerForTrack((Track)item);
+			music.getPlayerForTrack((Track)item);
 			finish();
 		}
 	}

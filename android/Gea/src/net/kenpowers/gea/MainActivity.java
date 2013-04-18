@@ -9,6 +9,7 @@ import org.json.*;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import android.app.SearchManager;
@@ -20,11 +21,19 @@ import com.actionbarsherlock.widget.SearchView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 
 import android.util.Log;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 
 import android.graphics.Bitmap;
@@ -42,6 +51,10 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 	private Track currentTrack;
 	
 	private GoogleMap gmap;
+	
+	private boolean musicServiceBound = false;
+	
+	private int volume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,22 +64,69 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         
         MainActivity.context = getApplicationContext();
         
-        Log.d(MainActivity.LOG_TAG, "MainActivity started");
+        Log.i(MainActivity.LOG_TAG, "MainActivity started");
         
         boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
         if (isDebuggable)
         	baseURL = GeaServerConstants.LOCALHOST_BASE_URL;
         else
         	baseURL = GeaServerConstants.NET_BASE_URL;
-                
-        ((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
+        
+        volume = 100;        
+        setUpSeekBarListeners();
+        
+        /*gmap = ((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+        SupportMapFragment mf = SupportMapFragment.newInstance();*/
+        
+        setUpMapIfNeeded();
+        
+        
+        
+        
+        
+    }
+    
+    @Override
+    protected void onStart() {
+    	super.onStart();
+        Intent intent = new Intent(this, MusicServiceWrapper.class);
+        bindService(intent, msConnection, Context.BIND_AUTO_CREATE);
+        
+    }
+    
+    @Override
+    protected void onResume() {
+    	((SeekBar)findViewById(R.id.volumeSeekBar)).setProgress(volume);
+    	super.onResume();
+    }
+    
+    private ServiceConnection msConnection = new ServiceConnection() {
+    	@Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to MusicServiceWrapper, cast the IBinder and get MusicServiceWrapper instance
+            MusicServiceWrapper.MusicBinder binder = (MusicServiceWrapper.MusicBinder) service;
+            music = binder.getService();
+            music.registerTrackChangedListener(MainActivity.this);
+            music.setPlayerVolume(volume);
+            musicServiceBound = true;
+    	}
+    	@Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            musicServiceBound = false;
+        }
+    };
+    
+    private void setUpSeekBarListeners() {
+    	//set up change listener for song progress seek bar
+    	((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
         			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        				if (!fromUser)
-        					return;
-        				int seconds = getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
-        				String position = getFormattedTimeFromSeconds(seconds);
-        				((TextView) findViewById(R.id.currentPositionText)).setText(position);
+        				if (fromUser) {	//only skip if bar moved by user
+        					int seconds = getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
+        					String position = getFormattedTimeFromSeconds(seconds);
+        					((TextView) findViewById(R.id.currentPositionText)).setText(position);
+        				}
         			}
         			public void onStartTrackingTouch(SeekBar seekBar) {
         				trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
@@ -77,7 +137,7 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         				trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
         			}
         });
-        
+        //set up change listener for volume control seek bar
         ((SeekBar)findViewById(R.id.volumeSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
 					@Override
@@ -87,18 +147,12 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress,
 							boolean fromUser) {
-						if (fromUser)
+						if (fromUser) {
+							volume = progress;
 							music.setPlayerVolume(progress);
+						}
 					}
-				});
-        
-        gmap = ((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
-        SupportMapFragment mf = SupportMapFragment.newInstance();
-        
-        setUpMapIfNeeded();
-        
-        music = MusicServiceWrapper.getInstance(this);
-        music.registerTrackChangedListener(this);
+		});
         
     }
     
@@ -110,7 +164,15 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
             // Check if we were successful in obtaining the map.
             if (gmap != null) {
                 // The Map is verified. It is now safe to manipulate the map.
-
+            	Criteria criteria = new Criteria();
+                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                String provider = locationManager.getBestProvider(criteria, false);
+                Location location = locationManager.getLastKnownLocation(provider);
+                LatLng coordinate = new LatLng(location.getLatitude(), location.getLongitude());
+                CameraUpdate center = CameraUpdateFactory.newLatLng(coordinate);
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(10);
+                gmap.moveCamera(center);
+                gmap.moveCamera(zoom);
             }
         }
     }
@@ -134,9 +196,16 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     
     @Override
 	public void onDestroy() {
-		music.cleanup();
-		super.onDestroy();
+    	super.onDestroy();
 	}
+    
+    @Override
+    protected void onStop() {
+    	super.onStop();
+    	if (musicServiceBound)
+    		unbindService(msConnection);
+    	musicServiceBound = false;
+    }
     
     public static Context getAppContext() {
     	return MainActivity.context;
@@ -200,7 +269,6 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     	if (music.playerIsPlaying()) {
     		trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
     		
-    		//button.setText(R.string.pause_button_text);
     		button.setImageResource(R.drawable.pause);
     	}
     	else {
@@ -258,14 +326,15 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 			trackPositionUpdateHandler.postDelayed(this, 100);
 			
 			int progress = getProgressPercent(currentPositionSeconds, durationSeconds);
-			//Log.d(LOG_TAG, ""+progress);
 			((SeekBar)findViewById(R.id.progressSeekBar)).setProgress(progress);
 	    }
     };
     
     private void downloadAlbumArt(String url) {
-    	new DownloadImageTask((ImageView)findViewById(R.id.playerAlbumArt)).execute(url);
+    	ImageView albumArtView = (ImageView)findViewById(R.id.playerAlbumArt);
+    	new DownloadImageTask(albumArtView).execute(url);
     }
+    
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 	    ImageView image;
 
@@ -292,9 +361,6 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 	}
     
     public boolean onOptionsItemSelected (MenuItem item) {
-		Log.d(MainActivity.LOG_TAG, "mainactivity got this far");
-		
-			
 		return true;
 		
 	}
