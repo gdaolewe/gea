@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
 
 # Assumes a clean installation of Ubuntu 12.10
-### WARNING: THIS WILL UPDATE ALL PACKAGES AND INSTALL THE PACKAGES LISTED BELOW BY DEFAULT ###
+### WARNING: THIS WILL UPDATE ALL PACKAGES AND INSTALL THE PACKAGES LISTED BELOW ###
 
-read -p "Press [Enter] key to begin installation... ([ctrl]+[c] to exit) "
+echo "
 
+WARNING: This will update *all* packages and install the following packages and their dependencies:
+  git
+  curl
+  postgresql
+  libpq-dev
+  build-essential
+
+"
+
+read -p "Press [Enter] key to begin installation, or [Ctrl] + [c] to exit
+"
 
 echo "Updating and installing packages..."
 echo
@@ -101,8 +112,12 @@ echo '{
 
 # We should also print a message about editing database.json with accurate production settings.
 
-echo "Installation complete."
-echo
+echo "
+
+
+Installation complete.
+
+"
 echo '
 If you do not have an Rdio API key, go to http://developer.rdio.com/
 and follow the section labeled "How to Get Started".
