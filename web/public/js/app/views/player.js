@@ -12,9 +12,9 @@ define([
   vent,
   rdio
 ) {
-  var playing = 0;
+  var playing = false;
   var song = null;
-  var playingClass = 'play-button pause-button';
+  var playingClass = ['play-button', 'pause-button'];
   var loading = false;
   var dragging = false;
   var deferred = new promise.Promise();
@@ -87,9 +87,13 @@ define([
       streamerPromise.then($.proxy(function () {
         this.$streamer.bind('playStateChanged', $.proxy(function(e, playState) {
           deferred.then($.proxy(function () {
-              this.updatePlayPauseButton();
               //If the playState is "playing" (==1), we are no longer waiting for the track to load
-              if (playState === 1) loading = false;
+              // else, if playState is *not* "buffering" (!=3), the player is paused/not playing
+              if (playState === 1) {
+                loading = false;
+                playing = true;
+              } else if (playState != 3) playing = false;
+              this.updatePlayPauseButton();
             }), this);
         }, this));
       }, this));
@@ -120,8 +124,7 @@ define([
       deferred.then($.proxy(function () {
         //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
-        ++playing;
-        playing % 2 ? this.$streamer.play() : this.$streamer.pause();
+        playing ? this.$streamer.pause() : this.$streamer.play();
       }, this));
     },
     playNext: function (e) {
@@ -130,7 +133,6 @@ define([
       deferred.then($.proxy(function () {
         //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
-        playing = 1;
         loading = true;
         this.$streamer.next();
       }, this));
@@ -141,7 +143,6 @@ define([
       deferred.then($.proxy(function () {
         //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
-        playing = 1;
         //If we've played more than 5 seconds (or this is the first track)
         // manually seek to the beginning of the current track instead of changing to the previous track
         if (this.trackPosition >= 5 || this.sourcePosition === 0) {
@@ -209,7 +210,7 @@ define([
       this.$streamer.seek(seconds);
     },
     updatePlayPauseButton: function () {
-      this.$playPauseButton.toggleClass(playingClass);
+      this.$playPauseButton.attr('class', playingClass[playing ? 1 : 0]);
     }
   }))();
 });
