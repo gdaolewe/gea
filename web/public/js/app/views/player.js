@@ -12,10 +12,11 @@ define([
   vent,
   rdio
 ) {
-  var playing = 0;
+  var playing = false;
   var song = null;
-  var playingClass = 'play-button pause-button';
+  var playingClass = ['play-button', 'pause-button'];
   var loading = false;
+  var dragging = false;
   var deferred = new promise.Promise();
   var streamerPromise = new promise.Promise();
   var currentStreamId = 'a171827';
@@ -27,7 +28,10 @@ define([
       'click #next': 'playNext',
       'click #previous': 'playPrevious',
       'click #like': 'like',
-      'click #dislike': 'dislike'
+      'click #dislike': 'dislike',
+      'mousedown #progress-bar': 'drag',
+      'mouseup #progress-bar': 'undrag',
+      'mousemove #progress-bar': 'seek'
     },
     initialize: function () {
       // Cache selectors
@@ -83,9 +87,13 @@ define([
       streamerPromise.then($.proxy(function () {
         this.$streamer.bind('playStateChanged', $.proxy(function(e, playState) {
           deferred.then($.proxy(function () {
-              this.updatePlayPauseButton();
               //If the playState is "playing" (==1), we are no longer waiting for the track to load
-              if (playState === 1) loading = false;
+              // else, if playState is *not* "buffering" (!=3), the player is paused/not playing
+              if (playState === 1) {
+                loading = false;
+                playing = true;
+              } else if (playState != 3) playing = false;
+              this.updatePlayPauseButton();
             }), this);
         }, this));
       }, this));
@@ -106,6 +114,7 @@ define([
         streamerPromise.done();
       }, this));
       this.$playPauseButton = this.$('#play-pause');
+      this.$progressBar = this.$('#progress-bar');
       this.$progressBarFill = this.$('#fill');
 	    this.$likeImg = this.$('#like'); //creates global var in initialized function
     },
@@ -115,8 +124,7 @@ define([
       deferred.then($.proxy(function () {
         //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
-        ++playing;
-        playing % 2 ? this.$streamer.play() : this.$streamer.pause();
+        playing ? this.$streamer.pause() : this.$streamer.play();
       }, this));
     },
     playNext: function (e) {
@@ -125,7 +133,6 @@ define([
       deferred.then($.proxy(function () {
         //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
-        playing = 1;
         loading = true;
         this.$streamer.next();
       }, this));
@@ -136,7 +143,6 @@ define([
       deferred.then($.proxy(function () {
         //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
-        playing = 1;
         //If we've played more than 5 seconds (or this is the first track)
         // manually seek to the beginning of the current track instead of changing to the previous track
         if (this.trackPosition >= 5 || this.sourcePosition === 0) {
@@ -163,8 +169,48 @@ define([
         alert('Dislike submitted! >:(');
       });
     },
+    drag: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      // User has begun seeking by pressing the mouse button down on the progress bar
+      dragging = true;
+      // Update the progress bar position (i.e. seek)
+      this.updateProgressBar(e.pageX);
+    },
+    undrag: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      if (dragging) {
+        // User has completed seeking by releasing the mouse button
+        dragging = false;
+        // Update the progress bar position (i.e. seek)
+        this.updateProgressBar(e.pageX);
+      }
+    },
+    seek: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      if (dragging) {
+        // If the user is in the process of dragging (i.e. seeking), update the progress bar position
+        this.updateProgressBar(e.pageX);
+      }
+    },
+    updateProgressBar: function (x) {
+      // Get the position of the click in the progress bar
+      var clickPosition = x - this.$progressBar.offset().left;
+      // Turn it into a percentage (0 to 1)
+      var percentage = clickPosition / this.$progressBar.width();
+      // Ensure percentage is at most 1 (=100%)
+      percentage = (percentage > 1) ? 1 : percentage;
+      // Ensure percentage is at least 0 (=0%)
+      percentage = (percentage < 0) ? 0 : percentage;
+      // Get the 'seconds' into the song that the percentage translates to
+      var seconds = percentage * this.duration;
+      // Tell the streaming service to seek to that position
+      this.$streamer.seek(seconds);
+    },
     updatePlayPauseButton: function () {
-      this.$playPauseButton.toggleClass(playingClass);
+      this.$playPauseButton.attr('class', playingClass[playing ? 1 : 0]);
     }
   }))();
 });
