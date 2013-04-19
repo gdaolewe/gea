@@ -21,6 +21,9 @@ define([
   // Reference sidebar element
   var $right = $('#right');
 
+  //Timeout thread for auto-search
+  var thread = null;
+
   return new (bb.View.extend({
     el: '#search',
     events: {
@@ -39,11 +42,16 @@ define([
       $(window).on('resize', $.proxy(this.resizeResults, this));
     },
     keyup: function (e) {
-      if (e.keyCode !== constants.KEY_ENTER) {
-        return;
-      }
       e.preventDefault();
       e.stopPropagation();
+      clearTimeout(thread);
+      if (e.keyCode === constants.KEY_ENTER) {
+        this.executeSearch();
+        return;
+      }
+      thread = setTimeout($.proxy(function () { this.executeSearch(); }, this), 500);
+    },
+    executeSearch: function () {
       this.loadingWidget = new LoadingWidget();
       this.emptyResults();
       this.$results.append(this.loadingWidget.el);
