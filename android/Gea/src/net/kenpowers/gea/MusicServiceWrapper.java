@@ -198,12 +198,12 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 							obj.getString("album"), obj.getString("icon"), obj.getInt("duration"));
 					Log.i(LOG_TAG, results[i].toString());
 					
-				} else if (key.equals("r")) {
-					
-				} else if (key.equals("a")) {
-					
+				} else if (type.equals("r")) {
+					results[i] = new Artist(key, "artist", obj.getString("name"), obj.getString("icon"));
+				} else if (type.equals("a")) {
+					results[i] = new Album(key, "album", obj.getString("name"), obj.getString("artist"), obj.getString("icon"));
 				} else {
-					Log.e(LOG_TAG, "Invalid result type");
+					Log.e(LOG_TAG, "Invalid result type " + key);
 				}
 			}
 			notifySearchCompleteListeners(results);
