@@ -14,8 +14,12 @@ import android.os.IBinder;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import android.app.SearchManager;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+
+import com.actionbarsherlock.view.ActionMode;
 import android.view.View;
+
 import android.widget.*;
 import com.actionbarsherlock.widget.SearchView;
 
@@ -28,6 +32,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
 import android.content.ComponentName;
@@ -58,7 +63,11 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.hide(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+        ft.commit();
         
         MainActivity.context = getApplicationContext();
         
@@ -147,7 +156,6 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         }
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -157,8 +165,41 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         SearchManager searchManager = (SearchManager) getSystemService(MainActivity.SEARCH_SERVICE);
         com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) menu.findItem(R.id.searchField)
         																								   .getActionView();
+        searchView.setOnQueryTextFocusChangeListener(new com.actionbarsherlock.widget.SearchView.OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+				if (!hasFocus) {
+					Log.d(LOG_TAG, "Search lost focus");
+			        ft.hide(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+			        ft.commit();
+				}
+			}
+        	
+        });
+        searchView.setOnQueryTextListener(new com.actionbarsherlock.widget.SearchView.OnQueryTextListener() {
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				return false;
+			}
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				// TODO Search suggestions
+				FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+				if (newText.length() > 0) {
+					Log.d(LOG_TAG, "Search has focus");
+			        ft.show(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+			        ft.commit();
+				} else {
+					Log.d(LOG_TAG, "Search lost focus");
+			        ft.hide(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+			        ft.commit();
+				}
+				return false;
+			}
+        });
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+        searchView.setIconifiedByDefault(true); // Do not iconify the widget; expand it by default
         searchView.setSubmitButtonEnabled(true);
         searchView.setQueryRefinementEnabled(true);
         return true;
@@ -169,6 +210,21 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     	super.onDestroy();
     	//music.cleanup();
 	}
+    
+    @Override
+    public void startActivity(Intent intent) {      
+        // check if search intent
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+        	boolean shouldSearchForSong 	= ((CheckBox)findViewById(R.id.songCheckBox)).isChecked();
+        	boolean shouldSearchForAlbum 	= ((CheckBox)findViewById(R.id.albumCheckBox)).isChecked();
+        	boolean shouldSearchForArtist = ((CheckBox)findViewById(R.id.artistCheckBox)).isChecked();
+            intent.putExtra("Song", shouldSearchForSong);
+            intent.putExtra("Album", shouldSearchForAlbum);
+            intent.putExtra("Artist", shouldSearchForArtist);
+        }
+
+        super.startActivity(intent);
+    }
     
     public static Context getAppContext() {
     	return MainActivity.context;

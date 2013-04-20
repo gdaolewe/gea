@@ -1,24 +1,18 @@
 package net.kenpowers.gea;
 
-//import android.app.ListActivity;
 import com.actionbarsherlock.app.SherlockListActivity;
 import android.app.SearchManager;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
-//import android.view.Menu;
-//import android.view.MenuItem;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import android.widget.CheckBox;
+
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class SearchActivity extends SherlockListActivity implements SearchCompleteListener {
 	private MusicServiceObject searchResults[];
@@ -32,7 +26,6 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	    setContentView(R.layout.search);
 	    getSupportActionBar().setHomeButtonEnabled(true);
 
-	    // Get the intent, verify the action and get the query
 	    handleIntent(getIntent());
 	}
 	
@@ -49,34 +42,63 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	        searchView.setSubmitButtonEnabled(true);
 	        searchView.setQueryRefinementEnabled(true);
 	        searchView.setQuery(query, false);
+	        
+	        
+	        
 	        return true;
 	 }
 	 
 	 @Override
 	 protected void onNewIntent(Intent intent) {
-	     setIntent(intent);
-	     handleIntent(intent);
+		 boolean shouldSearchForSong 	= ((CheckBox)findViewById(R.id.songCheckBox)).isChecked();
+		 boolean shouldSearchForAlbum 	= ((CheckBox)findViewById(R.id.albumCheckBox)).isChecked();
+		 boolean shouldSearchForArtist = ((CheckBox)findViewById(R.id.artistCheckBox)).isChecked();
+		 intent.putExtra("Song", shouldSearchForSong);
+		 intent.putExtra("Album", shouldSearchForAlbum);
+		 intent.putExtra("Artist", shouldSearchForArtist);
+		 setIntent(intent);
+		 handleIntent(intent);
 	 }
 	 
 	 private void handleIntent(Intent intent) {
+		 
 		 if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			 boolean shouldSearchForSong = intent.getBooleanExtra("Song", false);
+			 boolean shouldSearchForAlbum = intent.getBooleanExtra("Album", false);
+			 boolean shouldSearchForArtist = intent.getBooleanExtra("Artist", false);
+			 ((CheckBox)findViewById(R.id.songCheckBox)).setChecked(shouldSearchForSong);
+	    	 ((CheckBox)findViewById(R.id.albumCheckBox)).setChecked(shouldSearchForAlbum);
+	    	 ((CheckBox)findViewById(R.id.artistCheckBox)).setChecked(shouldSearchForArtist);
+			 
+			 String type = (shouldSearchForSong? "Song,":"") + (shouldSearchForAlbum? "Album,":"") + (shouldSearchForArtist? "Artist":"");
+			 if (! (shouldSearchForSong | shouldSearchForAlbum | shouldSearchForArtist) )
+				 type = "Song";
+			 
 		      music = MusicServiceWrapper.getInstance();
 		      music.registerSearchCompleteListener(this);
 		      query = intent.getStringExtra(SearchManager.QUERY);
-		      performSearch(query);
-		    }
+		      performSearch(query, type);
+		 }
 	 }
 	
-	public void performSearch(String query) {
+	public void performSearch(String query, String type) {
 		if (query.length() < 1) {
 			Log.e(MainActivity.LOG_TAG, "Search submitted with no search text entered");
 			return;
 		}
-		Log.d(MainActivity.LOG_TAG, query);
-		music.search(query, "Song");
+		Log.i(MainActivity.LOG_TAG, "Searched for '" + query + "' with types " + type);
+		music.search(query, type);
 	}
 	
 	public void onSearchComplete(MusicServiceObject[] results) {
+		Log.i(MainActivity.LOG_TAG, "Search returned " + results.length + " results");
+		if (results.length < 1) {
+			Log.i(MainActivity.LOG_TAG, "No search results");
+			String[] resultsStrings = {"No search results"};
+			setListAdapter(new ArrayAdapter<String>(this, R.layout.search_result, resultsStrings));
+			return;
+		}
+			
 		searchResults = results;
 		
 		String resultsStrings[] = new String[searchResults.length];
@@ -95,7 +117,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				listItemSelected(position);
 			}
-			public void onNothingSelected(AdapterView<?> parent) {}
+			public void onNothingSelected(AdapterView<?> parent) { /*do nothing*/ }
 		});
 	}
 	

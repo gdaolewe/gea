@@ -8,6 +8,9 @@
     <string name="stop_button_text">Stop</string>
     <string name="prev_button_text">Prev</string>
     <string name="next_button_text">Next</string>
+    <string name="song_toggle">Song</string>
+    <string name="album_toggle">Album</string>
+    <string name="artist_toggle">Artist</string>
     <string name="search_hint">search</string>
     <string name="search_submit_button_text">Go</string>
     <string name="song_info_placeholder_text">Nothing playing</string>
