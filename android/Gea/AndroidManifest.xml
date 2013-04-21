@@ -56,9 +56,9 @@
                 android:resource="@xml/searchable" />
         </activity>
         
-        <activity android:name="net.kenpowers.gea.ArtistActivity" ></activity>
+        <activity android:name="net.kenpowers.gea.ArtistActivity_" ></activity>
         
-        <activity android:name="net.kenpowers.gea.AlbumActivity" ></activity>
+        <activity android:name="net.kenpowers.gea.AlbumActivity_" ></activity>
         
         <activity
             android:name="net.kenpowers.gea.LaunchActivity"

@@ -104,12 +104,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 		music.search(query, type);
 	}
 	
-	private boolean alreadyHaveResults;
-	
 	public void onSearchComplete(MusicServiceObject[] results) {
-		if (alreadyHaveResults)
-			return;
-		alreadyHaveResults = true;
 		Log.i(MainActivity.LOG_TAG, "Search returned " + results.length + " results");
 		if (results.length < 1) {
 			Log.i(MainActivity.LOG_TAG, "No search results");
@@ -139,16 +134,17 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	}
 	
 	public void listItemSelected(int position) {
+		Log.d(MainActivity.LOG_TAG, "item selected");
 		MusicServiceObject item = searchResults[position];
 		if (item.getType().equals("track")) {
 			music.getPlayerForTrack((Track)item);
 			finish();
 		} else if (item.getType().equals("album")) {
-			Intent intent = new Intent(this, AlbumActivity.class);
+			Intent intent = new Intent(this, AlbumActivity_.class);
 			intent.putExtra("key", item.getKey());
 			startActivity(intent);
 		} else if (item.getType().equals("artist")) {
-			Intent intent = new Intent(this, ArtistActivity.class);
+			Intent intent = new Intent(this, ArtistActivity_.class);
 			intent.putExtra("key", item.getKey());
 			startActivity(intent);
 		}
