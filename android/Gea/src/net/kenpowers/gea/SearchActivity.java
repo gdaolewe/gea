@@ -52,7 +52,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	 protected void onNewIntent(Intent intent) {
 		 boolean shouldSearchForSong 	= ((CheckBox)findViewById(R.id.songCheckBox)).isChecked();
 		 boolean shouldSearchForAlbum 	= ((CheckBox)findViewById(R.id.albumCheckBox)).isChecked();
-		 boolean shouldSearchForArtist = ((CheckBox)findViewById(R.id.artistCheckBox)).isChecked();
+		 boolean shouldSearchForArtist 	= ((CheckBox)findViewById(R.id.artistCheckBox)).isChecked();
 		 intent.putExtra("Song", shouldSearchForSong);
 		 intent.putExtra("Album", shouldSearchForAlbum);
 		 intent.putExtra("Artist", shouldSearchForArtist);
@@ -126,6 +126,10 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 		if (item.getType().equals("track")) {
 			music.getPlayerForTrack((Track)item);
 			finish();
+		} else if (item.getType().equals("album")) {
+			Intent intent = new Intent(this, AlbumActivity.class);
+			intent.putExtra("key", item.getKey());
+			startActivity(intent);
 		}
 	}
 	

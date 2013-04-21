@@ -25,6 +25,7 @@ import com.rdio.android.api.RdioListener;
 import com.rdio.android.api.services.RdioAuthorisationException;
 import com.rdio.android.api.RdioSubscriptionType;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import org.apache.http.message.BasicNameValuePair;
@@ -178,39 +179,102 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 		rdio.apiCall("search", params, this);
 	}
 	
+	public void getMusicServiceObjectsForKeys(String[] keys) {
+		String keysString = "";
+		for (int i=0; i<keys.length; i++) {
+			keysString += keys[i];
+			if (i < keys.length-1)
+				keysString += ",";
+		}
+		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+		params.add(new BasicNameValuePair("keys", keysString));
+		rdio.apiCall("get", params, this);
+	}
+	
 	/*
 	 * RdioApiCallback methods
 	 */
 	public void onApiSuccess(JSONObject result) {
 		try {
-			JSONArray resultsJSON = result.getJSONObject("result").getJSONArray("results");
-			
-			MusicServiceObject[] results = new MusicServiceObject[resultsJSON.length()];
-			Log.i(LOG_TAG, "Search results:");
-			for (int i=0; i<resultsJSON.length(); i++) {
-				JSONObject obj = resultsJSON.getJSONObject(i);
-				
-				String key = obj.getString("key");
-				String type = obj.getString("type");
-				
-				if (type.equals("t")) {
-					results[i] = new Track(key, "track", obj.getString("name"), obj.getString("artist"),
-							obj.getString("album"), obj.getString("icon"), obj.getInt("duration"));
-					Log.i(LOG_TAG, results[i].toString());
+			result = result.getJSONObject("result");
+			if (result.has("results")) {
+				JSONArray resultsJSON = result.getJSONArray("results");
+				MusicServiceObject[] results = new MusicServiceObject[resultsJSON.length()];
+				Log.i(LOG_TAG, "Search results:");
+				for (int i=0; i<resultsJSON.length(); i++) {
+					JSONObject obj = resultsJSON.getJSONObject(i);
 					
-				} else if (type.equals("r")) {
-					results[i] = new Artist(key, "artist", obj.getString("name"), obj.getString("icon"));
-				} else if (type.equals("a")) {
-					results[i] = new Album(key, "album", obj.getString("name"), obj.getString("artist"), obj.getString("icon"));
-				} else {
-					Log.e(LOG_TAG, "Invalid result type " + key);
+					results[i] = getMusicServiceObjectForJSON(obj);
+					
+					/*String key = obj.getString("key");
+					String type = obj.getString("type");
+					
+					if (type.equals("t")) {
+						results[i] = new Track(key, "track", obj.getString("name"), obj.getString("artist"),
+								obj.getString("album"), obj.getString("icon"), obj.getInt("duration"));
+						Log.i(LOG_TAG, results[i].toString());
+						
+					} else if (type.equals("r")) {
+						results[i] = new Artist(key, "artist", obj.getString("name"), obj.getString("icon"));
+					} else if (type.equals("a")) {
+						JSONArray trackKeysJSON = obj.getJSONArray("trackKeys");
+						String[] trackKeys = new String[trackKeysJSON.length()];
+						for (int trackIndex=0; trackIndex<trackKeysJSON.length(); trackIndex++)
+							trackKeys[trackIndex] = trackKeysJSON.getString(trackIndex);
+						results[i] = new Album(key, "album", obj.getString("name"), obj.getString("artist"), obj.getString("artistKey"),
+											   obj.getString("icon"), trackKeys);
+					} else {
+						Log.e(LOG_TAG, "Invalid result type " + key);
+					}*/
 				}
+				notifySearchCompleteListeners(results);
+			} else {
+				MusicServiceObject[] results = new MusicServiceObject[result.length()];
+				Iterator<?> jsonKeys = result.keys();
+				int i = 0;
+				while (jsonKeys.hasNext()) {
+					String jsonKey = (String)jsonKeys.next();
+					JSONObject obj = result.getJSONObject(jsonKey);
+					results[i] = getMusicServiceObjectForJSON(obj);
+					i++;
+				}
+				notifySearchCompleteListeners(results);
 			}
-			notifySearchCompleteListeners(results);
 			
 		} catch (JSONException e) {
 			Log.d(LOG_TAG,"JSON exception");		
 		}	
+	}
+	
+	private MusicServiceObject getMusicServiceObjectForJSON(JSONObject obj) {
+		MusicServiceObject msObj = null;
+		
+		try {
+			String key = obj.getString("key");
+			String type = obj.getString("type");
+		
+		if (type.equals("t")) {
+			msObj = new Track(key, "track", obj.getString("name"), obj.getString("artist"),
+					obj.getString("album"), obj.getString("icon"), obj.getInt("duration"));
+			
+		} else if (type.equals("r")) {
+			msObj = new Artist(key, "artist", obj.getString("name"), obj.getString("icon"));
+		} else if (type.equals("a")) {
+			JSONArray trackKeysJSON = obj.getJSONArray("trackKeys");
+			String[] trackKeys = new String[trackKeysJSON.length()];
+			for (int trackIndex=0; trackIndex<trackKeysJSON.length(); trackIndex++)
+				trackKeys[trackIndex] = trackKeysJSON.getString(trackIndex);
+			msObj = new Album(key, "album", obj.getString("name"), obj.getString("artist"), obj.getString("artistKey"),
+								   obj.getString("icon"), trackKeys);
+		} else {
+			Log.e(LOG_TAG, "Invalid result type " + key);
+		}
+		} catch (JSONException e) {
+			Log.d(LOG_TAG,"JSON exception");
+		}
+		if (msObj != null)
+			Log.i(LOG_TAG, msObj.toString());
+		return msObj;
 	}
 	
 	public void onApiFailure(String methodName, Exception e) {
