@@ -40,18 +40,18 @@ INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (12, 'Volbeat', 'G
 -- Data for Name: ratings; Type: TABLE DATA; Schema: public; Owner: gea
 --
 
-INSERT INTO ratings (id, sid, rating, "time") VALUES (1, 1, 1, '2013-03-30 18:46:31.917881');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (2, 2, 1, '2013-03-30 18:47:07.884791');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (3, 3, 1, '2013-03-30 18:47:21.513034');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (4, 4, 1, '2013-03-30 18:47:33.424182');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (5, 5, 1, '2013-03-30 18:47:59.6563');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (6, 6, 1, '2013-03-30 18:48:16.822093');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (7, 7, -1, '2013-03-30 18:48:33.901092');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (8, 8, -1, '2013-03-30 18:48:45.470382');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (9, 9, -1, '2013-03-30 18:49:00.193444');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (10, 10, -1, '2013-03-30 18:49:10.752677');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (11, 11, -1, '2013-03-30 18:49:22.3177');
-INSERT INTO ratings (id, sid, rating, "time") VALUES (12, 12, -1, '2013-03-30 18:49:33.491916');
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (1, 1, 1, '2013-03-30 18:46:31.917881', 21);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (2, 2, 1, '2013-03-30 18:47:07.884791', 21);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (3, 3, 1, '2013-03-30 18:47:21.513034', 21);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (4, 4, 1, '2013-03-30 18:47:33.424182', 21);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (5, 5, 1, '2013-03-30 18:47:59.6563', 21);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (6, 6, 1, '2013-03-30 18:48:16.822093', 32);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (7, 7, -1, '2013-03-30 18:48:33.901092', 32);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (8, 8, -1, '2013-03-30 18:48:45.470382', 32);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (9, 9, -1, '2013-03-30 18:49:00.193444', 12);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (10, 10, -1, '2013-03-30 18:49:10.752677', 12);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (11, 11, -1, '2013-03-30 18:49:22.3177', 12);
+INSERT INTO ratings (id, sid, rating, "time", lid) VALUES (12, 12, -1, '2013-03-30 18:49:33.491916', 12);
 
 
 --
