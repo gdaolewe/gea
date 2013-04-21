@@ -25,6 +25,9 @@ public class Track extends MusicServiceObject implements Comparable<Track> {
 	public int getDuration() {
 		return duration;
 	}
+	public int getNum() {
+		return trackNum;
+	}
 	public int compareTo(Track o) {
 		if (trackNum == o.trackNum)
 			return 0;

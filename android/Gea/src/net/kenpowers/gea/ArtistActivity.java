@@ -1,15 +1,26 @@
 package net.kenpowers.gea;
 
+import java.io.InputStream;
+
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 
+import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.ViewById;
+import com.googlecode.androidannotations.annotations.EActivity;
+
+@EActivity(R.layout.activity_artist)
 public class ArtistActivity extends SherlockActivity implements SearchCompleteListener {
 	private Artist artist;
 	private Album[] albums;
@@ -35,6 +46,7 @@ public class ArtistActivity extends SherlockActivity implements SearchCompleteLi
 			artist = (Artist)results[0];
 			((TextView)findViewById(R.id.artist)).setText(artist.getName());
 			music.getAlbumsForArtist(artist);
+			downloadArtistImage(artist.getImageURL());
 		} else if (results[0].getType().equals("album")) {
 			albums = new Album[results.length];
 			String[] albumsStrings = new String[results.length];
@@ -60,8 +72,25 @@ public class ArtistActivity extends SherlockActivity implements SearchCompleteLi
 	}
 	
 	public void listItemSelected(int position) {
-		Intent intent = new Intent(this, AlbumActivity.class);
+		Intent intent = new Intent(this, AlbumActivity_.class);
 		intent.putExtra("key", albums[position].getKey());
 		startActivity(intent);
+	}
+	
+	@ViewById(R.id.image)
+	ImageView image;
+	
+	@Background
+	void downloadArtistImage(String url) {
+		Bitmap bmp = null;
+		try {
+            InputStream in = new java.net.URL(url).openStream();
+            bmp = BitmapFactory.decodeStream(in);
+        } catch (Exception e) {
+            Log.e("Error", e.getMessage());
+            e.printStackTrace();
+        }
+		if (bmp != null)
+			image.setImageBitmap(bmp);
 	}
 }
