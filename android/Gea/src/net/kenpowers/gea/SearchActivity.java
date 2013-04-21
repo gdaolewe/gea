@@ -18,6 +18,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	private MusicServiceObject searchResults[];
 	private MusicServiceWrapper music;
 	String query;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +53,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	 protected void onNewIntent(Intent intent) {
 		 boolean shouldSearchForSong 	= ((CheckBox)findViewById(R.id.songCheckBox)).isChecked();
 		 boolean shouldSearchForAlbum 	= ((CheckBox)findViewById(R.id.albumCheckBox)).isChecked();
-		 boolean shouldSearchForArtist = ((CheckBox)findViewById(R.id.artistCheckBox)).isChecked();
+		 boolean shouldSearchForArtist 	= ((CheckBox)findViewById(R.id.artistCheckBox)).isChecked();
 		 intent.putExtra("Song", shouldSearchForSong);
 		 intent.putExtra("Album", shouldSearchForAlbum);
 		 intent.putExtra("Artist", shouldSearchForArtist);
@@ -70,10 +71,23 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	    	 ((CheckBox)findViewById(R.id.albumCheckBox)).setChecked(shouldSearchForAlbum);
 	    	 ((CheckBox)findViewById(R.id.artistCheckBox)).setChecked(shouldSearchForArtist);
 			 
-			 String type = (shouldSearchForSong? "Song,":"") + (shouldSearchForAlbum? "Album,":"") + (shouldSearchForArtist? "Artist":"");
+			 /*String type = (shouldSearchForSong? "Song,":"") + (shouldSearchForAlbum? "Album,":"") + (shouldSearchForArtist? "Artist":"");
 			 if (! (shouldSearchForSong | shouldSearchForAlbum | shouldSearchForArtist) )
-				 type = "Song";
-			 
+				 type = "Song";*/
+	    	 String type = "";
+	    	 if (shouldSearchForSong) {
+	    		 type += "Song";
+	    		 if (shouldSearchForAlbum || shouldSearchForArtist)
+	    			 type += ",";
+	    	 }
+	    	 if (shouldSearchForAlbum) {
+	    		 type += "Album";
+	    		 if (shouldSearchForArtist)
+	    			 type +=  ",";
+	    	 }
+	    	 if (shouldSearchForArtist) {
+	    		 type += "artist";
+	    	 }
 		      music = MusicServiceWrapper.getInstance();
 		      music.registerSearchCompleteListener(this);
 		      query = intent.getStringExtra(SearchManager.QUERY);
@@ -90,7 +104,12 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 		music.search(query, type);
 	}
 	
+	private boolean alreadyHaveResults;
+	
 	public void onSearchComplete(MusicServiceObject[] results) {
+		if (alreadyHaveResults)
+			return;
+		alreadyHaveResults = true;
 		Log.i(MainActivity.LOG_TAG, "Search returned " + results.length + " results");
 		if (results.length < 1) {
 			Log.i(MainActivity.LOG_TAG, "No search results");
@@ -114,9 +133,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 			}
 		});
 		listview.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				listItemSelected(position);
-			}
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { /*do nothing*/ }
 			public void onNothingSelected(AdapterView<?> parent) { /*do nothing*/ }
 		});
 	}
@@ -126,6 +143,14 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 		if (item.getType().equals("track")) {
 			music.getPlayerForTrack((Track)item);
 			finish();
+		} else if (item.getType().equals("album")) {
+			Intent intent = new Intent(this, AlbumActivity.class);
+			intent.putExtra("key", item.getKey());
+			startActivity(intent);
+		} else if (item.getType().equals("artist")) {
+			Intent intent = new Intent(this, ArtistActivity.class);
+			intent.putExtra("key", item.getKey());
+			startActivity(intent);
 		}
 	}
 	

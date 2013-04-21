@@ -187,11 +187,9 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 				// TODO Search suggestions
 				FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 				if (newText.length() > 0) {
-					Log.d(LOG_TAG, "Search has focus");
 			        ft.show(getSupportFragmentManager().findFragmentById(R.id.searchContext));
 			        ft.commit();
 				} else {
-					Log.d(LOG_TAG, "Search lost focus");
 			        ft.hide(getSupportFragmentManager().findFragmentById(R.id.searchContext));
 			        ft.commit();
 				}
@@ -199,7 +197,7 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 			}
         });
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(true); // Do not iconify the widget; expand it by default
+        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         searchView.setSubmitButtonEnabled(true);
         searchView.setQueryRefinementEnabled(true);
         return true;
