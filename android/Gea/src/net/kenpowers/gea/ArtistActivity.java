@@ -2,7 +2,6 @@ package net.kenpowers.gea;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -10,42 +9,41 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.MenuItem;
 
-public class AlbumActivity extends SherlockActivity implements SearchCompleteListener {
-	private Album album;
-	private Track[] tracks;
+public class ArtistActivity extends SherlockActivity implements SearchCompleteListener {
+	private Artist artist;
+	private Album[] albums;
 	private MusicServiceWrapper music;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_album);
+		setContentView(R.layout.activity_artist);
 	    getSupportActionBar().setHomeButtonEnabled(true);
 	    
-		Intent intent = getIntent();
-		String key = intent.getStringExtra("key");
+	    Intent intent = getIntent();
+	    String key = intent.getStringExtra("key");
 		music = MusicServiceWrapper.getInstance();
 		music.registerSearchCompleteListener(this);
 		String[] keys = {key};
 		music.getMusicServiceObjectsForKeys(keys);
 	}
-	
+
+	@Override
 	public void onSearchComplete(MusicServiceObject[] results) {
-		if (results[0].getType().equals("album")) {
-			album = (Album)results[0];
-			((TextView)findViewById(R.id.artist)).setText(album.getArtist());
-			((TextView)findViewById(R.id.album)).setText(album.getName());
-			music.getMusicServiceObjectsForKeys(album.getTrackKeys());
-		} else if (results[0].getType().equals("track")) {
-			tracks = new Track[results.length];
-			String[] tracksStrings = new String[results.length];
+		if (results[0].getType().equals("artist")) {
+			artist = (Artist)results[0];
+			((TextView)findViewById(R.id.artist)).setText(artist.getName());
+			music.getAlbumsForArtist(artist);
+		} else if (results[0].getType().equals("album")) {
+			albums = new Album[results.length];
+			String[] albumsStrings = new String[results.length];
 			for (int i=0; i<results.length; i++) {
-				tracks[i] = (Track)results[i];
-				tracksStrings[i] = results[i].getName();
+				albums[i] = (Album)results[i];
+				albumsStrings[i] = results[i].getName();
 			}
-			ListView list = (ListView)findViewById(R.id.tracks);
-			list.setAdapter(new ArrayAdapter<String>(this, R.layout.search_result, tracksStrings));
+			ListView list = (ListView)findViewById(R.id.albums);
+			list.setAdapter(new ArrayAdapter<String>(this, R.layout.search_result, albumsStrings));
 			list.setOnItemClickListener(new ListView.OnItemClickListener() {
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -62,16 +60,8 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 	}
 	
 	public void listItemSelected(int position) {
-		music.getPlayerForTrack(tracks[position]);
-		startActivity(new Intent(this, MainActivity.class));
-	}
-	
-	public boolean onOptionsItemSelected (MenuItem item) {
-		if (item.getItemId() == android.R.id.home) {
-			finish();	
-			return true;
-		} else {
-			return super.onOptionsItemSelected(item);
-		}
+		Intent intent = new Intent(this, AlbumActivity.class);
+		intent.putExtra("key", albums[position].getKey());
+		startActivity(intent);
 	}
 }
