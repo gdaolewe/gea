@@ -8,6 +8,11 @@ public class GeaGETRequest implements GeaServerRequest {
 	private HashMap<String, String> parameters;
 	private String queryString;
 	
+	/**
+	 * Constructor for building Gea GET request. Used for pulling ratings from GEA server.
+	 * @param baseURL location of GEA server.
+	 * @param parameters parameters for GET request.
+	 */
 	public GeaGETRequest(String baseURL, HashMap<String, String> parameters) {
 		this.baseURL = baseURL;
 		this.parameters = parameters;
