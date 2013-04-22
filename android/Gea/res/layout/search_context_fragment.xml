@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/searchSelect"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="top|center_horizontal" >
+
+        <CheckBox
+            android:id="@+id/songCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/song_toggle" />
+        
+        <CheckBox
+            android:id="@+id/albumCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/songCheckBox"
+            android:text="@string/album_toggle" />
+
+        <CheckBox
+            android:id="@+id/artistCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/albumCheckBox"
+            android:text="@string/artist_toggle" />
+
+    </RelativeLayout>

@@ -1,0 +1,67 @@
+########## Beta Release - April 2, 2013 ##########
+
+Source code located at https://github.com/OpenGea/gea
+
+##### Installation and Setup Instructions
+
+### Web Client
+Installation and Setup instructions for the web client and server are available in the same folder as these release notes.
+An online version of these instructions are also provided at https://github.com/OpenGea/gea/DeveloperWebBuildInstructions-ubuntu.md
+
+### Android App
+
+------------------------------------------------------------------------
+##### Usage
+
+### Web Client
+See the end of the Installation and Setup instructions for usage.
+
+### Android App
+
+------------------------------------------------------------------------
+##### File Change Logs and Issue Tracking
+To view the file change logs, navigate to https://github.com/OpenGea/gea/commits/develop. To view details on a particular change, click on the title of the commit. This will display the file that was changed and what changes were made.
+
+This project uses the GitHub issue tracker. To access the issue tracker for this project, go to https://github.com/OpenGea/gea/issues. Issues can be filtered by release milestone and tags. To submit a new issue, you must have an account with GitHub.
+
+------------------------------------------------------------------------
+##### Features
+
+### Web Client
++Added search capability for songs and albums
++Added control playback (play, pause, next, previous)
++Added display of song metadata
++Added ability to pull top 10 songs from server
++Added display of track position and duration
++Added album art display
++Added song approval communication
++Added plain map
+
+### Android App
++Added search capability for songs
++Added control playback (play, pause, next, previous)
++Added volume control
++Added scrubbing
++Added display of song metadata
++Added display of track position and duration
++Added album art display
++Added song approval communication
+
+------------------------------------------------------------------------
+##### Bugs and Issues
+
+### Web Client
+- Scrubbing not yet implemented
+- Clicking on artists in search results does nothing
+- Play button is occasionally inconsistent
+- No indication when a user is at the end of a song queue (pressing the 'Next' button gives no feedback)
+- Rdio logo is not displayed
+- Tests (available on the branch feature/test) are currently non-functional as sinon.js isn't working properly)
+
+### Android App
+- Playback stops when searching during playback
+- No launch screen
+- Does not yet retrieve statistical data from server
+- Search for albums or artists is not yet implemented
+- Rdio logo not displayed
+- No map displayed
