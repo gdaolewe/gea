@@ -13,7 +13,7 @@ public class LaunchActivity extends Activity implements MusicServiceReadyListene
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_launch);
-		MusicServiceWrapper.getInstance(MainActivity.getAppContext()).registerMusicServiceReadyListener(this);
+		
 	}
 
 	@Override

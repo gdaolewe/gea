@@ -1,7 +1,7 @@
 package net.kenpowers.gea;
 
-public class MusicServiceObject {
-	protected String key, type, name;
+public abstract class MusicServiceObject {
+	private String key, type, name;
 	
 	public MusicServiceObject(String key, String type, String name) {
 		this.key = key;

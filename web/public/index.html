@@ -5,23 +5,33 @@
     <title>Gea</title>
   </head>
   <body>
-    <div id="map">(map here)</div>
+    <div id="map"></div>
     <div id="right">
       <div id="player">
-        <div id="player-art">(art here)</div>
+        <div id="api"></div>
+        <div><img id="player-art" src="/img/templogo.png" alt="(art here)">
+          <span id="social">
+            <div id="like"></div>
+            <div id="dislike"></div>
+          </span>
+        </div>
         <div id="progress-bar"><div id="fill"></div></div>
         <div id="controls">
-          <div id="previous">&lt;</div>
-          <div id="play-pause"></div>
-          <div id="next">&gt;</div>
+          <div id="previous"></div>
+          <div id="play-pause" class="pause-button"></div>
+          <div id="next"></div>
         </div>
-        <div id="social">
-          <div id="like">Like :D</div>
-          <div id="dislike">Dislike &gt;:(</div>
+        <div id="player-metadata">
+          <div><span id="track-header">Song: </span><span id="track"></span></div>
+          <div><span id="album-header">Album: </span><span id="album"></span></div>
+          <div><span id="artist-header">Artist: </span><span id="artist"></span></div>
         </div>
-        <div id="player-metadata"></div>
       </div>
-      <div id="results">(search results here)</div>
+      <div id="search">
+        <div id="top-trending">Get top 10 trending songs</div>
+        <input id="search-input" type="text" placeholder="search" />
+        <div id="search-results"></div>
+      </div>
     </div>
     <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.4/require.min.js" data-main="/js/main"></script>
     <script>

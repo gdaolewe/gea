@@ -7,25 +7,45 @@ import java.util.HashMap;
 import org.json.*;
 
 import android.os.AsyncTask;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
-import android.app.Activity;
+import android.os.IBinder;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import android.app.SearchManager;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
+import com.actionbarsherlock.view.ActionMode;
+import android.view.View;
+
+import android.widget.*;
+import com.actionbarsherlock.widget.SearchView;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
+
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.view.Menu;
-import android.view.View;
-import android.widget.*;
 
-public class MainActivity extends Activity implements RequestTaskCompleteListener, 
+
+public class MainActivity extends SherlockFragmentActivity implements RequestTaskCompleteListener, 
 														TrackChangedListener {
 	
 	private static Context context;
@@ -36,25 +56,57 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 	private Track currentTrack;
 	
 	private GoogleMap gmap;
+	
+	private int volume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.hide(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+        ft.commit();
         
         MainActivity.context = getApplicationContext();
         
-        Log.d(MainActivity.LOG_TAG, "MainActivity started");
+        Log.i(MainActivity.LOG_TAG, "MainActivity started");
         
+        //If in debug mode, connect to Gea server running on localhost, else connect to production server
         boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
         if (isDebuggable)
         	baseURL = GeaServerConstants.LOCALHOST_BASE_URL;
         else
         	baseURL = GeaServerConstants.NET_BASE_URL;
-                
-        ((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
+        
+        volume = 100;
+        music = MusicServiceWrapper.getInstance();
+        music.registerTrackChangedListener(MainActivity.this);
+        setUpSeekBarListeners();
+        
+        setUpMapIfNeeded();
+    }
+    
+    @Override
+    protected void onResume() {
+    	((SeekBar)findViewById(R.id.volumeSeekBar)).setProgress(volume);
+    	music = MusicServiceWrapper.getInstance();
+    	music.setPlayerVolume(volume);
+    	super.onResume();
+    }
+    
+    private void setUpSeekBarListeners() {
+    	//set up change listener for song progress seek bar
+    	((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
-        			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+        			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        				if (fromUser) {	//only skip if bar moved by user
+        					int seconds = getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
+        					String position = getFormattedTimeFromSeconds(seconds);
+        					((TextView) findViewById(R.id.currentPositionText)).setText(position);
+        				}
+        			}
         			public void onStartTrackingTouch(SeekBar seekBar) {
         				trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
         			}
@@ -64,42 +116,86 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         				trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
         			}
         });
-        
+        //set up change listener for volume control seek bar
         ((SeekBar)findViewById(R.id.volumeSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
-					
 					@Override
 					public void onStopTrackingTouch(SeekBar seekBar) {}
-					
 					@Override
 					public void onStartTrackingTouch(SeekBar seekBar) {}
-					
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress,
 							boolean fromUser) {
-						if (fromUser)
+						if (fromUser) {
+							volume = progress;
 							music.setPlayerVolume(progress);
+						}
 					}
-				});
-        
-        //uncomment this code to add Google MapFragment
-        //gmap = ((MapFragment)getFragmentManager().findFragmentById(R.layout.fragment1).getMap());
-        //MapFragment mf = MapFragment.newInstance();
-        
-        music = MusicServiceWrapper.getInstance(this);
-        music.registerTrackChangedListener(this);
+		});
         
     }
-
+    
+    private void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (gmap == null) {
+            gmap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+                                .getMap();
+            // Check if we were successful in obtaining the map.
+            if (gmap != null) {
+                // The Map is verified. It is now safe to manipulate the map.
+            	Criteria criteria = new Criteria();
+                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                String provider = locationManager.getBestProvider(criteria, false);
+                Location location = locationManager.getLastKnownLocation(provider);
+                LatLng coordinate = new LatLng(location.getLatitude(), location.getLongitude());
+                CameraUpdate center = CameraUpdateFactory.newLatLng(coordinate);
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(10);
+                gmap.moveCamera(center);
+                gmap.moveCamera(zoom);
+            }
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getSupportMenuInflater().inflate(R.menu.main, menu);
         
      // Get the SearchView and set the searchable configuration
-        SearchManager searchManager = (SearchManager) getSystemService(this.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.searchField).getActionView();
+        SearchManager searchManager = (SearchManager) getSystemService(MainActivity.SEARCH_SERVICE);
+        com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) menu.findItem(R.id.searchField)
+        																								   .getActionView();
+        searchView.setOnQueryTextFocusChangeListener(new com.actionbarsherlock.widget.SearchView.OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+				if (!hasFocus) {
+					Log.d(LOG_TAG, "Search lost focus");
+			        ft.hide(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+			        ft.commit();
+				}
+			}
+        	
+        });
+        searchView.setOnQueryTextListener(new com.actionbarsherlock.widget.SearchView.OnQueryTextListener() {
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				return false;
+			}
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				// TODO Search suggestions
+				FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+				if (newText.length() > 0) {
+			        ft.show(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+			        ft.commit();
+				} else {
+			        ft.hide(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+			        ft.commit();
+				}
+				return false;
+			}
+        });
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         searchView.setSubmitButtonEnabled(true);
@@ -109,25 +205,60 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     
     @Override
 	public void onDestroy() {
-		music.cleanup();
-		super.onDestroy();
+    	super.onDestroy();
+    	//music.cleanup();
 	}
+    
+    @Override
+    public void startActivity(Intent intent) {      
+        // check if search intent
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+        	boolean shouldSearchForSong 	= ((CheckBox)findViewById(R.id.songCheckBox)).isChecked();
+        	boolean shouldSearchForAlbum 	= ((CheckBox)findViewById(R.id.albumCheckBox)).isChecked();
+        	boolean shouldSearchForArtist = ((CheckBox)findViewById(R.id.artistCheckBox)).isChecked();
+            intent.putExtra("Song", shouldSearchForSong);
+            intent.putExtra("Album", shouldSearchForAlbum);
+            intent.putExtra("Artist", shouldSearchForArtist);
+        }
+
+        super.startActivity(intent);
+    }
     
     public static Context getAppContext() {
     	return MainActivity.context;
     }
     
     public void onUpButtonClicked(View view) {
-    	if (view.getId() != R.id.approval_up_button || currentTrack == null)
+    	ImageButton upButton = (ImageButton)view;
+    	if (upButton.getId() != R.id.approval_up_button)
     		return;
-    	Log.d(LOG_TAG, "up button clicked");  
-    	sendApprovalRequest(true);
+    	//show clicked icon
+    	upButton.setImageResource(R.drawable.thumbup_over);
+    	//return to unclicked icon after delay
+    	new Handler().postDelayed(new Runnable() {
+    		public void run() {
+    			ImageButton upButton = ((ImageButton)findViewById(R.id.approval_up_button));
+    			upButton.setImageResource(R.drawable.thumbup);
+    		}
+    	}, 100);
+    	if (currentTrack != null)
+    		sendApprovalRequest(true);
     }
     public void onDownButtonClicked(View view) {
-    	if (view.getId() != R.id.approval_down_button || currentTrack == null)
+    	ImageButton downButton = (ImageButton)view;
+    	if (downButton.getId() != R.id.approval_down_button)
     		return;
-    	Log.d(LOG_TAG, "down button clicked");	
-    	sendApprovalRequest(false);
+    	//show clicked icon
+    	downButton.setImageResource(R.drawable.thumbdown_over);
+    	//return to unclicked icon after delay
+    	new Handler().postDelayed(new Runnable() {
+    		public void run() {
+    			ImageButton downButton = ((ImageButton)findViewById(R.id.approval_down_button));
+    			downButton.setImageResource(R.drawable.thumbdown);
+    		}
+    	}, 100);
+    	if (currentTrack != null)
+    		sendApprovalRequest(false);
     }
     
     public void sendApprovalRequest(boolean trackLiked) {
@@ -140,6 +271,18 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         		new GeaPOSTRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
     }
     
+    /**
+     * Queries GEA server for top num songs.
+     * @param num number of top songs to pull from GEA server.
+     */
+    public void getApprovalRequest(int num){
+    	HashMap<String, String> params = new HashMap<String, String>();
+    	params.put("limit", Integer.toString(num));
+    	
+    	new RequestTask(this).execute(
+    			new GeaGETRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
+    }
+    
     public void onTaskComplete(GeaServerRequest request, String result) {
     	if (result==null || request==null) {
     		Log.e(LOG_TAG, "Error fetching JSON");
@@ -148,41 +291,18 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     		
     }
     
-    private String secondsToTimeFormat(int time) {
-    	int seconds = time % 60;
-    	int minutes = time / 60;
-    	return "" + (minutes<10 ? "0":"") + minutes + ":" + (seconds<10? "0":"") + seconds;
-    }
-    
-    private Handler trackPositionUpdateHandler = new Handler();
-    
-    public void onTrackChanged(Track track) {
-    	if (track==null) {
-    		((TextView)findViewById(R.id.play_pause_button)).setText("Play");
-        	trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
-    	} else {
-    		Log.d(LOG_TAG, track.toString());
-    		currentTrack = track;
-    		downloadAlbumArt(currentTrack.getAlbumArtURL());
-	    	String trackInfo = String.format(currentTrack.toString());
-	    	((TextView)findViewById(R.id.songInfoText)).setText(trackInfo);
-	    	((TextView)findViewById(R.id.play_pause_button)).setText("Pause");
-	    	
-	    	trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
-    	}
-    }
-    
     public void togglePaused(View view) {
     	if (view.getId() == R.id.play_pause_button)
     		music.togglePlayerPaused();
-    	TextView button = (TextView)findViewById(R.id.play_pause_button);
+    	ImageButton button = (ImageButton)findViewById(R.id.play_pause_button);
     	if (music.playerIsPlaying()) {
     		trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
-    		button.setText("Pause");
+    		
+    		button.setImageResource(R.drawable.pause);
     	}
     	else {
     		trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
-    		button.setText("Play");
+    		button.setImageResource(R.drawable.play);
     	}
     }
     
@@ -196,26 +316,54 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
     	return (int)seconds;
     }
     
+    private String getFormattedTimeFromSeconds(int seconds) {
+    	int secs = seconds % 60;
+    	int minutes = seconds / 60;
+    	return "" + (minutes<10 ? "0":"") + minutes + ":" + (secs<10? "0":"") + secs;
+    }
+    
+    private Handler trackPositionUpdateHandler = new Handler();
+    
+    public void onTrackChanged(Track track) {
+    	if (track==null) {
+    		((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.play);
+        	trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
+    	} else {
+    		Log.d(LOG_TAG, "Now playing " + track.toString());
+    		currentTrack = track;
+    		downloadAlbumArt(currentTrack.getAlbumArtURL());
+	    	String trackInfo = String.format(currentTrack.toString());
+	    	((TextView)findViewById(R.id.songInfoText)).setText(trackInfo);
+	    	//((TextView)findViewById(R.id.play_pause_button)).setText("Pause");
+	    	((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.pause);
+	    	
+	    	trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
+    	}
+    }
+    
+    
+    
     private Runnable updateTrackPositionTask = new Runnable() {
 	    public void run() {
 	    	int durationSeconds = music.getPlayerDuration()/1000;
-	    	String durationString = secondsToTimeFormat(durationSeconds);
+	    	String durationString = getFormattedTimeFromSeconds(durationSeconds);
 	    	((TextView)findViewById(R.id.durationText)).setText(durationString);
 	    	
 			int currentPositionSeconds = music.getPlayerPosition()/1000;
-	    	String currentPositionString = secondsToTimeFormat(currentPositionSeconds);
+	    	String currentPositionString = getFormattedTimeFromSeconds(currentPositionSeconds);
 			((TextView)findViewById(R.id.currentPositionText)).setText(currentPositionString);
 			trackPositionUpdateHandler.postDelayed(this, 100);
 			
 			int progress = getProgressPercent(currentPositionSeconds, durationSeconds);
-			//Log.d(LOG_TAG, ""+progress);
 			((SeekBar)findViewById(R.id.progressSeekBar)).setProgress(progress);
 	    }
     };
     
     private void downloadAlbumArt(String url) {
-    	new DownloadImageTask((ImageView)findViewById(R.id.playerAlbumArt)).execute(url);
+    	ImageView albumArtView = (ImageView)findViewById(R.id.playerAlbumArt);
+    	new DownloadImageTask(albumArtView).execute(url);
     }
+    
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 	    ImageView image;
 
@@ -239,6 +387,11 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
 	    protected void onPostExecute(Bitmap result) {
 	        image.setImageBitmap(result);
 	    }
+	}
+    
+    public boolean onOptionsItemSelected (MenuItem item) {
+		return true;
+		
 	}
     
 }
