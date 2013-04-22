@@ -140,6 +140,10 @@ public class MainActivity extends Activity implements RequestTaskCompleteListene
         		new GeaPOSTRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
     }
     
+    public void getApprovalRequest(int num){
+    	HashMap<String, String> params = new HashMap<String, String>();
+    }
+    
     public void onTaskComplete(GeaServerRequest request, String result) {
     	if (result==null || request==null) {
     		Log.e(LOG_TAG, "Error fetching JSON");

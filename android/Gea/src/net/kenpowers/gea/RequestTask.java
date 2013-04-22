@@ -12,10 +12,18 @@ public class RequestTask extends AsyncTask<GeaServerRequest, String, String> {
 	private RequestTaskCompleteListener callback;
 	private GeaServerRequest request;
 	
+	/**
+	 * Constructor for making a GET|POST request to GEA server.
+	 * @param callback callback to listener on completion
+	 */
 	public RequestTask(RequestTaskCompleteListener callback) {
 		this.callback = callback;
 	}
 	
+	/**
+	 * Main body for request. Opens connection to GEA server and performs the given request operation.
+	 * @return the body returned by the GEA server.
+	 */
 	protected String doInBackground(GeaServerRequest... request) {
         int statusCode = 0;
         this.request = request[0];
@@ -50,6 +58,9 @@ public class RequestTask extends AsyncTask<GeaServerRequest, String, String> {
         return null;
     }
 
+	/**
+	 * Notifies listener that this asynchronous task is complete.
+	 */
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
