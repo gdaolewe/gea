@@ -4,6 +4,7 @@ var pg = require('pg'),
     fs = require('fs'),
     path = require('path'),
     util = require('util'),
+    request = require('request'),
     rdio = require('./util/rdio'),
     config = require(path.join(__appDir, 'db/database.json'))[process.env.NODE_ENV === 'production' ? 'prod' : 'dev'];
 
@@ -85,11 +86,13 @@ module.exports = {
           }
         },
         function (data, next) {
-          client.query({
-            name: 'insert_rating',
-            text: INSERT_RATING,
-            values: [data.rows[0].id, VERDICTS[req.query.verdict]]
-          }, next);
+          request({url: 'http://freegeoip.net/json/' + req.ip}, function (err, resp, body) {
+            client.query({
+              name: 'insert_rating',
+              text: INSERT_RATING,
+              values: [data.rows[0].id, VERDICTS[req.query.verdict], JSON.parse(body).region_name]
+            }, next);
+          });
         }
       ], function (err, data) {
         if (err) {
