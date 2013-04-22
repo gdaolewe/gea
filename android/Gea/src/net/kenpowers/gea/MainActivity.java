@@ -271,6 +271,18 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         		new GeaPOSTRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
     }
     
+    /**
+     * Queries GEA server for top num songs.
+     * @param num number of top songs to pull from GEA server.
+     */
+    public void getApprovalRequest(int num){
+    	HashMap<String, String> params = new HashMap<String, String>();
+    	params.put("limit", Integer.toString(num));
+    	
+    	new RequestTask(this).execute(
+    			new GeaGETRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
+    }
+    
     public void onTaskComplete(GeaServerRequest request, String result) {
     	if (result==null || request==null) {
     		Log.e(LOG_TAG, "Error fetching JSON");
