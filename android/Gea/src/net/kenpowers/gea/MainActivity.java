@@ -9,7 +9,6 @@ import org.json.*;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import android.app.SearchManager;
@@ -38,13 +37,16 @@ import android.util.Log;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.ViewById;
+import com.googlecode.androidannotations.annotations.EActivity;
 
+@EActivity(R.layout.activity_main)
 public class MainActivity extends SherlockFragmentActivity implements RequestTaskCompleteListener, 
 														TrackChangedListener {
 	
@@ -267,8 +269,8 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         params.put("id", currentTrack.getKey());
         params.put("verdict", trackLiked? "like" : "dislike");
         
-        new RequestTask(this).execute(
-        		new GeaPOSTRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
+        //new RequestTask(this).execute(
+        //		new GeaPOSTRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
     }
     
     /**
