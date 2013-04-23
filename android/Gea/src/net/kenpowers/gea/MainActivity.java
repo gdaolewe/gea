@@ -53,8 +53,7 @@ import com.googlecode.androidannotations.annotations.ViewById;
 import com.googlecode.androidannotations.annotations.EActivity;
 
 @EActivity
-public class MainActivity extends SherlockFragmentActivity implements RequestTaskCompleteListener, 
-														TrackChangedListener {
+public class MainActivity extends SherlockFragmentActivity implements TrackChangedListener {
 	
 	private static Context context;
 	static final String LOG_TAG = "Gea";
@@ -272,14 +271,12 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     
     
     public void sendApprovalRequest(boolean trackLiked) {
-    	HashMap<String, String> params = new HashMap<String, String>();
-        params.put("from", "rdio");
-        params.put("id", currentTrack.getKey());
-        params.put("verdict", trackLiked? "like" : "dislike");
-        
-        new RequestTask(this).execute(
-        		new GeaPOSTRequest(baseURL + GeaServerHandler.BASE_RATE_QUERY, params));
-        
+    	BasicNameValuePair[] params = new BasicNameValuePair[3];
+    	params[0] = new BasicNameValuePair("from", "rdio");
+    	params[1] = new BasicNameValuePair("id", currentTrack.getKey());
+    	params[2] = new BasicNameValuePair("verdit", trackLiked? "like" : "dislike");
+        String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
+        GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.POST);
     }
     
     /**
@@ -292,7 +289,7 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     	try {
     		BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
     		BasicNameValuePair[] params = {param};
-    		String url = GeaServerHandler.getURLStringForParams(GeaServerHandler.NET_BASE_URL + GeaServerHandler.BASE_RATE_QUERY, params);
+    		String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
             json = GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.GET);
             String output = "";
             for (int i=0; i < json.length(); i++) {
@@ -311,16 +308,6 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     public void makeToast(String text) {
     	Toast toast = Toast.makeText(getAppContext(), text, Toast.LENGTH_SHORT);
     	toast.show();
-    }
-    
-    public void onTaskComplete(GeaServerRequest request, String result) {
-    	if (result==null || request==null) {
-    		Log.e(LOG_TAG, "Error fetching JSON");
-    		return;
-    	} else {
-    		Log.d("LOG_TAG", result);
-    	}
-    		
     }
     
     public void togglePaused(View view) {
