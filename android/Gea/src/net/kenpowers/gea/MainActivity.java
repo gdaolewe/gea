@@ -1,9 +1,14 @@
 package net.kenpowers.gea;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import java.util.HashMap;
 
+import org.apache.http.message.BasicNameValuePair;
 import org.json.*;
 
 import android.os.AsyncTask;
@@ -43,10 +48,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.UiThread;
 import com.googlecode.androidannotations.annotations.ViewById;
 import com.googlecode.androidannotations.annotations.EActivity;
 
-@EActivity(R.layout.activity_main)
+@EActivity
 public class MainActivity extends SherlockFragmentActivity implements RequestTaskCompleteListener, 
 														TrackChangedListener {
 	
@@ -73,21 +79,22 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         
         MainActivity.context = getApplicationContext();
         
-        Log.i(MainActivity.LOG_TAG, "MainActivity started");
+        Log.i(LOG_TAG, "MainActivity started");
         
         //If in debug mode, connect to Gea server running on localhost, else connect to production server
         boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
         if (isDebuggable)
-        	baseURL = GeaServerConstants.LOCALHOST_BASE_URL;
+        	baseURL = GeaServerHandler.LOCALHOST_BASE_URL;
         else
-        	baseURL = GeaServerConstants.NET_BASE_URL;
+        	baseURL = GeaServerHandler.NET_BASE_URL;
         
         volume = 100;
         music = MusicServiceWrapper.getInstance();
-        music.registerTrackChangedListener(MainActivity.this);
+        music.registerTrackChangedListener(this);
         setUpSeekBarListeners();
         
         setUpMapIfNeeded();
+        getApprovalRequest(5);
     }
     
     @Override
@@ -263,32 +270,55 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     		sendApprovalRequest(false);
     }
     
+    
     public void sendApprovalRequest(boolean trackLiked) {
     	HashMap<String, String> params = new HashMap<String, String>();
         params.put("from", "rdio");
         params.put("id", currentTrack.getKey());
         params.put("verdict", trackLiked? "like" : "dislike");
         
-        //new RequestTask(this).execute(
-        //		new GeaPOSTRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
+        new RequestTask(this).execute(
+        		new GeaPOSTRequest(baseURL + GeaServerHandler.BASE_RATE_QUERY, params));
+        
     }
     
     /**
      * Queries GEA server for top num songs.
      * @param num number of top songs to pull from GEA server.
      */
+    @Background
     public void getApprovalRequest(int num){
-    	HashMap<String, String> params = new HashMap<String, String>();
-    	params.put("limit", Integer.toString(num));
-    	
-    	new RequestTask(this).execute(
-    			new GeaGETRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
+    	JSONArray json;
+    	try {
+    		BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
+    		BasicNameValuePair[] params = {param};
+    		String url = GeaServerHandler.getURLStringForParams(GeaServerHandler.NET_BASE_URL + GeaServerHandler.BASE_RATE_QUERY, params);
+            json = GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.GET);
+            String output = "";
+            for (int i=0; i < json.length(); i++) {
+            	JSONObject obj = json.getJSONObject(i);
+            	output += obj.getString("artist") + " - " + obj.getString("title") + "\n";
+            }
+            
+            makeToast(output);
+
+    	} catch (Exception e) {
+    		Log.e(LOG_TAG, e.toString());
+    	}
+    }
+    
+    @UiThread
+    public void makeToast(String text) {
+    	Toast toast = Toast.makeText(getAppContext(), text, Toast.LENGTH_SHORT);
+    	toast.show();
     }
     
     public void onTaskComplete(GeaServerRequest request, String result) {
     	if (result==null || request==null) {
     		Log.e(LOG_TAG, "Error fetching JSON");
     		return;
+    	} else {
+    		Log.d("LOG_TAG", result);
     	}
     		
     }
@@ -336,7 +366,6 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     		downloadAlbumArt(currentTrack.getAlbumArtURL());
 	    	String trackInfo = String.format(currentTrack.toString());
 	    	((TextView)findViewById(R.id.songInfoText)).setText(trackInfo);
-	    	//((TextView)findViewById(R.id.play_pause_button)).setText("Pause");
 	    	((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.pause);
 	    	
 	    	trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);

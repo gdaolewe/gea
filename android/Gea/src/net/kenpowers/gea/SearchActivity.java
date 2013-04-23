@@ -88,6 +88,8 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	    	 if (shouldSearchForArtist) {
 	    		 type += "artist";
 	    	 }
+	    	 if (! (shouldSearchForSong | shouldSearchForAlbum | shouldSearchForArtist) )
+				 type = "Song";
 		      music = MusicServiceWrapper.getInstance();
 		      music.registerSearchCompleteListener(this);
 		      query = intent.getStringExtra(SearchManager.QUERY);

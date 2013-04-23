@@ -30,6 +30,7 @@ public class RequestTask extends AsyncTask<GeaServerRequest, String, String> {
         
         try {
         	URL url = new URL(this.request.getURL());
+        	Log.d(MainActivity_.LOG_TAG, url.toString());
         	HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         	connection.setRequestMethod(this.request.getRequestMethod().toString());
         	connection.setRequestProperty("Content-length", "0");
@@ -45,12 +46,12 @@ public class RequestTask extends AsyncTask<GeaServerRequest, String, String> {
                 br.close();
                 return sb.toString();
         	} else {
-        		Log.e(MainActivity.LOG_TAG, "Error connecting to Gea server: " + statusCode);
+        		Log.e(MainActivity_.LOG_TAG, "Error connecting to Gea server: " + statusCode);
         		return null;
         	}
         	
         } catch (MalformedURLException e) {
-        	Log.d(MainActivity.LOG_TAG, "malformed URL " + this.request.getURL());
+        	Log.d(MainActivity_.LOG_TAG, "malformed URL " + this.request.getURL());
         } catch (IOException e) {
         	e.printStackTrace();
         }        

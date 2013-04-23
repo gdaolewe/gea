@@ -6,7 +6,7 @@
 
     
     <uses-sdk
-        android:minSdkVersion="16"
+        android:minSdkVersion="8"
         android:targetSdkVersion="17" />
     
    <uses-permission
@@ -60,11 +60,6 @@
         
         <activity android:name="net.kenpowers.gea.AlbumActivity_" ></activity>
         
-        <activity
-            android:name="net.kenpowers.gea.LaunchActivity"
-            android:label="@string/title_activity_launch" >
-            
-        </activity>
         <service android:enabled="true" android:name=".MusicServiceWrapper" />
         <meta-data
     		android:name="com.google.android.maps.v2.API_KEY"

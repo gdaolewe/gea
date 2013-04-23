@@ -6,7 +6,7 @@ import org.junit.BeforeClass;
 
 import net.kenpowers.gea.GeaGETRequest;
 import net.kenpowers.gea.GeaPOSTRequest;
-import net.kenpowers.gea.GeaServerConstants;
+import net.kenpowers.gea.GeaServerHandler;
 import net.kenpowers.gea.GeaServerRequest;
 import net.kenpowers.gea.RequestTask;
 import android.test.AndroidTestCase;
@@ -20,8 +20,8 @@ public class RequestTaskTest extends AndroidTestCase{
 	
 	@BeforeClass
 	public void setup(){
-		get = new GeaGETRequest(server + GeaServerConstants.BASE_RATE_QUERY, null);
-		post = new GeaPOSTRequest(server + GeaServerConstants.BASE_RATE_QUERY, null);
+		get = new GeaGETRequest(server + GeaServerHandler.BASE_RATE_QUERY, null);
+		post = new GeaPOSTRequest(server + GeaServerHandler.BASE_RATE_QUERY, null);
 	}
 	
 	@Test
