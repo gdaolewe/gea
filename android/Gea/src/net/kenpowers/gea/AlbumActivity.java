@@ -79,7 +79,7 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 	
 	public void listItemSelected(int position) {
 		music.getPlayerForTrack(tracks[position]);
-		startActivity(new Intent(this, MainActivity.class));
+		startActivity(new Intent(this, MainActivity_.class));
 	}
 	
 	public boolean onOptionsItemSelected (MenuItem item) {

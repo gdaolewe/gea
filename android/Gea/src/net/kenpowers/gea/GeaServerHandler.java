@@ -27,15 +27,16 @@ public class GeaServerHandler {
 	
 	public static enum RequestMethod { GET, POST; }
 	
+	public static void sendRequest(String urlString, RequestMethod method) {
+		connect(urlString, method);
+	}
+	
 	public static JSONArray getJSONForRequest(String urlString, RequestMethod method) {
 		JSONArray json = null;
+		HttpURLConnection connection = connect(urlString, method);
+		if (connection == null)
+			return null;
 		try {
-			URL url = new URL(urlString);
-			Log.d(MainActivity_.LOG_TAG, url.toString());
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod(RequestMethod.GET.toString());
-			connection.setRequestProperty("Content-length", "0");
-			connection.connect();
 			int statusCode = connection.getResponseCode();
 			if (connection.getResponseCode() == 200) {
 	    		BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -57,8 +58,24 @@ public class GeaServerHandler {
 		} catch(JSONException e) {
 			Log.e(LOG_TAG, e.toString());
 		}
-		
 		return json;
+	}
+	
+	private static HttpURLConnection connect(String urlString, RequestMethod method) {
+		HttpURLConnection connection = null;
+		try {
+			URL url = new URL(urlString);
+			Log.d(MainActivity_.LOG_TAG, url.toString());
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod(method.toString());
+			connection.setRequestProperty("Content-length", "0");
+			connection.connect();
+		} catch (MalformedURLException e) {
+			Log.e(LOG_TAG, e.toString());
+		} catch(IOException e) {
+			Log.e(LOG_TAG, e.toString());
+		}
+		return connection;
 	}
 	
 	public static String getURLStringForParams(String baseURL, BasicNameValuePair[] parameters) {

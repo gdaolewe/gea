@@ -82,10 +82,11 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         
         //If in debug mode, connect to Gea server running on localhost, else connect to production server
         boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
-        if (isDebuggable)
+        /*if (isDebuggable)
         	baseURL = GeaServerHandler.LOCALHOST_BASE_URL;
         else
-        	baseURL = GeaServerHandler.NET_BASE_URL;
+        	baseURL = GeaServerHandler.NET_BASE_URL;*/
+        baseURL = GeaServerHandler.NET_BASE_URL;
         
         volume = 100;
         music = MusicServiceWrapper.getInstance();
@@ -269,14 +270,14 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     		sendApprovalRequest(false);
     }
     
-    
+    @Background
     public void sendApprovalRequest(boolean trackLiked) {
     	BasicNameValuePair[] params = new BasicNameValuePair[3];
     	params[0] = new BasicNameValuePair("from", "rdio");
     	params[1] = new BasicNameValuePair("id", currentTrack.getKey());
-    	params[2] = new BasicNameValuePair("verdit", trackLiked? "like" : "dislike");
+    	params[2] = new BasicNameValuePair("verdict", trackLiked? "like" : "dislike");
         String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
-        GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.POST);
+        GeaServerHandler.sendRequest(url, GeaServerHandler.RequestMethod.POST);
     }
     
     /**
@@ -291,14 +292,17 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     		BasicNameValuePair[] params = {param};
     		String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
             json = GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.GET);
+            if (json == null) {
+            	Log.e(LOG_TAG, "Error retrieving JSON from Gea Server");
+            }
             String output = "";
             for (int i=0; i < json.length(); i++) {
             	JSONObject obj = json.getJSONObject(i);
             	output += obj.getString("artist") + " - " + obj.getString("title") + "\n";
             }
-            
-            makeToast(output);
-
+            //makeToast(output);
+    	} catch (JSONException e) {
+    		Log.e(LOG_TAG, "Error parsing JSON retrived from Gea Server");
     	} catch (Exception e) {
     		Log.e(LOG_TAG, e.toString());
     	}
@@ -358,8 +362,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	    	trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
     	}
     }
-    
-    
     
     private Runnable updateTrackPositionTask = new Runnable() {
 	    public void run() {

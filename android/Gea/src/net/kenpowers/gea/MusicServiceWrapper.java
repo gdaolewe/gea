@@ -33,7 +33,7 @@ import org.json.*;
 
 
 
-public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePublisher, 
+public class MusicServiceWrapper implements SearchCompletePublisher, 
 											TrackChangedPublisher {
 	
 	private static final MusicServiceWrapper INSTANCE = new MusicServiceWrapper();
@@ -176,7 +176,28 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("query", query));
 		params.add(new BasicNameValuePair("types", types));
-		rdio.apiCall("search", params, this);
+		rdio.apiCall("search", params, new RdioApiCallback() {
+			@Override
+			public void onApiFailure(String methodName, Exception e) {
+				Log.e(LOG_TAG, "Rdio API call" + methodName + " failed");
+			}
+			@Override
+			public void onApiSuccess(JSONObject result) {
+				MusicServiceObject[] results = null;
+				try {
+					JSONArray json = result.getJSONObject("result").getJSONArray("results");
+					results = new MusicServiceObject[json.length()];
+					Log.i(LOG_TAG, "Search results:");
+					for (int i=0; i<json.length(); i++) {
+						JSONObject obj = json.getJSONObject(i);
+						results[i] = getMusicServiceObjectForJSON(obj);
+					}
+					notifySearchCompleteListeners(results);
+				} catch(JSONException e) {
+					Log.e(LOG_TAG,"Error parsing JSON: search");
+				}
+			}
+		});
 	}
 	
 	public void getMusicServiceObjectsForKeys(String[] keys) {
@@ -186,58 +207,67 @@ public class MusicServiceWrapper implements RdioApiCallback, SearchCompletePubli
 			if (i < keys.length-1)
 				keysString += ",";
 		}
+		Log.d(LOG_TAG, keysString);
 		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("keys", keysString));
-		rdio.apiCall("get", params, this);
+		rdio.apiCall("get", params, new RdioApiCallback() {
+			@Override
+			public void onApiFailure(String methodName, Exception e) {
+				Log.e(LOG_TAG, "Rdio API call" + methodName + " failed");
+			}
+			@Override
+			public void onApiSuccess(JSONObject result) {
+				MusicServiceObject[] results = null;
+				try {
+					Log.d(LOG_TAG, result.toString());
+					JSONObject json = result.getJSONObject("result");
+					results = new MusicServiceObject[json.length()];
+					Iterator<?> jsonKeys = json.keys();
+					int i = 0;
+					while (jsonKeys.hasNext()) {
+						String jsonKey = (String)jsonKeys.next();
+						JSONObject obj = json.getJSONObject(jsonKey);
+						results[i] = getMusicServiceObjectForJSON(obj);
+						i++;
+					}
+					notifySearchCompleteListeners(results);
+				} catch(JSONException e) {
+					Log.e(LOG_TAG,"Error parsing JSON: get");
+				}
+			}
+		});
 	}
 	
 	public void getAlbumsForArtist(Artist artist) {
 		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("artist", artist.getKey()));
 		Log.d(LOG_TAG, artist.getKey());
-		rdio.apiCall("getAlbumsForArtist", params, this);
+		rdio.apiCall("getAlbumsForArtist", params, new RdioApiCallback() {
+			@Override
+			public void onApiFailure(String methodName, Exception e) {
+				Log.e(LOG_TAG, "Rdio API call" + methodName + " failed");
+			}
+			@Override
+			public void onApiSuccess(JSONObject result) {
+				MusicServiceObject[] results = null;
+				try {
+				JSONArray json = result.getJSONArray("result");
+				results = new MusicServiceObject[json.length()];
+				Log.i(LOG_TAG, "Search results:");
+				for (int i=0; i<json.length(); i++) {
+					JSONObject obj = json.getJSONObject(i);
+					results[i] = getMusicServiceObjectForJSON(obj);
+				}
+				notifySearchCompleteListeners(results);
+				} catch (JSONException e) {
+					Log.e(LOG_TAG,"Error parsing JSON: getAlbumsForArtist");
+				}
+			}
+			
+		});
 	}
 	
-	/*
-	 * RdioApiCallback methods
-	 */
-	public void onApiSuccess(JSONObject result) {
-		try {
-			result = result.getJSONObject("result");
-		} catch(JSONException e) {
-			Log.d(LOG_TAG,"JSON exception: key \"result\" is not JSONObject");
-		}
-		try {
-			if (result.has("results") || result.has("result")) {
-				JSONArray resultsJSON;
-				if (result.has("results"))
-					resultsJSON = result.getJSONArray("results");
-				else
-					resultsJSON = result.getJSONArray("result");
-				
-				MusicServiceObject[] results = new MusicServiceObject[resultsJSON.length()];
-				Log.i(LOG_TAG, "Search results:");
-				for (int i=0; i<resultsJSON.length(); i++) {
-					JSONObject obj = resultsJSON.getJSONObject(i);
-					results[i] = getMusicServiceObjectForJSON(obj);
-				}
-				notifySearchCompleteListeners(results);
-			} else {
-				MusicServiceObject[] results = new MusicServiceObject[result.length()];
-				Iterator<?> jsonKeys = result.keys();
-				int i = 0;
-				while (jsonKeys.hasNext()) {
-					String jsonKey = (String)jsonKeys.next();
-					JSONObject obj = result.getJSONObject(jsonKey);
-					results[i] = getMusicServiceObjectForJSON(obj);
-					i++;
-				}
-				notifySearchCompleteListeners(results);
-			}
-		} catch (JSONException e) {
-			Log.e(LOG_TAG,"JSON exception");		
-		}	
-	}
+	
 	
 		private MusicServiceObject getMusicServiceObjectForJSON(JSONObject obj) {
 			MusicServiceObject msObj = null;
