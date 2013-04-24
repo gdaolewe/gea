@@ -22,5 +22,8 @@ getLib jquery.rdio.min.js https://raw.github.com/rdio/jquery.rdio.js/master/jque
 getLib async.js https://raw.github.com/millermedeiros/requirejs-plugins/master/src/async.js
 getLib promise.js https://raw.github.com/stackp/promisejs/master/promise.js
 getLib text.js https://raw.github.com/requirejs/text/master/text.js
+getLib jquery.joyride.js https://raw.github.com/zurb/joyride/master/jquery.joyride-2.0.3.js
+getLib jquery.cookie.js https://raw.github.com/zurb/joyride/master/jquery.cookie.js
 LIB_DIR='assets/styl/lib'
 getLib normalize.styl https://raw.github.com/KenPowers/normalize.styl/master/normalize.styl
+getLib joyride.styl https://raw.github.com/zurb/joyride/master/joyride-2.0.3.css
