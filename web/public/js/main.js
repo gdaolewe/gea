@@ -18,8 +18,8 @@ require({
     'promise': 'lib/promise',
     'async': 'lib/async',
     'text': 'lib/text',
-    'jqueryjoyride': 'lib/jquery.joyride',
-    'jquerycookie': 'lib/jquery.cookie'
+    'joyride': 'lib/jquery.joyride',
+    'cookie': 'lib/jquery.cookie'
   },
   shim: {
     'backbone': {
@@ -27,8 +27,8 @@ require({
       exports: 'Backbone'
     },
     'jqueryrdio': ['jquery'],
-    'jqueryjoyride': ['jquery', 'jquerycookie'],
-    'jquerycookie': ['jquery']
+    'joyride': ['jquery', 'cookie'],
+    'cookie': ['jquery']
   },
   deps: ['app']
 });

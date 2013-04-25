@@ -1,27 +1,24 @@
 /*global define*/
 define([
   'backbone',
-  'jqueryjoyride',
+  'joyride',
   'util/jqr!'
-], function (
-  bb
-) {
+], function (bb) {
   return new (bb.View.extend({
     el: '#joyRideTipContent',
     initialize: function () {
-      console.log(this.$el.joyride);
       this.$el.joyride({
-        'autoStart': true,
+        'startOffset':2,
         'tipLocation': 'bottom',         // 'top' or 'bottom' in relation to parent
         'nubPosition': 'auto',           // override on a per tooltip bases
-        'scrollSpeed': 300,              // Page scrolling speed in ms
-        'timer': 2000,                   // 0 = off, all other numbers = time(ms)
-        'startTimerOnClick': true,       // true/false to start timer on first click
+        'scrollSpeed': 800,              // Page scrolling speed in ms
+        'timer': 0,                   // 0 = off, all other numbers = time(ms)
+        'startTimerOnClick': false,       // true/false to start timer on first click
         'nextButton': true,              // true/false for next button visibility
-        'tipAnimation': 'pop',           // 'pop' or 'fade' in each tip
+        'tipAnimation': 'fade',           // 'pop' or 'fade' in each tip
         'pauseAfter': [],                // array of indexes where to pause the tour after
-        'tipAnimationFadeSpeed': 300,    // if 'fade'- speed in ms of transition
-        'cookieMonster': true,           // true/false for whether cookies are used
+        'tipAnimationFadeSpeed': 500,    // if 'fade'- speed in ms of transition
+        'cookieMonster': false,           // true/false for whether cookies are used
         'cookieName': 'JoyRide',         // choose your own cookie name
         'cookieDomain': false,           // set to false or yoursite.com
         'tipContent': '#joyRideTipContent'
@@ -29,6 +26,7 @@ define([
         //'postRideCallback': $noop,       // a method to call once the tour closes
         //'postStepCallback': $noop        // A method to call after each step
       });
+      this.$el.joyride();
     }
   }))();
 });
