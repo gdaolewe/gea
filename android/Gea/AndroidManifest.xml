@@ -33,7 +33,8 @@
         
         <activity
             android:name="net.kenpowers.gea.MainActivity_"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,7 +47,8 @@
         </activity>
         
         <activity android:name="net.kenpowers.gea.SearchActivity"
-            	  android:launchMode="singleTop" >
+            	  android:launchMode="singleTop"
+            	  android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -56,9 +58,13 @@
                 android:resource="@xml/searchable" />
         </activity>
         
-        <activity android:name="net.kenpowers.gea.ArtistActivity_" ></activity>
+        <activity android:name="net.kenpowers.gea.ArtistActivity_"
+            	  android:screenOrientation="portrait" >
+        </activity>
         
-        <activity android:name="net.kenpowers.gea.AlbumActivity_" ></activity>
+        <activity android:name="net.kenpowers.gea.AlbumActivity_"
+            	  android:screenOrientation="portrait" >
+        </activity>
         
         <service android:enabled="true" android:name=".MusicServiceWrapper" />
         <meta-data

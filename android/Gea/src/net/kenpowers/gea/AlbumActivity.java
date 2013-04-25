@@ -101,10 +101,8 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
             InputStream in = new java.net.URL(url).openStream();
             bmp = BitmapFactory.decodeStream(in);
         } catch (Exception e) {
-            Log.e("Error", e.getMessage());
-            e.printStackTrace();
+            Log.e("Error", e.toString());
         }
-		if (bmp != null)
-			albumArt.setImageBitmap(bmp);
+		albumArt.setImageBitmap(bmp);
 	}
 }

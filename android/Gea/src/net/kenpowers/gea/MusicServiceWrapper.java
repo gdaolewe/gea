@@ -31,8 +31,6 @@ import java.util.ArrayList;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.*;
 
-
-
 public class MusicServiceWrapper implements SearchCompletePublisher, 
 											TrackChangedPublisher {
 	

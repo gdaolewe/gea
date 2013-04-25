@@ -1,12 +1,6 @@
 package net.kenpowers.gea;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import java.util.HashMap;
 
 import org.apache.http.message.BasicNameValuePair;
 import org.json.*;
@@ -18,14 +12,13 @@ import android.os.Handler;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import android.app.SearchManager;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-import com.actionbarsherlock.view.ActionMode;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 
 import android.widget.*;
-import com.actionbarsherlock.widget.SearchView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -36,10 +29,10 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -73,7 +66,9 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.hide(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+        Fragment searchContext = getSupportFragmentManager().findFragmentById(R.id.searchContext);
+        searchContext.getView().bringToFront();
+        ft.hide(searchContext);
         ft.commit();
         
         MainActivity.context = getApplicationContext();
@@ -82,10 +77,10 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         
         //If in debug mode, connect to Gea server running on localhost, else connect to production server
         boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
-        /*if (isDebuggable)
+        if (isDebuggable)
         	baseURL = GeaServerHandler.LOCALHOST_BASE_URL;
         else
-        	baseURL = GeaServerHandler.NET_BASE_URL;*/
+        	baseURL = GeaServerHandler.NET_BASE_URL;
         baseURL = GeaServerHandler.NET_BASE_URL;
         
         volume = 100;
@@ -141,14 +136,20 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 						}
 					}
 		});
-        
     }
     
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
+    	SupportMapFragment mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (gmap == null) {
-            gmap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                                .getMap();
+            gmap = mapFrag.getMap();
+            mapFrag.getView().setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					setSearchContextVisible(false);
+				}
+            	
+            });
             // Check if we were successful in obtaining the map.
             if (gmap != null) {
                 // The Map is verified. It is now safe to manipulate the map.
@@ -212,11 +213,23 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         return true;
     }
     
-    @Override
-	public void onDestroy() {
-    	super.onDestroy();
-    	//music.cleanup();
-	}
+    private void setSearchContextVisible(boolean visible) {
+    	FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+    	Fragment searchContext = getSupportFragmentManager().findFragmentById(R.id.searchContext);
+    	if (visible)
+    		ft.show(searchContext);
+    	else
+    		ft.hide(searchContext);
+    	ft.commit();
+    }
+    
+    public void hideKeyboard(View view) {
+    	//if (view.getId()==R.id.mainLayout || view.getId()==R.id.map ) {
+    		InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        	in.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        	setSearchContextVisible(false);
+    	//}
+    }
     
     @Override
     public void startActivity(Intent intent) {      
@@ -352,7 +365,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     		((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.play);
         	trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
     	} else {
-    		Log.d(LOG_TAG, "Now playing " + track.toString());
+    		Log.i(LOG_TAG, "Now playing " + track.toString());
     		currentTrack = track;
     		downloadAlbumArt(currentTrack.getAlbumArtURL());
 	    	String trackInfo = String.format(currentTrack.toString());
@@ -379,10 +392,24 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	    }
     };
     
-    private void downloadAlbumArt(String url) {
-    	ImageView albumArtView = (ImageView)findViewById(R.id.playerAlbumArt);
+    @ViewById(R.id.playerAlbumArt)
+    ImageView albumArtView;
+    
+    @Background
+    void downloadAlbumArt(String url) {
     	new DownloadImageTask(albumArtView).execute(url);
     }
+    
+    /*@Background
+    void downloadAlbumArt(String url) {
+		try {
+            InputStream in = new java.net.URL(url).openStream();
+            Bitmap bmp = BitmapFactory.decodeStream(in);
+            albumArtView.setImageBitmap(bmp);
+        } catch (Exception e) {
+            Log.e("Error", e.toString());
+        }
+	}*/
     
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 	    ImageView image;
@@ -390,7 +417,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	    public DownloadImageTask(ImageView image) {
 	        this.image = image;
 	    }
-
 	    protected Bitmap doInBackground(String... urls) {
 	        String url = urls[0];
 	        Bitmap result = null;
@@ -403,12 +429,11 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	        }
 	        return result;
 	    }
-
 	    protected void onPostExecute(Bitmap result) {
 	        image.setImageBitmap(result);
 	    }
 	}
-    
+
     public boolean onOptionsItemSelected (MenuItem item) {
 		return true;
 		
