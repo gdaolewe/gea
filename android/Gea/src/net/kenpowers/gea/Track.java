@@ -1,8 +1,12 @@
 package net.kenpowers.gea;
 
 public class Track extends MusicServiceObject implements Comparable<Track> {
+	public static final int NOT_RATED = 0;
+	public static final int DISLIKED = -1;
+	public static final int LIKED = 1;
 	private String artist, album, albumArtURL;
 	private int duration, trackNum;
+	private int liked = Track.NOT_RATED;
 	public Track(String key, String type, String name, String artist, 
 			String album, String albumArtURL, int duration, int trackNum) {
 		super (key, type, name);
@@ -27,6 +31,12 @@ public class Track extends MusicServiceObject implements Comparable<Track> {
 	}
 	public int getNum() {
 		return trackNum;
+	}
+	public int isLiked() {
+		return liked;
+	}
+	public void setLiked(int liked) {
+		this.liked = liked;
 	}
 	public int compareTo(Track o) {
 		if (trackNum == o.trackNum)

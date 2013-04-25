@@ -39,6 +39,8 @@ import android.content.pm.ApplicationInfo;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 
 import com.googlecode.androidannotations.annotations.Background;
 import com.googlecode.androidannotations.annotations.UiThread;
@@ -93,11 +95,30 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     }
     
     @Override
-    protected void onResume() {
+    protected void onStart() {
+    	super.onStart();
     	((SeekBar)findViewById(R.id.volumeSeekBar)).setProgress(volume);
+    	if (currentTrack != null) {
+    		ImageButton upButton = ((ImageButton)findViewById(R.id.approval_up_button));
+    		ImageButton downButton = ((ImageButton)findViewById(R.id.approval_down_button));
+    		switch(currentTrack.isLiked()) {
+    		case Track.NOT_RATED:
+    			upButton.setImageResource(R.drawable.thumbup);
+    			downButton.setImageResource(R.drawable.thumbdown);
+    			break;
+    		case Track.LIKED:
+    			upButton.setImageResource(R.drawable.thumbup_over);
+    			downButton.setImageResource(R.drawable.thumbdown);
+    			break;
+    		case Track.DISLIKED:
+    			downButton.setImageResource(R.drawable.thumbdown_over);
+    			upButton.setImageResource(R.drawable.thumbup);
+    			break;
+    		}
+    	}
     	music = MusicServiceWrapper.getInstance();
     	music.setPlayerVolume(volume);
-    	super.onResume();
+    	
     }
     
     private void setUpSeekBarListeners() {
@@ -105,7 +126,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     	((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
         			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        				if (fromUser) {	//only skip if bar moved by user
+        				if (fromUser) {	//only seek if bar moved by user
         					int seconds = getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
         					String position = getFormattedTimeFromSeconds(seconds);
         					((TextView) findViewById(R.id.currentPositionText)).setText(position);
@@ -224,22 +245,22 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     }
     
     public void hideKeyboard(View view) {
-    	//if (view.getId()==R.id.mainLayout || view.getId()==R.id.map ) {
+    	if (view.getId()==R.id.mainLayout || view.getId()==R.id.map ) {
     		InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         	in.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         	setSearchContextVisible(false);
-    	//}
+    	}
     }
     
     @Override
     public void startActivity(Intent intent) {      
         // check if search intent
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-        	boolean shouldSearchForSong 	= ((CheckBox)findViewById(R.id.songCheckBox)).isChecked();
-        	boolean shouldSearchForAlbum 	= ((CheckBox)findViewById(R.id.albumCheckBox)).isChecked();
+        	boolean shouldSearchForSong   = ((CheckBox)findViewById(R.id.songCheckBox)).isChecked();
+        	boolean shouldSearchForAlbum  = ((CheckBox)findViewById(R.id.albumCheckBox)).isChecked();
         	boolean shouldSearchForArtist = ((CheckBox)findViewById(R.id.artistCheckBox)).isChecked();
-            intent.putExtra("Song", shouldSearchForSong);
-            intent.putExtra("Album", shouldSearchForAlbum);
+            intent.putExtra("Song",   shouldSearchForSong);
+            intent.putExtra("Album",  shouldSearchForAlbum);
             intent.putExtra("Artist", shouldSearchForArtist);
         }
 
@@ -254,33 +275,34 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     	ImageButton upButton = (ImageButton)view;
     	if (upButton.getId() != R.id.approval_up_button)
     		return;
-    	//show clicked icon
-    	upButton.setImageResource(R.drawable.thumbup_over);
-    	//return to unclicked icon after delay
-    	new Handler().postDelayed(new Runnable() {
-    		public void run() {
-    			ImageButton upButton = ((ImageButton)findViewById(R.id.approval_up_button));
-    			upButton.setImageResource(R.drawable.thumbup);
-    		}
-    	}, 100);
-    	if (currentTrack != null)
+    	if (currentTrack != null) {
+    		currentTrack.setLiked(Track.LIKED);
+    		highlightApprovalButton(upButton);
     		sendApprovalRequest(true);
+    	}
     }
     public void onDownButtonClicked(View view) {
     	ImageButton downButton = (ImageButton)view;
     	if (downButton.getId() != R.id.approval_down_button)
     		return;
-    	//show clicked icon
-    	downButton.setImageResource(R.drawable.thumbdown_over);
-    	//return to unclicked icon after delay
-    	new Handler().postDelayed(new Runnable() {
-    		public void run() {
-    			ImageButton downButton = ((ImageButton)findViewById(R.id.approval_down_button));
-    			downButton.setImageResource(R.drawable.thumbdown);
-    		}
-    	}, 100);
-    	if (currentTrack != null)
+    	if (currentTrack != null) {
+    		currentTrack.setLiked(Track.DISLIKED);
+    		highlightApprovalButton(downButton);
     		sendApprovalRequest(false);
+    	}
+    }
+    
+    private void highlightApprovalButton(ImageButton button) {
+    	switch(button.getId()) {
+    	case R.id.approval_up_button:
+    		button.setImageResource(R.drawable.thumbup_over);
+    		((ImageButton)findViewById(R.id.approval_down_button)).setImageResource(R.drawable.thumbdown);
+    		break;
+    	case R.id.approval_down_button:
+    		button.setImageResource(R.drawable.thumbdown_over);
+    		((ImageButton)findViewById(R.id.approval_up_button)).setImageResource(R.drawable.thumbup);
+    		break;
+    	}
     }
     
     @Background
