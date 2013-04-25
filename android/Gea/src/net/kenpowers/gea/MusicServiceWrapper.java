@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.googlecode.androidannotations.annotations.Background;
 import com.rdio.android.api.Rdio;
 import com.rdio.android.api.RdioApiCallback;
 import com.rdio.android.api.RdioListener;
@@ -45,6 +46,7 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 	private MediaPlayer player;
 	private int volume;
 	private Track currentTrack;
+	private Bitmap currentAlbumArt;
 
 	private MusicServiceWrapper() {
 		if (rdio == null) {
@@ -109,6 +111,10 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		if (musicServiceReadyListeners.size() > 0)
 			for (MusicServiceReadyListener listener: musicServiceReadyListeners)
 				listener.onMusicServiceReady();
+	}
+	
+	public Track getCurrentTrack() {
+		return currentTrack;
 	}
 	
 	public void getPlayerForTrack(Track track) {

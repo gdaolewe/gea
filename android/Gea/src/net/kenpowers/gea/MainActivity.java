@@ -98,27 +98,28 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     protected void onStart() {
     	super.onStart();
     	((SeekBar)findViewById(R.id.volumeSeekBar)).setProgress(volume);
+    	music = MusicServiceWrapper.getInstance();
+    	music.setPlayerVolume(volume);
+    	onTrackChanged(music.getCurrentTrack());
     	if (currentTrack != null) {
+    		onTrackChanged(currentTrack);
     		ImageButton upButton = ((ImageButton)findViewById(R.id.approval_up_button));
     		ImageButton downButton = ((ImageButton)findViewById(R.id.approval_down_button));
     		switch(currentTrack.isLiked()) {
-    		case Track.NOT_RATED:
-    			upButton.setImageResource(R.drawable.thumbup);
-    			downButton.setImageResource(R.drawable.thumbdown);
-    			break;
-    		case Track.LIKED:
-    			upButton.setImageResource(R.drawable.thumbup_over);
-    			downButton.setImageResource(R.drawable.thumbdown);
-    			break;
-    		case Track.DISLIKED:
-    			downButton.setImageResource(R.drawable.thumbdown_over);
-    			upButton.setImageResource(R.drawable.thumbup);
-    			break;
+	    		case Track.NOT_RATED:
+	    			upButton.setImageResource(R.drawable.thumbup);
+	    			downButton.setImageResource(R.drawable.thumbdown);
+	    			break;
+	    		case Track.LIKED:
+	    			upButton.setImageResource(R.drawable.thumbup_over);
+	    			downButton.setImageResource(R.drawable.thumbdown);
+	    			break;
+	    		case Track.DISLIKED:
+	    			downButton.setImageResource(R.drawable.thumbdown_over);
+	    			upButton.setImageResource(R.drawable.thumbup);
+	    			break;
     		}
     	}
-    	music = MusicServiceWrapper.getInstance();
-    	music.setPlayerVolume(volume);
-    	
     }
     
     private void setUpSeekBarListeners() {
@@ -382,6 +383,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     
     private Handler trackPositionUpdateHandler = new Handler();
     
+    //If track is not null, a new track has been sent to player and should start playing
     public void onTrackChanged(Track track) {
     	if (track==null) {
     		((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.play);
@@ -417,7 +419,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     @ViewById(R.id.playerAlbumArt)
     ImageView albumArtView;
     
-    @Background
     void downloadAlbumArt(String url) {
     	new DownloadImageTask(albumArtView).execute(url);
     }
