@@ -25,6 +25,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -40,7 +43,6 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 
 import com.googlecode.androidannotations.annotations.Background;
 import com.googlecode.androidannotations.annotations.UiThread;
@@ -58,6 +60,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	private Track currentTrack;
 	
 	private GoogleMap gmap;
+	private Marker here;
 	
 	private int volume;
 
@@ -184,6 +187,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
                 CameraUpdate zoom = CameraUpdateFactory.zoomTo(5);
                 gmap.moveCamera(center);
                 gmap.moveCamera(zoom);
+                here = gmap.addMarker(new MarkerOptions().position(coordinate).title("Top tracks"));
             }
         }
     }
@@ -307,7 +311,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     }
     
     @Background
-    public void sendApprovalRequest(boolean trackLiked) {
+    void sendApprovalRequest(boolean trackLiked) {
     	BasicNameValuePair[] params = new BasicNameValuePair[3];
     	params[0] = new BasicNameValuePair("from", "rdio");
     	params[1] = new BasicNameValuePair("id", currentTrack.getKey());
@@ -321,7 +325,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
      * @param num number of top songs to pull from GEA server.
      */
     @Background
-    public void getApprovalRequest(int num){
+    void getApprovalRequest(int num){
     	JSONArray json;
     	try {
     		BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
@@ -336,19 +340,20 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
             	JSONObject obj = json.getJSONObject(i);
             	output += obj.getString("artist") + " - " + obj.getString("title") + "\n";
             }
-            //makeToast(output);
+            Log.d(LOG_TAG, output);
+            updateMap(output);
     	} catch (JSONException e) {
     		Log.e(LOG_TAG, "Error parsing JSON retrived from Gea Server");
     	} catch (Exception e) {
     		Log.e(LOG_TAG, e.toString());
     	}
     }
-    
-    @UiThread
-    public void makeToast(String text) {
-    	Toast toast = Toast.makeText(getAppContext(), text, Toast.LENGTH_SHORT);
-    	toast.show();
-    }
+   
+   @UiThread
+   void updateMap(String text) {
+	   here.setSnippet(text);
+	   here.showInfoWindow();
+   }
     
     public void togglePaused(View view) {
     	if (view.getId() == R.id.play_pause_button)
@@ -416,47 +421,25 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	    }
     };
     
-    @ViewById(R.id.playerAlbumArt)
-    ImageView albumArtView;
-    
-    void downloadAlbumArt(String url) {
-    	new DownloadImageTask(albumArtView).execute(url);
-    }
-    
-    /*@Background
+    @Background
     void downloadAlbumArt(String url) {
 		try {
             InputStream in = new java.net.URL(url).openStream();
             Bitmap bmp = BitmapFactory.decodeStream(in);
-            albumArtView.setImageBitmap(bmp);
+            setAlbumArt(bmp);
         } catch (Exception e) {
             Log.e("Error", e.toString());
         }
-	}*/
-    
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-	    ImageView image;
-
-	    public DownloadImageTask(ImageView image) {
-	        this.image = image;
-	    }
-	    protected Bitmap doInBackground(String... urls) {
-	        String url = urls[0];
-	        Bitmap result = null;
-	        try {
-	            InputStream in = new java.net.URL(url).openStream();
-	            result = BitmapFactory.decodeStream(in);
-	        } catch (Exception e) {
-	            Log.e("Error", e.getMessage());
-	            e.printStackTrace();
-	        }
-	        return result;
-	    }
-	    protected void onPostExecute(Bitmap result) {
-	        image.setImageBitmap(result);
-	    }
 	}
-
+    
+    @ViewById(R.id.playerAlbumArt)
+    ImageView albumArtView;
+    
+    @UiThread
+    void setAlbumArt(Bitmap bmp) {
+    	albumArtView.setImageBitmap(bmp);
+    }
+    
     public boolean onOptionsItemSelected (MenuItem item) {
 		return true;
 		
