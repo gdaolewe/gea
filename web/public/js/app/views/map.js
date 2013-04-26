@@ -18,6 +18,14 @@ define([
         mapTypeId: google.maps.MapTypeId.ROADMAP
       };
       this.map = new google.maps.Map(this.el, this.mapOptions);
+      this.oms = new OverlappingMarkerSpiderfier(this.map);
+      /*sets up listeners
+      
+      var iw = new google.maps.InfoWindow();
+      this.oms.addListener('click', function(marker) {
+        iw.setContent(marker.desc);
+        iw.open(this.map, this.marker);
+      });*/
       setTimeout($.proxy(function () {
         this.addAllMarkers();
       }, this), 200);
@@ -30,6 +38,7 @@ define([
         title:"Hello World!",
         animation: google.maps.Animation.DROP
       });
+      this.oms.addMarker(marker);
     },
 
     addAllMarkers: function () {
