@@ -1,25 +1,11 @@
 package net.kenpowers.gea;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
-import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.v4.app.NotificationCompat;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Intent;
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.googlecode.androidannotations.annotations.Background;
 import com.rdio.android.api.Rdio;
 import com.rdio.android.api.RdioApiCallback;
 import com.rdio.android.api.RdioListener;
@@ -46,7 +32,6 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 	private MediaPlayer player;
 	private int volume;
 	private Track currentTrack;
-	private Bitmap currentAlbumArt;
 
 	private MusicServiceWrapper() {
 		if (rdio == null) {

@@ -181,7 +181,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
                 Location location = locationManager.getLastKnownLocation(provider);
                 LatLng coordinate = new LatLng(location.getLatitude(), location.getLongitude());
                 CameraUpdate center = CameraUpdateFactory.newLatLng(coordinate);
-                CameraUpdate zoom = CameraUpdateFactory.zoomTo(10);
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(5);
                 gmap.moveCamera(center);
                 gmap.moveCamera(zoom);
             }
