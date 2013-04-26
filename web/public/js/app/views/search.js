@@ -44,11 +44,19 @@ define([
     keyup: function (e) {
       e.preventDefault();
       e.stopPropagation();
-      clearTimeout(thread);
       if (e.keyCode === constants.KEY_ENTER) {
+        clearTimeout(thread);
         this.executeSearch();
         return;
       }
+      $.each(constants, $.proxy(function (key, val) {
+        if (val === e.keyCode) {
+          e.found = true;
+          return;
+        }
+      }, e));
+      if (e.found) return;
+      clearTimeout(thread);
       thread = setTimeout($.proxy(function () { this.executeSearch(); }, this), 500);
     },
     executeSearch: function () {
