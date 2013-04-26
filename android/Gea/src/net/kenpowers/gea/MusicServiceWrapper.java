@@ -32,6 +32,7 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 	private MediaPlayer player;
 	private int volume;
 	private Track currentTrack;
+	private Album currentAlbum;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 
 	private MusicServiceWrapper() {
 		if (rdio == null) {

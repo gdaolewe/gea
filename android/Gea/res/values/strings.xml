@@ -25,5 +25,6 @@
     <string name="position_duration_separator_display">/</string>
     <string name="album_art_content_description">Album Art</string>
     <string name="rdio_logo_content_description">Rdio Logo</string>
+    <string name="powered_by">Powered By</string>
 
 </resources>

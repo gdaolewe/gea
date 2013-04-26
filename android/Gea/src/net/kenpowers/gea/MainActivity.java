@@ -16,7 +16,6 @@ import com.actionbarsherlock.view.MenuItem;
 
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 
 import android.widget.*;
 
@@ -70,12 +69,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         setContentView(R.layout.activity_main);
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment searchContext = getSupportFragmentManager().findFragmentById(R.id.searchContext);
-        searchContext.getView().bringToFront();
-        ft.hide(searchContext);
-        ft.commit();
-        
         MainActivity.context = getApplicationContext();
         
         Log.i(LOG_TAG, "MainActivity started");
@@ -86,10 +79,32 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         	baseURL = GeaServerHandler.LOCALHOST_BASE_URL;
         else
         	baseURL = GeaServerHandler.NET_BASE_URL;
+        
+        //TODO Connecting to beta server for debugging for now, remove this later
         baseURL = GeaServerHandler.NET_BASE_URL;
+        
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment searchContext = getSupportFragmentManager().findFragmentById(R.id.searchContext);
+        searchContext.getView().bringToFront();
+        int color = getResources().getColor(R.color.abs__background_holo_light);
+        searchContext.getView().setBackgroundColor(color);
+        ft.hide(searchContext);
+        Fragment launchFragment = getSupportFragmentManager().findFragmentById(R.id.launch);
+        launchFragment.getView().bringToFront();
+        ft.commit();
         
         volume = 100;
         music = MusicServiceWrapper.getInstance();
+        music.registerMusicServiceReadyListener(new MusicServiceReadyListener() {
+			@Override
+			public void onMusicServiceReady() {
+				FragmentTransaction ft = getSupportFragmentManager().beginTransaction();	
+				Fragment launchFragment = getSupportFragmentManager().findFragmentById(R.id.launch);
+				ft.hide(launchFragment);
+				ft.commit();
+			}
+        	
+        });
         music.registerTrackChangedListener(this);
         setUpSeekBarListeners();
         
@@ -131,8 +146,8 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         		new SeekBar.OnSeekBarChangeListener() {
         			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         				if (fromUser) {	//only seek if bar moved by user
-        					int seconds = getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
-        					String position = getFormattedTimeFromSeconds(seconds);
+        					int seconds = PlayerTimeFormatter.getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
+        					String position = PlayerTimeFormatter.getFormattedTimeFromSeconds(seconds);
         					((TextView) findViewById(R.id.currentPositionText)).setText(position);
         				}
         			}
@@ -140,7 +155,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         				trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
         			}
         			public void onStopTrackingTouch(SeekBar seekBar) {
-        				music.seekPlayerTo(getSecondsFromProgress(seekBar.getProgress(),
+        				music.seekPlayerTo(PlayerTimeFormatter.getSecondsFromProgress(seekBar.getProgress(),
         							music.getPlayerDuration()/1000));
         				trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
         			}
@@ -247,14 +262,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     	else
     		ft.hide(searchContext);
     	ft.commit();
-    }
-    
-    public void hideKeyboard(View view) {
-    	if (view.getId()==R.id.mainLayout || view.getId()==R.id.map ) {
-    		InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        	in.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        	setSearchContextVisible(false);
-    	}
     }
     
     @Override
@@ -370,22 +377,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     	}
     }
     
-    private int getProgressPercent(int position, int duration) {
-    	double progress = ((double)position/duration)*100;
-    	return (int)progress;
-    }
-    
-    private int getSecondsFromProgress(int progress, int duration) {
-    	double seconds = (double)progress*duration / 100;
-    	return (int)seconds;
-    }
-    
-    private String getFormattedTimeFromSeconds(int seconds) {
-    	int secs = seconds % 60;
-    	int minutes = seconds / 60;
-    	return "" + (minutes<10 ? "0":"") + minutes + ":" + (secs<10? "0":"") + secs;
-    }
-    
     private Handler trackPositionUpdateHandler = new Handler();
     
     //If track is not null, a new track has been sent to player and should start playing
@@ -408,15 +399,15 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     private Runnable updateTrackPositionTask = new Runnable() {
 	    public void run() {
 	    	int durationSeconds = music.getPlayerDuration()/1000;
-	    	String durationString = getFormattedTimeFromSeconds(durationSeconds);
+	    	String durationString = PlayerTimeFormatter.getFormattedTimeFromSeconds(durationSeconds);
 	    	((TextView)findViewById(R.id.durationText)).setText(durationString);
 	    	
 			int currentPositionSeconds = music.getPlayerPosition()/1000;
-	    	String currentPositionString = getFormattedTimeFromSeconds(currentPositionSeconds);
+	    	String currentPositionString = PlayerTimeFormatter.getFormattedTimeFromSeconds(currentPositionSeconds);
 			((TextView)findViewById(R.id.currentPositionText)).setText(currentPositionString);
 			trackPositionUpdateHandler.postDelayed(this, 100);
 			
-			int progress = getProgressPercent(currentPositionSeconds, durationSeconds);
+			int progress = PlayerTimeFormatter.getProgressPercent(currentPositionSeconds, durationSeconds);
 			((SeekBar)findViewById(R.id.progressSeekBar)).setProgress(progress);
 	    }
     };
@@ -442,8 +433,5 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     
     public boolean onOptionsItemSelected (MenuItem item) {
 		return true;
-		
 	}
-    
 }
-
