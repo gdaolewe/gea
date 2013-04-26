@@ -11,7 +11,7 @@ body
 
 body
   background-color #D6FFC2
-
+  
 #api
   visibility hidden
   height 0
@@ -26,10 +26,12 @@ body
   overflow hidden
 
 #player-art
+  display: block; 
+  background:url(/img/sprite.png);
+  background-position: 0px 0px;  
   width 200px
   height 200px
-  background #fff
-
+ 
 #progress-bar
   width 300px
   height 10px
@@ -66,38 +68,41 @@ body
 #next
   left 200px
   background #eee
-  background-image url(/img/next.png)
+  background-image url(/img/sprite.png)
+  background-position: -0px -490px; 
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/next-over.png)
+    background-position: -0px -400px;
+	
+.next-end
+  background-position: -100px -430px;
 
 #previous
   background #eee
-  background-image url(/img/prev.png)
+  background-image url(/img/sprite.png)
+  background-position: -0px -520px; 
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/prev-over.png)
+    background-position: -0px -460px; 
 
 #play-pause
   left 100px
 
 .play-button
   background #eee
-  background-image url(/img/play.png)
+  background-image url(/img/sprite.png)
+  background-position: -100px -400px; 
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/play-over.png)
+    background-position: -100px -460px; 
 
 .pause-button
   background #eee
-  background-image url(/img/pause.png)
+  background-image url(/img/sprite.png)
+  background-position: -100px -490px; 
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/pause-over.png)
+    background-position: -0px -430px; 
 
 #social
   height 200px
@@ -107,6 +112,7 @@ body
 #dislike
   display inline-block
   background #eee
+  background-image url(/img/sprite.png)
   width 100px
   height 100px
   line-height 100px
@@ -117,20 +123,18 @@ body
 #like
   top 0
   right 0
-  background-image url(/img/thumbup.png)
+  background-position: -0px -200px; 
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/thumbup-over.png)
+    background-position: -100px -200px; 
 
 #dislike
   top 100px
   right 0
-  background-image url(/img/thumbdown.png)
+  background-position: -100px -300px; 
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/thumbdown-over.png)
+    background-position: -0px -300px; 
 
 #fill
   height 100%

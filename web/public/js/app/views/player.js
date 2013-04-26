@@ -70,7 +70,7 @@ define([
             // Save the current track's duration for computing the percent remaining
             this.duration = playingTrack.duration;
             // Update the album art div to reflect the current track's art
-            this.$art.attr('src', playingTrack.icon);
+            this.$art.css('background-image', "url(" + playingTrack.icon + ")");
             // Update the currently playing track name
             this.$track.text(playingTrack.name);
             // Update the currently playing track's artist name
