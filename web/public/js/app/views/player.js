@@ -56,6 +56,23 @@ define([
             currentStreamId = key;
             this.$streamer.play(key);
           }, this));
+
+          // Listen for the keyboard shortcuts
+          vent.on('playPause-shortcut', $.proxy(function () {
+            this.togglePlay($.Event());
+          }, this));
+          vent.on('next-shortcut', $.proxy(function () {
+            this.playNext($.Event());
+          }, this));
+          vent.on('previous-shortcut', $.proxy(function () {
+            this.playPrevious($.Event());
+          }, this));
+          vent.on('like-shortcut', $.proxy(function () {
+            this.like($.Event());
+          }, this));
+          vent.on('dislike-shortcut', $.proxy(function () {
+            this.dislike($.Event());
+          }, this));
         }, this));
       }, this));
 

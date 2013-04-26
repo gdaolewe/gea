@@ -6,6 +6,7 @@ define([
   './widgets/Loading',
   './widgets/SearchResult',
   './player',
+  'app/vent',
   'util/jqr!'
 ], function (
   bb,
@@ -13,7 +14,8 @@ define([
   searchResults,
   LoadingWidget,
   SearchResult,
-  player
+  player,
+  vent
 ) {
   // Store ./widgets/SearchResult views
   var resultViews = [];
@@ -23,6 +25,9 @@ define([
 
   //Timeout thread for auto-search
   var thread = null;
+
+  //Boolean to indicate that search should *not* auto-execute
+  var focused = false;
 
   return new (bb.View.extend({
     el: '#search',
@@ -40,10 +45,21 @@ define([
       this.resizeResults();
       player.$el.on('reflow', $.proxy(this.resizeResults, this));
       $(window).on('resize', $.proxy(this.resizeResults, this));
+      // Listen for the keyboard shortcut to focus the search input element
+      vent.on('focusSearch-shortcut', $.proxy(function () {
+        // 'keyup' catches the release from the 'enter' button, so
+        // prevent it from using that input as a reason to execute a search
+        focused = true;
+        this.$input.focus();
+      }, this));
     },
     keyup: function (e) {
       e.preventDefault();
       e.stopPropagation();
+      if (focused) {
+        focused = false;
+        return;
+      }
       if (e.keyCode === constants.KEY_ENTER) {
         clearTimeout(thread);
         this.executeSearch();

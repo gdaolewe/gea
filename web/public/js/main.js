@@ -18,7 +18,9 @@ require({
     'promise': 'lib/promise',
     'async': 'lib/async',
     'text': 'lib/text',
-    'oms': 'lib/oms.min'
+    'oms': 'lib/oms.min',
+    'keymaster': 'lib/keymaster.min',
+    'backboneshortcuts': 'lib/backbone.shortcuts.min'
   },
   shim: {
     'backbone': {
@@ -26,7 +28,8 @@ require({
       exports: 'Backbone'
     },
     'jqueryrdio': ['jquery'],
-    'oms': ['util/googlemaps']
+    'oms': ['util/googlemaps'],
+    'backboneshortcuts': ['backbone', 'keymaster']
   },
   deps: ['app']
 });
