@@ -16,15 +16,17 @@ require({
     ],
     'jqueryrdio': 'lib/jquery.rdio.min',
     'promise': 'lib/promise',
-	'async': 'lib/async',
-    'text': 'lib/text'
+    'async': 'lib/async',
+    'text': 'lib/text',
+    'oms': 'lib/oms.min'
   },
   shim: {
     'backbone': {
       deps: ['jquery', 'util/_conf'],
       exports: 'Backbone'
     },
-    'jqueryrdio': ['jquery']
+    'jqueryrdio': ['jquery'],
+    'oms': ['util/googlemaps']
   },
   deps: ['app']
 });

@@ -13,6 +13,7 @@ define([
   rdio
 ) {
   var playing = false;
+  var lastTrack = false;
   var song = null;
   var playingClass = ['play-button', 'pause-button'];
   var loading = false;
@@ -43,6 +44,7 @@ define([
       this.duration = 1;
       this.trackPosition = 0;
       this.sourcePosition = 0;
+      this.sourceLength = 0;
       // Rdio streamer object
       this.$streamer = rdio;
       // Queue the first album when ready
@@ -62,7 +64,14 @@ define([
         this.$streamer.bind('playingTrackChanged', $.proxy(function(e, playingTrack, sourcePosition) {
           deferred.done();
           if (playingTrack) {
+            //Store which track this is in the current playing source
             this.sourcePosition = sourcePosition;
+            //Set global boolean to indicate if this is the last track in the source or not
+            lastTrack = (this.sourcePosition === this.sourceLength - 1);
+            //If this is the last track, switch to the 'disabled' button
+            //if (lastTrack) this.$nextButton.attr('class', 'next-end');
+            // otherwise, ensure it is the enabled 'next' button
+            //else {}
             //Update the play/pause button correctly
             deferred.then($.proxy(function () {
               this.updatePlayPauseButton();
@@ -80,6 +89,12 @@ define([
             // Trigger reflow event
             this.$el.trigger('reflow');
           }
+        }, this));
+      }, this));
+
+      streamerPromise.then($.proxy(function () {
+        this.$streamer.bind('playingSourceChanged', $.proxy(function(e, playingSource) {
+          this.sourceLength = playingSource.length;
         }, this));
       }, this));
 
@@ -114,6 +129,7 @@ define([
         streamerPromise.done();
       }, this));
       this.$playPauseButton = this.$('#play-pause');
+      this.$nextButton = this.$('#next');
       this.$progressBar = this.$('#progress-bar');
       this.$progressBarFill = this.$('#fill');
 	    this.$likeImg = this.$('#like'); //creates global var in initialized function
@@ -133,6 +149,7 @@ define([
       deferred.then($.proxy(function () {
         //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
+        if (lastTrack) return;
         loading = true;
         this.$streamer.next();
       }, this));

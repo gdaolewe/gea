@@ -2,26 +2,23 @@ package net.kenpowers.gea;
 
 import java.io.InputStream;
 
-import java.util.HashMap;
-
+import org.apache.http.message.BasicNameValuePair;
 import org.json.*;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import android.app.SearchManager;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-import com.actionbarsherlock.view.ActionMode;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 
 import android.widget.*;
-import com.actionbarsherlock.widget.SearchView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -32,21 +29,26 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 
+import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.UiThread;
+import com.googlecode.androidannotations.annotations.ViewById;
+import com.googlecode.androidannotations.annotations.EActivity;
 
-public class MainActivity extends SherlockFragmentActivity implements RequestTaskCompleteListener, 
-														TrackChangedListener {
+@EActivity
+public class MainActivity extends SherlockFragmentActivity implements TrackChangedListener {
 	
 	private static Context context;
 	static final String LOG_TAG = "Gea";
@@ -66,34 +68,58 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.hide(getSupportFragmentManager().findFragmentById(R.id.searchContext));
+        Fragment searchContext = getSupportFragmentManager().findFragmentById(R.id.searchContext);
+        searchContext.getView().bringToFront();
+        ft.hide(searchContext);
         ft.commit();
         
         MainActivity.context = getApplicationContext();
         
-        Log.i(MainActivity.LOG_TAG, "MainActivity started");
+        Log.i(LOG_TAG, "MainActivity started");
         
         //If in debug mode, connect to Gea server running on localhost, else connect to production server
         boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
         if (isDebuggable)
-        	baseURL = GeaServerConstants.LOCALHOST_BASE_URL;
+        	baseURL = GeaServerHandler.LOCALHOST_BASE_URL;
         else
-        	baseURL = GeaServerConstants.NET_BASE_URL;
+        	baseURL = GeaServerHandler.NET_BASE_URL;
+        baseURL = GeaServerHandler.NET_BASE_URL;
         
         volume = 100;
         music = MusicServiceWrapper.getInstance();
-        music.registerTrackChangedListener(MainActivity.this);
+        music.registerTrackChangedListener(this);
         setUpSeekBarListeners();
         
         setUpMapIfNeeded();
+        getApprovalRequest(5);
     }
     
     @Override
-    protected void onResume() {
+    protected void onStart() {
+    	super.onStart();
     	((SeekBar)findViewById(R.id.volumeSeekBar)).setProgress(volume);
     	music = MusicServiceWrapper.getInstance();
     	music.setPlayerVolume(volume);
-    	super.onResume();
+    	onTrackChanged(music.getCurrentTrack());
+    	if (currentTrack != null) {
+    		onTrackChanged(currentTrack);
+    		ImageButton upButton = ((ImageButton)findViewById(R.id.approval_up_button));
+    		ImageButton downButton = ((ImageButton)findViewById(R.id.approval_down_button));
+    		switch(currentTrack.isLiked()) {
+	    		case Track.NOT_RATED:
+	    			upButton.setImageResource(R.drawable.thumbup);
+	    			downButton.setImageResource(R.drawable.thumbdown);
+	    			break;
+	    		case Track.LIKED:
+	    			upButton.setImageResource(R.drawable.thumbup_over);
+	    			downButton.setImageResource(R.drawable.thumbdown);
+	    			break;
+	    		case Track.DISLIKED:
+	    			downButton.setImageResource(R.drawable.thumbdown_over);
+	    			upButton.setImageResource(R.drawable.thumbup);
+	    			break;
+    		}
+    	}
     }
     
     private void setUpSeekBarListeners() {
@@ -101,7 +127,7 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     	((SeekBar)findViewById(R.id.progressSeekBar)).setOnSeekBarChangeListener(
         		new SeekBar.OnSeekBarChangeListener() {
         			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        				if (fromUser) {	//only skip if bar moved by user
+        				if (fromUser) {	//only seek if bar moved by user
         					int seconds = getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
         					String position = getFormattedTimeFromSeconds(seconds);
         					((TextView) findViewById(R.id.currentPositionText)).setText(position);
@@ -132,14 +158,20 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 						}
 					}
 		});
-        
     }
     
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
+    	SupportMapFragment mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (gmap == null) {
-            gmap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                                .getMap();
+            gmap = mapFrag.getMap();
+            mapFrag.getView().setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					setSearchContextVisible(false);
+				}
+            	
+            });
             // Check if we were successful in obtaining the map.
             if (gmap != null) {
                 // The Map is verified. It is now safe to manipulate the map.
@@ -203,21 +235,33 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
         return true;
     }
     
-    @Override
-	public void onDestroy() {
-    	super.onDestroy();
-    	//music.cleanup();
-	}
+    private void setSearchContextVisible(boolean visible) {
+    	FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+    	Fragment searchContext = getSupportFragmentManager().findFragmentById(R.id.searchContext);
+    	if (visible)
+    		ft.show(searchContext);
+    	else
+    		ft.hide(searchContext);
+    	ft.commit();
+    }
+    
+    public void hideKeyboard(View view) {
+    	if (view.getId()==R.id.mainLayout || view.getId()==R.id.map ) {
+    		InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        	in.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        	setSearchContextVisible(false);
+    	}
+    }
     
     @Override
     public void startActivity(Intent intent) {      
         // check if search intent
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-        	boolean shouldSearchForSong 	= ((CheckBox)findViewById(R.id.songCheckBox)).isChecked();
-        	boolean shouldSearchForAlbum 	= ((CheckBox)findViewById(R.id.albumCheckBox)).isChecked();
+        	boolean shouldSearchForSong   = ((CheckBox)findViewById(R.id.songCheckBox)).isChecked();
+        	boolean shouldSearchForAlbum  = ((CheckBox)findViewById(R.id.albumCheckBox)).isChecked();
         	boolean shouldSearchForArtist = ((CheckBox)findViewById(R.id.artistCheckBox)).isChecked();
-            intent.putExtra("Song", shouldSearchForSong);
-            intent.putExtra("Album", shouldSearchForAlbum);
+            intent.putExtra("Song",   shouldSearchForSong);
+            intent.putExtra("Album",  shouldSearchForAlbum);
             intent.putExtra("Artist", shouldSearchForArtist);
         }
 
@@ -232,51 +276,78 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     	ImageButton upButton = (ImageButton)view;
     	if (upButton.getId() != R.id.approval_up_button)
     		return;
-    	//show clicked icon
-    	upButton.setImageResource(R.drawable.thumbup_over);
-    	//return to unclicked icon after delay
-    	new Handler().postDelayed(new Runnable() {
-    		public void run() {
-    			ImageButton upButton = ((ImageButton)findViewById(R.id.approval_up_button));
-    			upButton.setImageResource(R.drawable.thumbup);
-    		}
-    	}, 100);
-    	if (currentTrack != null)
+    	if (currentTrack != null) {
+    		currentTrack.setLiked(Track.LIKED);
+    		highlightApprovalButton(upButton);
     		sendApprovalRequest(true);
+    	}
     }
     public void onDownButtonClicked(View view) {
     	ImageButton downButton = (ImageButton)view;
     	if (downButton.getId() != R.id.approval_down_button)
     		return;
-    	//show clicked icon
-    	downButton.setImageResource(R.drawable.thumbdown_over);
-    	//return to unclicked icon after delay
-    	new Handler().postDelayed(new Runnable() {
-    		public void run() {
-    			ImageButton downButton = ((ImageButton)findViewById(R.id.approval_down_button));
-    			downButton.setImageResource(R.drawable.thumbdown);
-    		}
-    	}, 100);
-    	if (currentTrack != null)
+    	if (currentTrack != null) {
+    		currentTrack.setLiked(Track.DISLIKED);
+    		highlightApprovalButton(downButton);
     		sendApprovalRequest(false);
-    }
-    
-    public void sendApprovalRequest(boolean trackLiked) {
-    	HashMap<String, String> params = new HashMap<String, String>();
-        params.put("from", "rdio");
-        params.put("id", currentTrack.getKey());
-        params.put("verdict", trackLiked? "like" : "dislike");
-        
-        new RequestTask(this).execute(
-        		new GeaPOSTRequest(baseURL + GeaServerConstants.BASE_RATE_QUERY, params));
-    }
-    
-    public void onTaskComplete(GeaServerRequest request, String result) {
-    	if (result==null || request==null) {
-    		Log.e(LOG_TAG, "Error fetching JSON");
-    		return;
     	}
-    		
+    }
+    
+    private void highlightApprovalButton(ImageButton button) {
+    	switch(button.getId()) {
+    	case R.id.approval_up_button:
+    		button.setImageResource(R.drawable.thumbup_over);
+    		((ImageButton)findViewById(R.id.approval_down_button)).setImageResource(R.drawable.thumbdown);
+    		break;
+    	case R.id.approval_down_button:
+    		button.setImageResource(R.drawable.thumbdown_over);
+    		((ImageButton)findViewById(R.id.approval_up_button)).setImageResource(R.drawable.thumbup);
+    		break;
+    	}
+    }
+    
+    @Background
+    public void sendApprovalRequest(boolean trackLiked) {
+    	BasicNameValuePair[] params = new BasicNameValuePair[3];
+    	params[0] = new BasicNameValuePair("from", "rdio");
+    	params[1] = new BasicNameValuePair("id", currentTrack.getKey());
+    	params[2] = new BasicNameValuePair("verdict", trackLiked? "like" : "dislike");
+        String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
+        GeaServerHandler.sendRequest(url, GeaServerHandler.RequestMethod.POST);
+    }
+    
+    /**
+     * Queries GEA server for top num songs.
+     * @param num number of top songs to pull from GEA server.
+     */
+    @Background
+    public void getApprovalRequest(int num){
+    	JSONArray json;
+    	try {
+    		BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
+    		BasicNameValuePair[] params = {param};
+    		String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
+            json = GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.GET);
+            if (json == null) {
+            	Log.e(LOG_TAG, "Error retrieving JSON from Gea Server");
+            }
+            String output = "";
+            for (int i=0; i < json.length(); i++) {
+            	JSONObject obj = json.getJSONObject(i);
+            	output += obj.getString("artist") + " - " + obj.getString("title") + "\n";
+            }
+            //makeToast(output);
+    	} catch (JSONException e) {
+    		Log.e(LOG_TAG, "Error parsing JSON retrived from Gea Server");
+    	} catch (Exception e) {
+    		Log.e(LOG_TAG, e.toString());
+    	}
+    }
+    
+    @UiThread
+    public void makeToast(String text) {
+    	Toast toast = Toast.makeText(getAppContext(), text, Toast.LENGTH_SHORT);
+    	toast.show();
     }
     
     public void togglePaused(View view) {
@@ -312,24 +383,22 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
     
     private Handler trackPositionUpdateHandler = new Handler();
     
+    //If track is not null, a new track has been sent to player and should start playing
     public void onTrackChanged(Track track) {
     	if (track==null) {
     		((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.play);
         	trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
     	} else {
-    		Log.d(LOG_TAG, "Now playing " + track.toString());
+    		Log.i(LOG_TAG, "Now playing " + track.toString());
     		currentTrack = track;
     		downloadAlbumArt(currentTrack.getAlbumArtURL());
 	    	String trackInfo = String.format(currentTrack.toString());
 	    	((TextView)findViewById(R.id.songInfoText)).setText(trackInfo);
-	    	//((TextView)findViewById(R.id.play_pause_button)).setText("Pause");
 	    	((ImageButton)findViewById(R.id.play_pause_button)).setImageResource(R.drawable.pause);
 	    	
 	    	trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
     	}
     }
-    
-    
     
     private Runnable updateTrackPositionTask = new Runnable() {
 	    public void run() {
@@ -347,10 +416,23 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 	    }
     };
     
-    private void downloadAlbumArt(String url) {
-    	ImageView albumArtView = (ImageView)findViewById(R.id.playerAlbumArt);
+    @ViewById(R.id.playerAlbumArt)
+    ImageView albumArtView;
+    
+    void downloadAlbumArt(String url) {
     	new DownloadImageTask(albumArtView).execute(url);
     }
+    
+    /*@Background
+    void downloadAlbumArt(String url) {
+		try {
+            InputStream in = new java.net.URL(url).openStream();
+            Bitmap bmp = BitmapFactory.decodeStream(in);
+            albumArtView.setImageBitmap(bmp);
+        } catch (Exception e) {
+            Log.e("Error", e.toString());
+        }
+	}*/
     
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 	    ImageView image;
@@ -358,7 +440,6 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 	    public DownloadImageTask(ImageView image) {
 	        this.image = image;
 	    }
-
 	    protected Bitmap doInBackground(String... urls) {
 	        String url = urls[0];
 	        Bitmap result = null;
@@ -371,12 +452,11 @@ public class MainActivity extends SherlockFragmentActivity implements RequestTas
 	        }
 	        return result;
 	    }
-
 	    protected void onPostExecute(Bitmap result) {
 	        image.setImageBitmap(result);
 	    }
 	}
-    
+
     public boolean onOptionsItemSelected (MenuItem item) {
 		return true;
 		
