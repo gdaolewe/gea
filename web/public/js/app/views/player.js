@@ -149,7 +149,10 @@ define([
       deferred.then($.proxy(function () {
         //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
-        if (lastTrack) return;
+        if (lastTrack) {
+          console.log("last!");
+          return;
+        }
         loading = true;
         this.$streamer.next();
       }, this));
