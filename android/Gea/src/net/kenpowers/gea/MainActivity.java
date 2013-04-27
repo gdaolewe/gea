@@ -371,6 +371,13 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
    public void onPrevButtonClicked(View view) {
 	   if (view.getId() != R.id.prevButton)
 		   return;
+	   ((ImageButton)view).setImageResource(R.drawable.prev_over);
+	   new Handler().postDelayed(new Runnable() {
+		@Override
+		public void run() {
+			((ImageButton)findViewById(R.id.prevButton)).setImageResource(R.drawable.prev);
+		}
+	   }, 100);
 	   if (music.getPlayerPosition() < 10000)
 		   music.playPreviousTrack();
 	   else
@@ -379,6 +386,13 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
    public void onNextButtonClicked(View view) {
 	   if (view.getId() != R.id.nextButton)
 		   return;
+	   ((ImageButton)view).setImageResource(R.drawable.next_over);
+	   new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				((ImageButton)findViewById(R.id.nextButton)).setImageResource(R.drawable.next);
+			}
+		   }, 100);
 	   music.playNextTrack();
    }
     

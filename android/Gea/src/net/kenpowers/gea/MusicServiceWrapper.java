@@ -169,8 +169,9 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		}
 	}
 	
-	public void setPlaylist(Track[] tracks) {
+	public void setPlaylist(Track[] tracks, int index) {
 		currentPlaylist = tracks;
+		currentPlaylistIndex = index;
 	}
 	
 	public void playPreviousTrack() {
@@ -184,7 +185,7 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 	public void playNextTrack() {
 		if (currentPlaylist == null)
 			return;
-		if (currentPlaylistIndex >= currentPlaylist.length)
+		if (currentPlaylistIndex >= currentPlaylist.length-1)
 			return;
 		currentPlaylistIndex++;
 		getPlayerForTrack(currentPlaylist[currentPlaylistIndex]);
@@ -343,8 +344,12 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 					mp.setWakeMode(MainActivity.getAppContext(), PowerManager.PARTIAL_WAKE_LOCK);
 					mp.setOnCompletionListener(new OnCompletionListener() {
 						public void onCompletion(MediaPlayer player) {
-							currentTrack = null;
-							notifyTrackChangedListeners(currentTrack);
+							if (currentPlaylist == null)
+								notifyTrackChangedListeners(null);
+							else if (currentPlaylistIndex >= currentPlaylist.length-1)
+								notifyTrackChangedListeners(null);
+							else
+								playNextTrack();
 						}
 					});
 					notifyTrackChangedListeners(currentTrack);

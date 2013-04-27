@@ -19,6 +19,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.UiThread;
 import com.googlecode.androidannotations.annotations.ViewById;
 import com.googlecode.androidannotations.annotations.EActivity;
 
@@ -78,8 +79,8 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 	}
 	
 	public void listItemSelected(int position) {
-		music.setPlaylist(tracks);
 		music.getPlayerForTrack(tracks[position]);
+		music.setPlaylist(tracks, position);
 		startActivity(new Intent(this, MainActivity_.class));
 	}
 	
@@ -101,9 +102,14 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 		try {
             InputStream in = new java.net.URL(url).openStream();
             bmp = BitmapFactory.decodeStream(in);
+            setAlbumArt(bmp);
         } catch (Exception e) {
             Log.e("Error", e.toString());
         }
+		
+	}
+	@UiThread
+	void setAlbumArt(Bitmap bmp) {
 		albumArt.setImageBitmap(bmp);
 	}
 }

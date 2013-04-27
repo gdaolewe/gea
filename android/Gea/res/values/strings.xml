@@ -26,5 +26,6 @@
     <string name="album_art_content_description">Album Art</string>
     <string name="rdio_logo_content_description">Rdio Logo</string>
     <string name="powered_by">Powered By</string>
+    <string name="loading">Rdio loading...</string>
 
 </resources>
