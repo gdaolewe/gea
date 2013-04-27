@@ -3,7 +3,7 @@ require({
   packages: ['app'],
   paths: {
     'jquery': [
-      '//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min',
+      '//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.0/jquery.min',
       'lib/jquery.min'
     ],
     '_': [
