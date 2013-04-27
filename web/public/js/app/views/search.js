@@ -78,11 +78,13 @@ define([
     executeSearch: function () {
       var val = this.$input.val();
       if (val.length > 1 && val[0].match(/[\w\d]/)) {
+        //Abort any current request
+        if (this.$req) this.$req.abort();
         this.loadingWidget = new LoadingWidget();
         this.emptyResults();
         this.$results.append(this.loadingWidget.el);
         // Perform search
-        $.get('/rdio/search?query=' + val).done(function (data) {
+        this.$req = $.get('/rdio/search?query=' + val).done(function (data) {
           searchResults.reset(data.result.results);
         }).fail(function () {
           searchResults.reset();
