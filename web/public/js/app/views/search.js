@@ -76,14 +76,18 @@ define([
       thread = setTimeout($.proxy(function () { this.executeSearch(); }, this), 500);
     },
     executeSearch: function () {
-      this.loadingWidget = new LoadingWidget();
-      this.emptyResults();
-      this.$results.append(this.loadingWidget.el);
       var val = this.$input.val();
-      // Perform search
-      $.get('/rdio/search?query=' + val, function (data) {
-        searchResults.reset(data.result.results);
-      });
+      if (val.length > 1 && val[0].match(/[\w\d]/)) {
+        this.loadingWidget = new LoadingWidget();
+        this.emptyResults();
+        this.$results.append(this.loadingWidget.el);
+        // Perform search
+        $.get('/rdio/search?query=' + val).done(function (data) {
+          searchResults.reset(data.result.results);
+        }).fail(function () {
+          searchResults.reset();
+        });
+      }
     },
     topTrendingClick: function (e) {
       e.stopPropagation();
