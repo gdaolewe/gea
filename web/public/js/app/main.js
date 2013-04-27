@@ -3,5 +3,6 @@ define([
   './views/map',
   './views/search',
   './views/player',
-  './views/tour'
+  './views/tour',
+  './shortcuts'
 ]);

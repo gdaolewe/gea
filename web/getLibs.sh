@@ -25,6 +25,8 @@ getLib async.js https://raw.github.com/millermedeiros/requirejs-plugins/master/s
 getLib promise.js https://raw.github.com/stackp/promisejs/master/promise.js
 getLib text.js https://raw.github.com/requirejs/text/master/text.js
 getLib oms.min.js http://jawj.github.io/OverlappingMarkerSpiderfier/bin/oms.min.js
+getLib keymaster.min.js https://raw.github.com/madrobby/keymaster/master/keymaster.min.js
+getLib backbone.shortcuts.min.js https://raw.github.com/bry4n/backbone-shortcuts/master/backbone.shortcuts.min.js
 LIB_DIR='assets/styl/lib'
 getLib normalize.styl https://raw.github.com/KenPowers/normalize.styl/master/normalize.styl
 getLib joyride.css https://raw.github.com/zurb/joyride/master/joyride-2.0.3.css

@@ -23,7 +23,9 @@ require({
     'async': 'lib/async',
     'text': 'lib/text',
     'oms': 'lib/oms.min',
-    'joyride': 'lib/jquery.joyride'
+    'joyride': 'lib/jquery.joyride',
+    'keymaster': 'lib/keymaster.min',
+    'backboneshortcuts': 'lib/backbone.shortcuts.min'
   },
   shim: {
     'backbone': {
@@ -33,7 +35,8 @@ require({
     'jqueryrdio': ['jquery'],
     'joyride': ['jquery', 'cookie'],
     'cookie': ['jquery'],
-    'oms': ['util/googlemaps']
+    'oms': ['util/googlemaps'],
+    'backboneshortcuts': ['backbone', 'keymaster']
   },
   deps: ['app']
 });
