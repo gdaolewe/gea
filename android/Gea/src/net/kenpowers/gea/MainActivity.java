@@ -16,7 +16,6 @@ import com.actionbarsherlock.view.MenuItem;
 
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 
 import android.widget.*;
 
@@ -25,6 +24,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -40,7 +42,6 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 
 import com.googlecode.androidannotations.annotations.Background;
 import com.googlecode.androidannotations.annotations.UiThread;
@@ -58,6 +59,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	private Track currentTrack;
 	
 	private GoogleMap gmap;
+	private Marker here;
 	
 	private int volume;
 
@@ -66,12 +68,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().setDisplayShowHomeEnabled(false);
-        
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment searchContext = getSupportFragmentManager().findFragmentById(R.id.searchContext);
-        searchContext.getView().bringToFront();
-        ft.hide(searchContext);
-        ft.commit();
         
         MainActivity.context = getApplicationContext();
         
@@ -83,10 +79,38 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         	baseURL = GeaServerHandler.LOCALHOST_BASE_URL;
         else
         	baseURL = GeaServerHandler.NET_BASE_URL;
+        
+        //TODO Connecting to beta server for debugging for now, remove this later
         baseURL = GeaServerHandler.NET_BASE_URL;
         
-        volume = 100;
         music = MusicServiceWrapper.getInstance();
+        
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment searchContext = getSupportFragmentManager().findFragmentById(R.id.searchContext);
+        searchContext.getView().bringToFront();
+        int color = getResources().getColor(R.color.abs__background_holo_light);
+        searchContext.getView().setBackgroundColor(color);
+        ft.hide(searchContext);
+        Fragment launchFragment = getSupportFragmentManager().findFragmentById(R.id.launch);
+        launchFragment.getView().bringToFront();
+        
+        if (music.isReady())
+        	ft.hide(launchFragment);
+        ft.commit();
+        
+        
+        volume = 100;
+        
+        music.registerMusicServiceReadyListener(new MusicServiceReadyListener() {
+			@Override
+			public void onMusicServiceReady() {
+				FragmentTransaction ft = getSupportFragmentManager().beginTransaction();	
+				Fragment launchFragment = getSupportFragmentManager().findFragmentById(R.id.launch);
+				ft.hide(launchFragment);
+				ft.commit();
+			}
+        	
+        });
         music.registerTrackChangedListener(this);
         setUpSeekBarListeners();
         
@@ -128,8 +152,8 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         		new SeekBar.OnSeekBarChangeListener() {
         			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         				if (fromUser) {	//only seek if bar moved by user
-        					int seconds = getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
-        					String position = getFormattedTimeFromSeconds(seconds);
+        					int seconds = PlayerTimeFormatter.getSecondsFromProgress(progress, music.getPlayerDuration()/1000);
+        					String position = PlayerTimeFormatter.getFormattedTimeFromSeconds(seconds);
         					((TextView) findViewById(R.id.currentPositionText)).setText(position);
         				}
         			}
@@ -137,7 +161,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         				trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
         			}
         			public void onStopTrackingTouch(SeekBar seekBar) {
-        				music.seekPlayerTo(getSecondsFromProgress(seekBar.getProgress(),
+        				music.seekPlayerTo(PlayerTimeFormatter.getSecondsFromProgress(seekBar.getProgress(),
         							music.getPlayerDuration()/1000));
         				trackPositionUpdateHandler.postDelayed(updateTrackPositionTask, 0);
         			}
@@ -181,9 +205,10 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
                 Location location = locationManager.getLastKnownLocation(provider);
                 LatLng coordinate = new LatLng(location.getLatitude(), location.getLongitude());
                 CameraUpdate center = CameraUpdateFactory.newLatLng(coordinate);
-                CameraUpdate zoom = CameraUpdateFactory.zoomTo(10);
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(5);
                 gmap.moveCamera(center);
                 gmap.moveCamera(zoom);
+                here = gmap.addMarker(new MarkerOptions().position(coordinate).title("Top tracks"));
             }
         }
     }
@@ -245,14 +270,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     	ft.commit();
     }
     
-    public void hideKeyboard(View view) {
-    	if (view.getId()==R.id.mainLayout || view.getId()==R.id.map ) {
-    		InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        	in.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        	setSearchContextVisible(false);
-    	}
-    }
-    
     @Override
     public void startActivity(Intent intent) {      
         // check if search intent
@@ -307,7 +324,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     }
     
     @Background
-    public void sendApprovalRequest(boolean trackLiked) {
+    void sendApprovalRequest(boolean trackLiked) {
     	BasicNameValuePair[] params = new BasicNameValuePair[3];
     	params[0] = new BasicNameValuePair("from", "rdio");
     	params[1] = new BasicNameValuePair("id", currentTrack.getKey());
@@ -321,7 +338,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
      * @param num number of top songs to pull from GEA server.
      */
     @Background
-    public void getApprovalRequest(int num){
+    void getApprovalRequest(int num){
     	JSONArray json;
     	try {
     		BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
@@ -336,19 +353,48 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
             	JSONObject obj = json.getJSONObject(i);
             	output += obj.getString("artist") + " - " + obj.getString("title") + "\n";
             }
-            //makeToast(output);
+            Log.d(LOG_TAG, output);
+            updateMap(output);
     	} catch (JSONException e) {
     		Log.e(LOG_TAG, "Error parsing JSON retrived from Gea Server");
     	} catch (Exception e) {
     		Log.e(LOG_TAG, e.toString());
     	}
     }
-    
-    @UiThread
-    public void makeToast(String text) {
-    	Toast toast = Toast.makeText(getAppContext(), text, Toast.LENGTH_SHORT);
-    	toast.show();
-    }
+   
+   @UiThread
+   void updateMap(String text) {
+	   here.setSnippet(text);
+	   here.showInfoWindow();
+   }
+   
+   public void onPrevButtonClicked(View view) {
+	   if (view.getId() != R.id.prevButton)
+		   return;
+	   ((ImageButton)view).setImageResource(R.drawable.prev_over);
+	   new Handler().postDelayed(new Runnable() {
+		@Override
+		public void run() {
+			((ImageButton)findViewById(R.id.prevButton)).setImageResource(R.drawable.prev);
+		}
+	   }, 100);
+	   if (music.getPlayerPosition() < 10000)
+		   music.playPreviousTrack();
+	   else
+		   music.seekPlayerTo(0);
+   }
+   public void onNextButtonClicked(View view) {
+	   if (view.getId() != R.id.nextButton)
+		   return;
+	   ((ImageButton)view).setImageResource(R.drawable.next_over);
+	   new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				((ImageButton)findViewById(R.id.nextButton)).setImageResource(R.drawable.next);
+			}
+		   }, 100);
+	   music.playNextTrack();
+   }
     
     public void togglePaused(View view) {
     	if (view.getId() == R.id.play_pause_button)
@@ -363,22 +409,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     		trackPositionUpdateHandler.removeCallbacks(updateTrackPositionTask);
     		button.setImageResource(R.drawable.play);
     	}
-    }
-    
-    private int getProgressPercent(int position, int duration) {
-    	double progress = ((double)position/duration)*100;
-    	return (int)progress;
-    }
-    
-    private int getSecondsFromProgress(int progress, int duration) {
-    	double seconds = (double)progress*duration / 100;
-    	return (int)seconds;
-    }
-    
-    private String getFormattedTimeFromSeconds(int seconds) {
-    	int secs = seconds % 60;
-    	int minutes = seconds / 60;
-    	return "" + (minutes<10 ? "0":"") + minutes + ":" + (secs<10? "0":"") + secs;
     }
     
     private Handler trackPositionUpdateHandler = new Handler();
@@ -403,64 +433,39 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     private Runnable updateTrackPositionTask = new Runnable() {
 	    public void run() {
 	    	int durationSeconds = music.getPlayerDuration()/1000;
-	    	String durationString = getFormattedTimeFromSeconds(durationSeconds);
+	    	String durationString = PlayerTimeFormatter.getFormattedTimeFromSeconds(durationSeconds);
 	    	((TextView)findViewById(R.id.durationText)).setText(durationString);
 	    	
 			int currentPositionSeconds = music.getPlayerPosition()/1000;
-	    	String currentPositionString = getFormattedTimeFromSeconds(currentPositionSeconds);
+	    	String currentPositionString = PlayerTimeFormatter.getFormattedTimeFromSeconds(currentPositionSeconds);
 			((TextView)findViewById(R.id.currentPositionText)).setText(currentPositionString);
 			trackPositionUpdateHandler.postDelayed(this, 100);
 			
-			int progress = getProgressPercent(currentPositionSeconds, durationSeconds);
+			int progress = PlayerTimeFormatter.getProgressPercent(currentPositionSeconds, durationSeconds);
 			((SeekBar)findViewById(R.id.progressSeekBar)).setProgress(progress);
 	    }
     };
     
-    @ViewById(R.id.playerAlbumArt)
-    ImageView albumArtView;
-    
-    void downloadAlbumArt(String url) {
-    	new DownloadImageTask(albumArtView).execute(url);
-    }
-    
-    /*@Background
+    @Background
     void downloadAlbumArt(String url) {
 		try {
             InputStream in = new java.net.URL(url).openStream();
             Bitmap bmp = BitmapFactory.decodeStream(in);
-            albumArtView.setImageBitmap(bmp);
+            setAlbumArt(bmp);
         } catch (Exception e) {
             Log.e("Error", e.toString());
         }
-	}*/
-    
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-	    ImageView image;
-
-	    public DownloadImageTask(ImageView image) {
-	        this.image = image;
-	    }
-	    protected Bitmap doInBackground(String... urls) {
-	        String url = urls[0];
-	        Bitmap result = null;
-	        try {
-	            InputStream in = new java.net.URL(url).openStream();
-	            result = BitmapFactory.decodeStream(in);
-	        } catch (Exception e) {
-	            Log.e("Error", e.getMessage());
-	            e.printStackTrace();
-	        }
-	        return result;
-	    }
-	    protected void onPostExecute(Bitmap result) {
-	        image.setImageBitmap(result);
-	    }
 	}
-
+    
+    @ViewById(R.id.playerAlbumArt)
+    ImageView albumArtView;
+    
+    @UiThread
+    void setAlbumArt(Bitmap bmp) {
+    	albumArtView.setImageBitmap(bmp);
+    }
+    
     public boolean onOptionsItemSelected (MenuItem item) {
 		return true;
-		
 	}
-    
 }
-

@@ -136,6 +136,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 		Log.d(MainActivity_.LOG_TAG, "item selected");
 		MusicServiceObject item = searchResults[position];
 		if (item.getType().equals("track")) {
+			
 			music.getPlayerForTrack((Track)item);
 			finish();
 		} else if (item.getType().equals("album")) {

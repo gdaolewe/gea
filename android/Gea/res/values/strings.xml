@@ -24,5 +24,8 @@
     <string name="default_duration_display">0:00</string>
     <string name="position_duration_separator_display">/</string>
     <string name="album_art_content_description">Album Art</string>
+    <string name="rdio_logo_content_description">Rdio Logo</string>
+    <string name="powered_by">Powered By</string>
+    <string name="loading">Rdio loading...</string>
 
 </resources>
