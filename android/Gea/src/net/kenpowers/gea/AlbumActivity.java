@@ -54,12 +54,12 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 			
 			for (int i=0; i<results.length; i++) {
 				tracks[i] = (Track)results[i];
-				//tracksStrings[i] = results[i].getName();
 			}
+			//sorts Tracks in ascending order of trackNum
 			Arrays.sort(tracks);
-			String[] tracksStrings = new String[tracks.length];
-			for (int i=0; i<tracks.length; i++)
-				tracksStrings[i] = tracks[i].getNum() + " - " + tracks[i].getName();
+			String[] tracksStrings = new String[tracks.length];										// sets up list of display strings
+			for (int i=0; i<tracks.length; i++)														// for list view in same order
+				tracksStrings[i] = tracks[i].getNum() + " - " + tracks[i].getName();				// as Tracks
 			ListView list = (ListView)findViewById(R.id.tracks);
 			list.setAdapter(new ArrayAdapter<String>(this, R.layout.search_result, tracksStrings));
 			list.setOnItemClickListener(new ListView.OnItemClickListener() {
@@ -78,6 +78,7 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 	}
 	
 	public void listItemSelected(int position) {
+		music.setPlaylist(tracks);
 		music.getPlayerForTrack(tracks[position]);
 		startActivity(new Intent(this, MainActivity_.class));
 	}

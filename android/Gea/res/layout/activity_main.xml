@@ -63,6 +63,7 @@
                 android:layout_weight="1"
                 android:background="@null"
                 android:contentDescription="@string/next_button_text"
+                android:onClick="onPrevButtonClicked"
                 android:scaleType="fitCenter"
                 android:src="@drawable/prev"
                 android:text="@string/prev_button_text" />
@@ -76,6 +77,7 @@
                 android:layout_weight="1"
                 android:background="@null"
                 android:contentDescription="@string/prev_button_text"
+                android:onClick="onNextButtonClicked"
                 android:scaleType="fitCenter"
                 android:src="@drawable/next"
                 android:text="@string/next_button_text" />
@@ -168,7 +170,7 @@
 
                 <ImageView
                     android:id="@+id/rdioLogo"
-                    android:layout_width="100dp"
+                    android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentRight="true"

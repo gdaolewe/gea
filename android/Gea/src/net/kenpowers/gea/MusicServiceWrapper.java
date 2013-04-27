@@ -28,18 +28,22 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 	private final String rdioKey = "9d3ayynanambvwxq5wpnw82y";
 	private final String rdioSecret = "CdNPjjcrPW";
 	private Rdio rdio;
+	private boolean rdioReady;
 	
 	private MediaPlayer player;
 	private int volume;
 	private Track currentTrack;
-	private Album currentAlbum;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-
+	private Track[] currentPlaylist; 
+	private int currentPlaylistIndex;
+	
 	private MusicServiceWrapper() {
+		rdioReady = false;
 		if (rdio == null) {
 			rdio = new Rdio(rdioKey, rdioSecret, null, null, MainActivity.getAppContext(), 
 				new RdioListener() {
 					public void onRdioAuthorised(String accessToken, String accessTokenSecret) {}
 					public void onRdioReady() {
+						rdioReady = true;
 						notifyMusicServiceReadyListeners();
 					}
 					public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {}
@@ -53,6 +57,9 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 	
 	public static MusicServiceWrapper getInstance() {
 		return INSTANCE;
+	}
+	public boolean isReady() {
+		return rdioReady;
 	}
 	
 	public void cleanup() {
@@ -162,6 +169,27 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		}
 	}
 	
+	public void setPlaylist(Track[] tracks) {
+		currentPlaylist = tracks;
+	}
+	
+	public void playPreviousTrack() {
+		if (currentPlaylist == null)
+			return;
+		if (currentPlaylistIndex <= 0)
+			return;
+		currentPlaylistIndex--;
+		getPlayerForTrack(currentPlaylist[currentPlaylistIndex]);
+	}
+	public void playNextTrack() {
+		if (currentPlaylist == null)
+			return;
+		if (currentPlaylistIndex >= currentPlaylist.length)
+			return;
+		currentPlaylistIndex++;
+		getPlayerForTrack(currentPlaylist[currentPlaylistIndex]);
+	}
+	
 	public void search(String query, String types) {
 		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("query", query));
@@ -257,31 +285,37 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		});
 	}
 	
-	
-	
 		private MusicServiceObject getMusicServiceObjectForJSON(JSONObject obj) {
 			MusicServiceObject msObj = null;
-			
 			try {
-				String key = obj.getString("key");
+				String key  = obj.getString("key");
 				String type = obj.getString("type");
 			
-			if (type.equals("t")) {
-				msObj = new Track(key, "track", obj.getString("name"), obj.getString("artist"),
-						obj.getString("album"), obj.getString("icon"), obj.getInt("duration"), obj.getInt("trackNum"));
-				
-			} else if (type.equals("r")) {
-				msObj = new Artist(key, "artist", obj.getString("name"), obj.getString("icon"));
-			} else if (type.equals("a")) {
-				JSONArray trackKeysJSON = obj.getJSONArray("trackKeys");
-				String[] trackKeys = new String[trackKeysJSON.length()];
-				for (int trackIndex=0; trackIndex<trackKeysJSON.length(); trackIndex++)
-					trackKeys[trackIndex] = trackKeysJSON.getString(trackIndex);
-				msObj = new Album(key, "album", obj.getString("name"), obj.getString("artist"), obj.getString("artistKey"),
-									   obj.getString("icon"), trackKeys);
-			} else {
-				Log.e(LOG_TAG, "Invalid result type " + key);
-			}
+				if (type.equals("t")) {
+					msObj = new Track(key, "track", obj.getString("name"), 
+													obj.getString("artist"),
+													obj.getString("artistKey"), 
+													obj.getString("album"), 
+													obj.getString("albumKey"),  
+													obj.getString("icon"), 
+													obj.getInt("duration"), 	  
+													obj.getInt("trackNum"));
+					
+				} else if (type.equals("r")) {
+					msObj = new Artist(key, "artist", obj.getString("name"), obj.getString("icon"));
+				} else if (type.equals("a")) {
+					JSONArray trackKeysJSON = obj.getJSONArray("trackKeys");
+					String[] trackKeys = new String[trackKeysJSON.length()];
+					for (int trackIndex=0; trackIndex<trackKeysJSON.length(); trackIndex++)
+						trackKeys[trackIndex] = trackKeysJSON.getString(trackIndex);
+					msObj = new Album(key, "album", obj.getString("name"), 
+									  				obj.getString("artist"), 
+									  				obj.getString("artistKey"),
+									  				obj.getString("icon"),   
+									  				trackKeys);
+				} else {
+					Log.e(LOG_TAG, "Invalid result type " + key);
+				}
 			} catch (JSONException e) {
 				Log.d(LOG_TAG,"JSON exception");
 			}

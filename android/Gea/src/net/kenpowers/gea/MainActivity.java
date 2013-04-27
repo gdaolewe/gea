@@ -83,6 +83,8 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         //TODO Connecting to beta server for debugging for now, remove this later
         baseURL = GeaServerHandler.NET_BASE_URL;
         
+        music = MusicServiceWrapper.getInstance();
+        
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         Fragment searchContext = getSupportFragmentManager().findFragmentById(R.id.searchContext);
         searchContext.getView().bringToFront();
@@ -91,10 +93,14 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         ft.hide(searchContext);
         Fragment launchFragment = getSupportFragmentManager().findFragmentById(R.id.launch);
         launchFragment.getView().bringToFront();
+        
+        if (music.isReady())
+        	ft.hide(launchFragment);
         ft.commit();
         
+        
         volume = 100;
-        music = MusicServiceWrapper.getInstance();
+        
         music.registerMusicServiceReadyListener(new MusicServiceReadyListener() {
 			@Override
 			public void onMusicServiceReady() {
@@ -360,6 +366,20 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
    void updateMap(String text) {
 	   here.setSnippet(text);
 	   here.showInfoWindow();
+   }
+   
+   public void onPrevButtonClicked(View view) {
+	   if (view.getId() != R.id.prevButton)
+		   return;
+	   if (music.getPlayerPosition() < 10000)
+		   music.playPreviousTrack();
+	   else
+		   music.seekPlayerTo(0);
+   }
+   public void onNextButtonClicked(View view) {
+	   if (view.getId() != R.id.nextButton)
+		   return;
+	   music.playNextTrack();
    }
     
     public void togglePaused(View view) {
