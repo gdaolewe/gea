@@ -15,7 +15,7 @@ mkdir -p assets/styl/lib
 # Get libraries
 LIB_DIR='public/js/lib'
 getLib require.min.js http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.4/require.min.js
-getLib jquery.min.js http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js
+getLib jquery.min.js http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.0/jquery.min.js
 getLib jquery.joyride.js https://raw.github.com/zurb/joyride/master/jquery.joyride-2.0.3.js
 getLib jquery.cookie.js https://raw.github.com/zurb/joyride/master/jquery.cookie.js
 getLib lodash.min.js http://cdnjs.cloudflare.com/ajax/libs/lodash.js/1.0.0-rc.3/lodash.min.js
