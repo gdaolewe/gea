@@ -18,6 +18,9 @@ define([
 
   return new (bb.View.extend({
     el: '#map',
+    events: {
+      'click #iw-img': 'playSong'
+    },
     initialize: function () {
       //this is centered on Coffeyville, KS - geographic center of US
       this.mapCenter = new google.maps.LatLng(39.8282, -98.5795);
@@ -70,13 +73,10 @@ define([
     },
 
     /*TODO
-      1.add listener to infowindow to listen for click on album art to play it
+      1.triggering listener to infowindow to listen for click on album art to play it
       2.implement google markerclusterer library
-      4.set up vent listener for filter changes
       different colors on spiderfying
       cycle through colors for each different coordinate
-
-      fixed clear markers function
     */
 
     loadAllMarkers: function (hours) {
@@ -86,13 +86,13 @@ define([
           data[position].reverse().forEach($.proxy(function (d) {
             var split = position.split(",");
             var latLng = new google.maps.LatLng(split[0], split[1]);
-            this.addNewMarker(latLng, d.title, d.artist, d.album, d.image, d.score);
+            this.addNewMarker(latLng, d.title, d.artist, d.album, d.image, d.score, d.rdioId);
           }, this));
         }
       }, this));
     },
 
-    addNewMarker: function (position, song, artist, album, image, score) {
+    addNewMarker: function (position, song, artist, album, image, score, key) {
       var marker = new google.maps.Marker({
         position: position,
         map: this.map,
@@ -102,7 +102,8 @@ define([
           song: song,
           album: album,
           artist: artist,
-          score: score
+          score: score,
+          key: key
         })
       });
       this.oms.addMarker(marker);
@@ -110,7 +111,7 @@ define([
       markerArray.push(marker);
     },
 
-    clearMarkers: function() {
+    clearMarkers: function () {
       if (iw) {
         iw.close();
       }
@@ -122,9 +123,14 @@ define([
       }
     },
 
-    iconWithColor: function() {
+    iconWithColor: function () {
       return newImage;
         //color + '|000000|ffff00';
+    },
+
+    playSong: function () {
+      console.log(iw);
+      //vent.trigger('iw-play', this.iw.)
     }
 
   }))();
