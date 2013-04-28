@@ -1,11 +1,13 @@
 package net.kenpowers.gea;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.http.message.BasicNameValuePair;
 import org.json.*;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -27,7 +29,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.location.Address;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 
@@ -80,8 +84,8 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         else
         	baseURL = GeaServerHandler.NET_BASE_URL;
         
-        //TODO Connecting to beta server for debugging for now, remove this later
-        baseURL = GeaServerHandler.NET_BASE_URL;
+        //For testing physical device against local server
+        baseURL = "http://192.168.1.115:3000";
         
         music = MusicServiceWrapper.getInstance();
         
@@ -208,7 +212,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
                 CameraUpdate zoom = CameraUpdateFactory.zoomTo(5);
                 gmap.moveCamera(center);
                 gmap.moveCamera(zoom);
-                here = gmap.addMarker(new MarkerOptions().position(coordinate).title("Top tracks"));
+                //here = gmap.addMarker(new MarkerOptions().position(coordinate).title("Top tracks"));
             }
         }
     }
@@ -339,33 +343,49 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
      */
     @Background
     void getApprovalRequest(int num){
-    	JSONArray json;
-    	try {
-    		BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
-    		BasicNameValuePair[] params = {param};
-    		String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
-            json = GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.GET);
-            if (json == null) {
-            	Log.e(LOG_TAG, "Error retrieving JSON from Gea Server");
-            }
-            String output = "";
-            for (int i=0; i < json.length(); i++) {
-            	JSONObject obj = json.getJSONObject(i);
-            	output += obj.getString("artist") + " - " + obj.getString("title") + "\n";
-            }
-            Log.d(LOG_TAG, output);
-            updateMap(output);
-    	} catch (JSONException e) {
-    		Log.e(LOG_TAG, "Error parsing JSON retrived from Gea Server");
-    	} catch (Exception e) {
-    		Log.e(LOG_TAG, e.toString());
-    	}
+    	JSONObject json;
+	    BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
+	    BasicNameValuePair[] params = {param};
+	    String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
+        json = GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.GET);
+        if (json == null) {
+        	Log.e(LOG_TAG, "Error retrieving JSON from Gea Server");
+        	return;
+        }
+        populateMap(json);
+    	
     }
    
    @UiThread
-   void updateMap(String text) {
-	   here.setSnippet(text);
-	   here.showInfoWindow();
+   void populateMap(JSONObject json) {
+	  
+	  Geocoder geocoder = new Geocoder(getAppContext());
+	  Iterator<?> stateKeys = json.keys(); 
+	  while (stateKeys.hasNext()) {
+		  String stateCoord = (String)stateKeys.next();
+		  Log.d(LOG_TAG, "state: " + stateCoord);
+		  try {
+			  JSONArray tracks = json.getJSONArray(stateCoord);
+			  String output = "";
+			  for (int i=0; i<tracks.length(); i++) {
+				  JSONObject track = tracks.getJSONObject(i);
+				  output += track.getString("artist") + " - " + track.getString("title") + "\n";
+			  }
+			  /*List<Address> addresses = geocoder.getFromLocationName(state, 1);
+			  if (addresses.size() > 0) {
+				  Address address = geocoder.getFromLocationName(state, 1).get(0);
+				  //Log.d(LOG_TAG, address.);
+				  LatLng coord = new LatLng(address.getLatitude(), address.getLongitude());
+				  Marker marker = gmap.addMarker(new MarkerOptions().position(coord).title("Top tracks").snippet(output));
+				  
+			  }*/
+			  LatLng coord = GeaServerHandler.getLatLngForCoordinateString(stateCoord);
+			  Marker marker = gmap.addMarker(new MarkerOptions().position(coord).title(stateCoord).snippet(output));
+		  } catch(JSONException e) {
+			  
+		  }
+	  }
+		  
    }
    
    public void onPrevButtonClicked(View view) {
