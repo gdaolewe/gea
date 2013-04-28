@@ -11,27 +11,23 @@ define([
   return new (bb.View.extend({
     el: '#map',
     initialize: function () {
-      this.mapCenter = new google.maps.LatLng(42.375200, -72.521200); //change to zoomed out version of all 50 states
-      this.mapOptions = {
+      //this is centered on Coffeyville, KS - geographic center of US
+      this.mapCenter = new google.maps.LatLng(39.8282, -98.5795);
         center: this.mapCenter,
-        zoom: 10,
+        zoom: 4,
         mapTypeId: google.maps.MapTypeId.ROADMAP
       };
       this.map = new google.maps.Map(this.el, this.mapOptions);
       this.oms = new OverlappingMarkerSpiderfier(this.map, {keepSpiderfied: true});
-      
-// also want to figure out how to get album art into the pins to make custom ones
-
       $.get('/rate?limit=10', $.proxy(function (data) {
         for (var position in data) {
           data[position].forEach($.proxy(function (d) {
             var split = position.split(",");
             var latLng = new google.maps.LatLng(split[0], split[1]);
-            this.addNewMarker(latLng, d.title, d.artist, d.album);
+            this.addNewMarker(latLng, d.title, d.artist, d.album, d.image);
           }, this));
         }
       }, this));
-            /*sets up listeners*/
       iw = new google.maps.InfoWindow();
       this.oms.addListener('click', $.proxy(function(m) {
         iw.setContent(m.desc);
@@ -39,16 +35,21 @@ define([
       }, this));
       setTimeout($.proxy(function(){this.clearMarkers();}, this),5000);
     },
-//maybe add listener to infowindow to listen for click on album art to play it
-    addNewMarker: function (position, song, artist, album) {
+
+    /*TODO
+      add listener to infowindow to listen for click on album art to play it
+      implement google markerclusterer library
+      set up vent listener for filter changes
+    */
+
+    addNewMarker: function (position, song, artist, album, image) {
       var marker = new google.maps.Marker({
         position: position,
         map: this.map,
         title: song,
-        //animation: google.maps.Animation.DROP, //removed for easier testing
-        desc: '<span id="info-window"><img src="http://cdn3.rd.io/album/3/3/f/0000000000029f33/square-200.jpg" width=100 height=100>'+
-                '<span><div id="iw-title">Song: ' + song + '</div>'+
-                '<div id="iw-album">Album: ' + album + '</div>'+
+        desc: '<span id="info-window"><img src="' + image + '" width=100 height=100>' +
+                '<span><div id="iw-title">Song: ' + song + '</div>' +
+                '<div id="iw-album">Album: ' + album + '</div>' +
                 '<div id="iw-artist">Artist: ' + artist + '</div></span></span>'
       });
       this.oms.addMarker(marker);
