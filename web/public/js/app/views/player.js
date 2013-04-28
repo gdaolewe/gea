@@ -20,7 +20,9 @@ define([
   var dragging = false;
   var deferred = new promise.Promise();
   var streamerPromise = new promise.Promise();
-  var currentStreamId = 'a171827';
+  var currentStreamId = null;
+  var likeEnabled = true;
+  var dislikeEnabled = true;
 
   return new (bb.View.extend({
     el: '#player',
@@ -50,7 +52,6 @@ define([
       // Queue the first album when ready
       streamerPromise.then($.proxy(function () {
         this.$streamer.bind('ready', $.proxy(function() {
-          this.$streamer.queue(currentStreamId);
           // Listen for new songs to play
           vent.on('play-key', $.proxy(function (key) {
             currentStreamId = key;
@@ -81,14 +82,16 @@ define([
         this.$streamer.bind('playingTrackChanged', $.proxy(function(e, playingTrack, sourcePosition) {
           deferred.done();
           if (playingTrack) {
+            //Get the current stream key
+            currentStreamId = playingTrack.key;
             //Store which track this is in the current playing source
             this.sourcePosition = sourcePosition;
+            //Ensure the like/dislike buttons are enabled
+            this.enableSocialButtons();
             //Set global boolean to indicate if this is the last track in the source or not
             lastTrack = (this.sourcePosition === this.sourceLength - 1);
             //If this is the last track, switch to the 'disabled' button
-            //if (lastTrack) this.$nextButton.attr('class', 'next-end');
-            // otherwise, ensure it is the enabled 'next' button
-            //else {}
+            (lastTrack) ? this.$nextButton.addClass('end') : this.$nextButton.removeClass('end');
             //Update the play/pause button correctly
             deferred.then($.proxy(function () {
               this.updatePlayPauseButton();
@@ -96,7 +99,7 @@ define([
             // Save the current track's duration for computing the percent remaining
             this.duration = playingTrack.duration;
             // Update the album art div to reflect the current track's art
-            this.$art.attr('src', playingTrack.icon);
+            this.$art.css('background-image', "url(" + playingTrack.icon + ")");
             // Update the currently playing track name
             this.$track.text(playingTrack.name);
             // Update the currently playing track's artist name
@@ -150,6 +153,7 @@ define([
       this.$progressBar = this.$('#progress-bar');
       this.$progressBarFill = this.$('#fill');
 	    this.$likeImg = this.$('#like'); //creates global var in initialized function
+      this.$dislikeImg = this.$('#dislike');
     },
     togglePlay: function (e) {
       e.stopPropagation();
@@ -166,11 +170,8 @@ define([
       deferred.then($.proxy(function () {
         //If we're still waiting to load from the streaming service, don't handle this.
         if (loading) return;
-        if (lastTrack) {
-          console.log("last!");
-          return;
-        }
-        loading = true;
+        if (lastTrack) return;
+        this.loading();
         this.$streamer.next();
       }, this));
     },
@@ -187,7 +188,7 @@ define([
         } else {
           //Otherwise, seek to the beginning of this track and then change to the previous (ensures the right behavior)
           this.$streamer.seek(0);
-          loading = true;
+          this.loading();
           this.$streamer.previous();
         }
       }, this));
@@ -195,16 +196,32 @@ define([
     like: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=like', function () {
-        alert('Like submitted! :D');
-      });
+      if (!loading && currentStreamId && likeEnabled) {
+        $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=like', $.proxy(function () {
+          this.$likeImg.toggleClass('disabled');
+          likeEnabled = false;
+          if (!dislikeEnabled) {
+            this.$dislikeImg.toggleClass('disabled');
+            dislikeEnabled = true;
+          }
+          alert('Like submitted! :D');
+        }, this));
+      }
     },
     dislike: function (e) {
       e.stopPropagation();
       e.preventDefault();
-      $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=dislike', function () {
-        alert('Dislike submitted! >:(');
-      });
+      if (!loading && currentStreamId && dislikeEnabled) {
+        $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=dislike', $.proxy(function () {
+          if (!likeEnabled) {
+            this.$likeImg.toggleClass('disabled');
+            likeEnabled = true;
+          }
+          this.$dislikeImg.toggleClass('disabled');
+          dislikeEnabled = false;
+          alert('Dislike submitted! >:(');
+        }, this));
+      }
     },
     drag: function (e) {
       e.stopPropagation();
@@ -248,6 +265,20 @@ define([
     },
     updatePlayPauseButton: function () {
       this.$playPauseButton.attr('class', playingClass[playing ? 1 : 0]);
+    },
+    enableSocialButtons: function () {
+      if (!likeEnabled) {
+        this.$likeImg.toggleClass('disabled');
+        likeEnabled = true;
+      }
+      if (!dislikeEnabled) {
+        this.$dislikeImg.toggleClass('disabled');
+        dislikeEnabled = true;
+      }
+    },
+    loading: function () {
+      loading = true;
+      currentStreamId = null;
     }
   }))();
 });
