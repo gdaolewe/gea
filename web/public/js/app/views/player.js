@@ -69,9 +69,15 @@ define([
             //Set global boolean to indicate if this is the last track in the source or not
             lastTrack = (this.sourcePosition === this.sourceLength - 1);
             //If this is the last track, switch to the 'disabled' button
-            //if (lastTrack) this.$nextButton.attr('class', 'next-end');
+            if (lastTrack) {
+			  this.$nextButton.removeClass('next');
+			  this.$nextButton.addClass('next-end');
+			}
             // otherwise, ensure it is the enabled 'next' button
-            //else {}
+            else {
+			  this.$nextButton.addClass('next');
+			  this.$nextButton.removeClass('next-end');
+			}
             //Update the play/pause button correctly
             deferred.then($.proxy(function () {
               this.updatePlayPauseButton();
