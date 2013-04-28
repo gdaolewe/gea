@@ -2,6 +2,7 @@
 define([
   'backbone',
   'util/constants',
+  'app/vent',
   'util/jqr!'
 ], function (
   bb,
@@ -30,7 +31,7 @@ define([
       e.preventDefault();
       e.stopPropagation();
       this.filterMap();
-    }
+    },
     filterMap: function () {
       var val = this.$select.val();
       vent.trigger('mapFilter', val);

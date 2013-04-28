@@ -4,5 +4,6 @@ define([
   './views/search',
   './views/player',
   './views/tour',
+  './views/mapFilter',
   './shortcuts'
 ]);

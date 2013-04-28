@@ -26,13 +26,15 @@ define([
         zoom: 4,
         mapTypeId: google.maps.MapTypeId.ROADMAP
       };
+      //creating a GoogleMap object
       this.map = new google.maps.Map(this.el, this.mapOptions);
+      //creating an OMS (Spiderfier) object
       this.oms = new OverlappingMarkerSpiderfier(this.map, {keepSpiderfied: true});
-      var mcOptions = {gridSize: 20, maxZoom: 20};
-      this.mc = new MarkerClusterer(this.map, mcOptions);
-
-      this.loadAllMarkers(""); ////////////////
-
+      //Creating a MarkerClusterer object
+      this.mc = new MarkerClusterer(this.map, {gridSize: 20, maxZoom: 20});
+      //initial load of markers, default is all time
+      this.loadAllMarkers("");
+      //creating InfoWindow object and listener for clicking on pins
       iw = new google.maps.InfoWindow();
       this.oms.addListener('click', $.proxy(function(m) {
         iw.setContent(m.desc);
@@ -41,7 +43,7 @@ define([
 
       this.oms.addListener('spiderfy', $.proxy(function(markers) {
         for(var i = 0; i < markers.length; i ++) {
-          markers[i].fillColor("blue");//setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png'); //do this in the template file?
+          //markers[i].fillColor("blue");//setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png'); //do this in the template file?
           //markers[i].setShadow(null);
         } 
         iw.close();
@@ -56,11 +58,12 @@ define([
         iw.close();
       }, this));
 
-      google.maps.event.addListener(this.mc, 'clusterclick', function(cluster) {
+      /*google.maps.event.addListener(this.mc, 'clusterclick', function(cluster) {
         map.setCenter(cluster.getCenter());
-      });
+      });*/
 
       vent.on('mapFilter', $.proxy(function (hours) {
+        this.oms.unspiderfy();
         this.clearMarkers();
         this.loadAllMarkers(hours);
       }, this));
@@ -103,7 +106,7 @@ define([
         })
       });
       this.oms.addMarker(marker);
-      this.mc.addMarker(marker);
+      //this.mc.addMarker(marker);
       markerArray.push(marker);
     },
 
