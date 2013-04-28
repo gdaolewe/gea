@@ -9,9 +9,7 @@ body
   height 100%
   max-width 100%
   max-height 100%
-
-body
-  background-color #D6FFC2
+  background-color #eee
 
 #api
   visibility hidden
@@ -110,7 +108,6 @@ body
 #like
 #dislike
   display inline-block
-  background #eee
   width 100px
   height 100px
   line-height 100px
@@ -121,11 +118,15 @@ body
 #like
   top 0
   right 0
-  background-image url(/img/thumbup.png)
+  background-image url('/img/thumbup.png')
   background-repeat no-repeat
   background-position:center;
   &:hover
-    background-image url(/img/thumbup-over.png)
+    background-image url('/img/thumbup-over.png')
+  &.disabled
+    background-color #aaa
+    &:hover
+      background-image url('/img/thumbup.png')
 
 #dislike
   top 100px
@@ -135,10 +136,17 @@ body
   background-position:center;
   &:hover
     background-image url(/img/thumbdown-over.png)
+  &.disabled
+    background-color #aaa
+    &:hover
+      background-image url('/img/thumbdown.png')
 
 #fill
   height 100%
   background #80C7E3
+
+#player-metadata
+  background-color #D6FFC2
 
 #track-header
 #album-header
