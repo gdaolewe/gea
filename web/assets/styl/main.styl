@@ -26,7 +26,8 @@ body
 
 #player-art
   display: block; 
-  background:url(/img/sprite.png);
+  background-color white
+  background-image url(/img/sprite.png);
   background-position: 0px 0px;  
   width 200px
   height 200px
@@ -69,14 +70,14 @@ body
   background #eee
   background-image url(/img/sprite.png)
   background-repeat no-repeat
-  
-.next
   background-position: -0px -490px; 
   &:hover
     background-position: -0px -400px;
-	
-.next-end
-  background-position: -100px -430px;
+  &.end
+    cursor default
+    background-position: -100px -430px;
+	&:hover
+	  background-position: -100px -430px;
 
 #previous
   background #eee
@@ -128,6 +129,7 @@ body
   &:hover
     background-position: -100px -200px; 
   &.disabled
+    cursor default
     background-color #aaa
     &:hover
       background-image url('/img/thumbup.png')
@@ -140,6 +142,7 @@ body
   &:hover
     background-position: -0px -300px; 
   &.disabled
+    cursor default
     background-color #aaa
     &:hover
       background-image url('/img/thumbdown.png')
