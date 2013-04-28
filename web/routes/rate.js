@@ -193,9 +193,9 @@ module.exports = {
           return done();
         }
         res.json(_.groupBy(data.rows, function (item) {
-          var n = item.name;
-          delete item.name;
-          return n;
+          var c = item.coords;
+          delete item.coords;
+          return c;
         }));
         done();
       });
