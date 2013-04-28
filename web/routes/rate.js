@@ -78,10 +78,11 @@ module.exports = {
               var artist = data.result[rdioId].artist;
               var album = data.result[rdioId].album;
               var title = data.result[rdioId].name;
+              var icon = data.result[rdioId].icon;
               client.query({
                 name: 'insert_song',
                 text: INSERT_SONG,
-                values: [artist, album, title, rdioId]
+                values: [artist, album, title, rdioId, icon]
               }, next);
             })
           }
