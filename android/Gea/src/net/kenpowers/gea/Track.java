@@ -4,14 +4,16 @@ public class Track extends MusicServiceObject implements Comparable<Track> {
 	public static final int NOT_RATED = 0;
 	public static final int DISLIKED = -1;
 	public static final int LIKED = 1;
-	private String artist, album, albumArtURL;
+	private String artist, artistKey, album, albumKey, albumArtURL;
 	private int duration, trackNum;
 	private int liked = Track.NOT_RATED;
 	public Track(String key, String type, String name, String artist, 
-			String album, String albumArtURL, int duration, int trackNum) {
+			String artistKey, String album, String albumKey, String albumArtURL, int duration, int trackNum) {
 		super (key, type, name);
 		this.artist = artist;
+		this.artistKey = artistKey;
 		this.album = album;
+		this.albumKey = albumKey;
 		this.albumArtURL = albumArtURL;
 		this.duration = duration;
 		this.trackNum = trackNum;
@@ -20,8 +22,14 @@ public class Track extends MusicServiceObject implements Comparable<Track> {
 	public String getArtist() {
 		return artist;
 	}
+	public String getArtistKey() {
+		return artistKey;
+	}
 	public String getAlbum() {
 		return album;
+	}
+	public String getAlbumKey() {
+		return albumKey;
 	}
 	public String getAlbumArtURL() {
 		return albumArtURL;

@@ -1,4 +1,5 @@
 @import 'lib/normalize'
+@import 'lib/joyride.css'
 @import 'nib'
 @import 'functions'
 
@@ -8,9 +9,7 @@ body
   height 100%
   max-width 100%
   max-height 100%
-
-body
-  background-color #D6FFC2
+  background-color #eee
   
 #api
   visibility hidden
@@ -113,7 +112,6 @@ body
 #like
 #dislike
   display inline-block
-  background #eee
   background-image url(/img/sprite.png)
   width 100px
   height 100px
@@ -129,6 +127,10 @@ body
   background-repeat no-repeat
   &:hover
     background-position: -100px -200px; 
+  &.disabled
+    background-color #aaa
+    &:hover
+      background-image url('/img/thumbup.png')
 
 #dislike
   top 100px
@@ -137,10 +139,17 @@ body
   background-repeat no-repeat
   &:hover
     background-position: -0px -300px; 
+  &.disabled
+    background-color #aaa
+    &:hover
+      background-image url('/img/thumbdown.png')
 
 #fill
   height 100%
   background #80C7E3
+
+#player-metadata
+  background-color #D6FFC2
 
 #track-header
 #album-header

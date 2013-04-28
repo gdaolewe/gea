@@ -1,25 +1,11 @@
 package net.kenpowers.gea;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
-import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.v4.app.NotificationCompat;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Intent;
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.googlecode.androidannotations.annotations.Background;
 import com.rdio.android.api.Rdio;
 import com.rdio.android.api.RdioApiCallback;
 import com.rdio.android.api.RdioListener;
@@ -42,18 +28,22 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 	private final String rdioKey = "9d3ayynanambvwxq5wpnw82y";
 	private final String rdioSecret = "CdNPjjcrPW";
 	private Rdio rdio;
+	private boolean rdioReady;
 	
 	private MediaPlayer player;
 	private int volume;
 	private Track currentTrack;
-	private Bitmap currentAlbumArt;
-
+	private Track[] currentPlaylist; 
+	private int currentPlaylistIndex;
+	
 	private MusicServiceWrapper() {
+		rdioReady = false;
 		if (rdio == null) {
 			rdio = new Rdio(rdioKey, rdioSecret, null, null, MainActivity.getAppContext(), 
 				new RdioListener() {
 					public void onRdioAuthorised(String accessToken, String accessTokenSecret) {}
 					public void onRdioReady() {
+						rdioReady = true;
 						notifyMusicServiceReadyListeners();
 					}
 					public void onRdioUserAppApprovalNeeded(Intent authorisationIntent) {}
@@ -67,6 +57,9 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 	
 	public static MusicServiceWrapper getInstance() {
 		return INSTANCE;
+	}
+	public boolean isReady() {
+		return rdioReady;
 	}
 	
 	public void cleanup() {
@@ -176,6 +169,28 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		}
 	}
 	
+	public void setPlaylist(Track[] tracks, int index) {
+		currentPlaylist = tracks;
+		currentPlaylistIndex = index;
+	}
+	
+	public void playPreviousTrack() {
+		if (currentPlaylist == null)
+			return;
+		if (currentPlaylistIndex <= 0)
+			return;
+		currentPlaylistIndex--;
+		getPlayerForTrack(currentPlaylist[currentPlaylistIndex]);
+	}
+	public void playNextTrack() {
+		if (currentPlaylist == null)
+			return;
+		if (currentPlaylistIndex >= currentPlaylist.length-1)
+			return;
+		currentPlaylistIndex++;
+		getPlayerForTrack(currentPlaylist[currentPlaylistIndex]);
+	}
+	
 	public void search(String query, String types) {
 		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("query", query));
@@ -271,31 +286,37 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		});
 	}
 	
-	
-	
 		private MusicServiceObject getMusicServiceObjectForJSON(JSONObject obj) {
 			MusicServiceObject msObj = null;
-			
 			try {
-				String key = obj.getString("key");
+				String key  = obj.getString("key");
 				String type = obj.getString("type");
 			
-			if (type.equals("t")) {
-				msObj = new Track(key, "track", obj.getString("name"), obj.getString("artist"),
-						obj.getString("album"), obj.getString("icon"), obj.getInt("duration"), obj.getInt("trackNum"));
-				
-			} else if (type.equals("r")) {
-				msObj = new Artist(key, "artist", obj.getString("name"), obj.getString("icon"));
-			} else if (type.equals("a")) {
-				JSONArray trackKeysJSON = obj.getJSONArray("trackKeys");
-				String[] trackKeys = new String[trackKeysJSON.length()];
-				for (int trackIndex=0; trackIndex<trackKeysJSON.length(); trackIndex++)
-					trackKeys[trackIndex] = trackKeysJSON.getString(trackIndex);
-				msObj = new Album(key, "album", obj.getString("name"), obj.getString("artist"), obj.getString("artistKey"),
-									   obj.getString("icon"), trackKeys);
-			} else {
-				Log.e(LOG_TAG, "Invalid result type " + key);
-			}
+				if (type.equals("t")) {
+					msObj = new Track(key, "track", obj.getString("name"), 
+													obj.getString("artist"),
+													obj.getString("artistKey"), 
+													obj.getString("album"), 
+													obj.getString("albumKey"),  
+													obj.getString("icon"), 
+													obj.getInt("duration"), 	  
+													obj.getInt("trackNum"));
+					
+				} else if (type.equals("r")) {
+					msObj = new Artist(key, "artist", obj.getString("name"), obj.getString("icon"));
+				} else if (type.equals("a")) {
+					JSONArray trackKeysJSON = obj.getJSONArray("trackKeys");
+					String[] trackKeys = new String[trackKeysJSON.length()];
+					for (int trackIndex=0; trackIndex<trackKeysJSON.length(); trackIndex++)
+						trackKeys[trackIndex] = trackKeysJSON.getString(trackIndex);
+					msObj = new Album(key, "album", obj.getString("name"), 
+									  				obj.getString("artist"), 
+									  				obj.getString("artistKey"),
+									  				obj.getString("icon"),   
+									  				trackKeys);
+				} else {
+					Log.e(LOG_TAG, "Invalid result type " + key);
+				}
 			} catch (JSONException e) {
 				Log.d(LOG_TAG,"JSON exception");
 			}
@@ -323,8 +344,12 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 					mp.setWakeMode(MainActivity.getAppContext(), PowerManager.PARTIAL_WAKE_LOCK);
 					mp.setOnCompletionListener(new OnCompletionListener() {
 						public void onCompletion(MediaPlayer player) {
-							currentTrack = null;
-							notifyTrackChangedListeners(currentTrack);
+							if (currentPlaylist == null)
+								notifyTrackChangedListeners(null);
+							else if (currentPlaylistIndex >= currentPlaylist.length-1)
+								notifyTrackChangedListeners(null);
+							else
+								playNextTrack();
 						}
 					});
 					notifyTrackChangedListeners(currentTrack);

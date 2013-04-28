@@ -11,6 +11,7 @@ WARNING: This will update *all* packages and install the following packages and 
   postgresql
   libpq-dev
   build-essential
+  memcached
 
 "
 
@@ -32,10 +33,10 @@ sudo apt-get -y upgrade
 #	postgresql
 #	libpq-dev
 #	build-essential
-#
+#	memcached
 # flashplugin-installer is required if viewing the webapp in a browser
 
-sudo apt-get -y install git curl postgresql postgresql-client-9.1 postgresql-common postgresql-9.1 libpq-dev build-essential
+sudo apt-get -y install git curl postgresql postgresql-client-9.1 postgresql-common postgresql-9.1 libpq-dev build-essential memcached
 
 echo "Downloading and installing 'nvm'..."
 echo
