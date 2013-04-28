@@ -3,7 +3,7 @@ require({
   packages: ['app'],
   paths: {
     'jquery': [
-      '//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min',
+      '//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.0/jquery.min',
       'lib/jquery.min'
     ],
     '_': [
@@ -14,11 +14,18 @@ require({
       '//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min',
       'lib/backbone.min'
     ],
+    'cookie': [
+      '//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.3.1/jquery.cookie.min',
+      'lib/jquery.cookie'
+    ],
     'jqueryrdio': 'lib/jquery.rdio.min',
     'promise': 'lib/promise',
     'async': 'lib/async',
     'text': 'lib/text',
-    'oms': 'lib/oms.min'
+    'oms': 'lib/oms.min',
+    'joyride': 'lib/jquery.joyride',
+    'keymaster': 'lib/keymaster.min',
+    'backboneshortcuts': 'lib/backbone.shortcuts.min'
   },
   shim: {
     'backbone': {
@@ -26,7 +33,10 @@ require({
       exports: 'Backbone'
     },
     'jqueryrdio': ['jquery'],
-    'oms': ['util/googlemaps']
+    'joyride': ['jquery', 'cookie'],
+    'cookie': ['jquery'],
+    'oms': ['util/googlemaps'],
+    'backboneshortcuts': ['backbone', 'keymaster']
   },
   deps: ['app']
 });
