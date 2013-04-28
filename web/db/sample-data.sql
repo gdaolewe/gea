@@ -20,18 +20,18 @@ SET search_path = public, pg_catalog;
 -- Data for Name: songs; Type: TABLE DATA; Schema: public; Owner: gea
 --
 
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (1, 'Meshuggah', 'Koloss', 'I Am Colossus', 't15858227');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (2, 'Meshuggah', 'Koloss', 'The Demon''s Name Is Surveillance', 't15858247');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (3, 'Meshuggah', 'Koloss', 'Do Not Look Down', 't15858265');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (4, 'Meshuggah', 'ObZen', 'Combustion', 't308719');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (5, 'Meshuggah', 'ObZen', 'Electric Red', 't308730');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (6, 'Meshuggah', 'ObZen', 'Bleed', 't308745');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (7, 'Volbeat', 'Beyond Hell / Above Heaven', 'The Mirror And The Ripper', 't16401310');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (8, 'Volbeat', 'Beyond Hell / Above Heaven', 'Heaven Nor Hell', 't16401332');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (9, 'Volbeat', 'Beyond Hell / Above Heaven', 'Who They Are', 't16401382');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (10, 'Volbeat', 'Guitar Gangsters & Cadillac Blood', 'Intro (End Of The Road)', 't3308868');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (11, 'Volbeat', 'Guitar Gangsters & Cadillac Blood', 'Guitar Gangsters & Cadillac Blood', 't3308870');
-INSERT INTO songs (id, artist, album, title, "rdioId") VALUES (12, 'Volbeat', 'Guitar Gangsters & Cadillac Blood', 'Back To Prom', 't3308875');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (1, 'Meshuggah', 'Koloss', 'I Am Colossus', 't15858227', 'http://cdn3.rd.io/album/9/2/7/0000000000158729/4/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (2, 'Meshuggah', 'Koloss', 'The Demon''s Name Is Surveillance', 't15858247', 'http://cdn3.rd.io/album/9/2/7/0000000000158729/4/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (3, 'Meshuggah', 'Koloss', 'Do Not Look Down', 't15858265', 'http://cdn3.rd.io/album/9/2/7/0000000000158729/4/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (4, 'Meshuggah', 'ObZen', 'Combustion', 't308719', 'http://cdn3.rd.io/album/4/6/0/0000000000006064/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (5, 'Meshuggah', 'ObZen', 'Electric Red', 't308730', 'http://cdn3.rd.io/album/4/6/0/0000000000006064/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (6, 'Meshuggah', 'ObZen', 'Bleed', 't308745', 'http://cdn3.rd.io/album/4/6/0/0000000000006064/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (7, 'Volbeat', 'Beyond Hell / Above Heaven', 'The Mirror And The Ripper', 't16401310', 'http://cdn3.rd.io/album/e/b/2/00000000001652be/2/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (8, 'Volbeat', 'Beyond Hell / Above Heaven', 'Heaven Nor Hell', 't16401332', 'http://cdn3.rd.io/album/e/b/2/00000000001652be/2/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (9, 'Volbeat', 'Beyond Hell / Above Heaven', 'Who They Are', 't16401382', 'http://cdn3.rd.io/album/e/b/2/00000000001652be/2/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (10, 'Volbeat', 'Guitar Gangsters & Cadillac Blood', 'Intro (End Of The Road)', 't3308868', 'http://cdn3.rd.io/album/e/a/e/0000000000041eae/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (11, 'Volbeat', 'Guitar Gangsters & Cadillac Blood', 'Guitar Gangsters & Cadillac Blood', 't3308870', 'http://cdn3.rd.io/album/e/a/e/0000000000041eae/square-200.jpg');
+INSERT INTO songs (id, artist, album, title, "rdioId", image) VALUES (12, 'Volbeat', 'Guitar Gangsters & Cadillac Blood', 'Back To Prom', 't3308875', 'http://cdn3.rd.io/album/e/a/e/0000000000041eae/square-200.jpg');
 
 
 --
