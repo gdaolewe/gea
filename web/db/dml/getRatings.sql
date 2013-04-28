@@ -4,11 +4,11 @@
 --GROUP BY artist, album, title, "rdioId"
 --ORDER BY score {--ORDER--}
 --LIMIT {--LIM--} OFFSET {--OFF--}
-SELECT name, artist, album, title, "rdioId", score FROM (
-  SELECT name, artist, album, title, "rdioId", SUM(rating) as score, row_number() OVER (PARTITION BY name) AS rank
+SELECT coords, artist, album, title, "rdioId", score FROM (
+  SELECT coords, artist, album, title, "rdioId", SUM(rating) as score, row_number() OVER (PARTITION BY locations.id) AS rank
   FROM songs, ratings, locations
   WHERE songs.id = ratings.sid AND ratings.lid = locations.id{EXTRA_WHERE}
-  GROUP BY name, artist, album, title, "rdioId"
+  GROUP BY locations.id, coords, artist, album, title, "rdioId"
 ) scored_songs_by_lid
 WHERE rank <= {LIM}
-ORDER BY name, score DESC
+ORDER BY score DESC
