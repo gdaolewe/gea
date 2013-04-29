@@ -9,10 +9,8 @@ body
   height 100%
   max-width 100%
   max-height 100%
-
-body
-  background-color #D6FFC2
-
+  background-color #eee
+  
 #api
   visibility hidden
   height 0
@@ -27,10 +25,13 @@ body
   overflow hidden
 
 #player-art
+  display: block; 
+  background-color white
+  background-image url(/img/sprite.png);
+  background-position: 0px 0px;  
   width 200px
   height 200px
-  background #fff
-
+ 
 #progress-bar
   width 300px
   height 10px
@@ -67,41 +68,43 @@ body
 #next
   left 200px
   background #eee
-  background-image url(/img/next.png)
+  background-image url(/img/sprite.png)
   background-repeat no-repeat
-  background-position:center;
+  background-position: -100px -588px;
   &:hover
-    background-image url(/img/next-over.png)
+    background-position: -100px -498px;
+  &.end
+    cursor default
+    background-position: -100px -558px;
+	&:hover
+	  background-position: -100px -558px;
 
 #previous
   background #eee
-  background-image url(/img/prev.png)
+  background-image url(/img/sprite.png)
+  background-position: -0px -530px;
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/prev-over.png)
+    background-position: -0px -560px; 
 
 #play-pause
   left 100px
 
-.next-end
-  background #eee
-
 .play-button
   background #eee
-  background-image url(/img/play.png)
+  background-image url(/img/sprite.png)
+  background-position: -100px -468px; 
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/play-over.png)
+    background-position: -0px -590px; 
 
 .pause-button
   background #eee
-  background-image url(/img/pause.png)
+  background-image url(/img/sprite.png)
+  background-position: -100px -528px;
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/pause-over.png)
+    background-position: -0px -500px; 
 
 #social
   height 200px
@@ -110,7 +113,7 @@ body
 #like
 #dislike
   display inline-block
-  background #eee
+  background-image url(/img/sprite.png)
   width 100px
   height 100px
   line-height 100px
@@ -121,24 +124,35 @@ body
 #like
   top 0
   right 0
-  background-image url(/img/thumbup.png)
+  background-position: -0px -200px; 
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/thumbup-over.png)
+    background-position: -100px -300px; 
+  &.disabled
+    cursor default
+    background-color #aaa
+    &:hover
+      background-position: -0px -200px; 
 
 #dislike
   top 100px
   right 0
-  background-image url(/img/thumbdown.png)
+  background-position: -0px -400px; 
   background-repeat no-repeat
-  background-position:center;
   &:hover
-    background-image url(/img/thumbdown-over.png)
+    background-position: -100px -200px; 
+  &.disabled
+    cursor default
+    background-color #aaa
+    &:hover
+      background-position: -0px -400px;
 
 #fill
   height 100%
   background #80C7E3
+
+#player-metadata
+  background-color #D6FFC2
 
 #track-header
 #album-header
@@ -191,7 +205,24 @@ body
       width 245px
       position absolute
       left 55px
-
+      .name
+        padding-left 10px
+      .artist, .album
+        padding-left 29px
+    .track-icon, .album-icon, .artist-icon
+      display inline-block
+      height 19px
+      background-image url(/img/sprite.png)
+    .track-icon
+      width 19px
+      background-position -157px -400px;
+    .album-icon
+      width 19px
+      background-position -157px -419px;
+    .artist-icon
+      width 19px
+      background-position -176px -400px;
+	  
 .loading-widget
   margin auto
   position relative
