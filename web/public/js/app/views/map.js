@@ -84,6 +84,7 @@ define([
 
       //listener for spiderify to set the markers to blue
       this.oms.addListener('spiderfy', $.proxy(function (markers) {
+        this.map.setCenter(markers[0].getPosition());
         for (var i = 0; i < markers.length; i ++) {
           markers[i].setIcon(this.blueIcon);
           markers[i].setShadow(this.blueIconShadow);
