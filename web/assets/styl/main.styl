@@ -157,6 +157,10 @@ body
 #track-header
 #album-header
 #artist-header
+.track-header
+.album-header
+.artist-header
+.score-header
   font-family Tahoma
   color: #009900
   font-weight bold
@@ -172,8 +176,47 @@ body
   overflow hidden
   background #ccc
 
+#iw-img
+#iw-overlay
+  cursor pointer
+  width 100px
+  height 100px
+
+#iw-img
+  display inline-block
+  background-size 100%
+
+#iw-overlay
+  left 0
+  top 0
+  display inline-block
+  background-image url(/img/sprite.png)
+  background-position -0px -300px
+  opacity 0
+  &:hover
+    opacity .8
+
+#iw-meta
+  width 100%
+  padding-left 5px
+  
 #search
   background #fff
+
+#map-panel
+  position absolute
+  top 5px
+  left calc(50% \- 200px)
+  width 200px
+  padding 4px
+  border-radius(2px)
+  z-index 5
+  background-color #fff
+  border 2px solid #aaa
+
+#map-filter
+  width 100%
+  opacity .7
 
 #search-input
   width 100%
