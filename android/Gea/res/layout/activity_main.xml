@@ -193,4 +193,16 @@
         android:layout_gravity="top"
         android:onClick="hideKeyboard" />
 
+    <fragment
+        android:id="@+id/topTracks"
+        android:name="net.kenpowers.gea.TopTracksFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="50dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="50dp" />
+
 </RelativeLayout>
