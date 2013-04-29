@@ -36,6 +36,7 @@ define([
       this.mc = new MarkerClusterer(this.map, [], {gridSize: 80, maxZoom: 6});
       //initial load of markers, default is all time
       this.loadAllMarkers("");
+      
       //creating InfoWindow object and listener for clicking on pins
       iw = new google.maps.InfoWindow();
       this.oms.addListener('click', $.proxy(function(m) {
@@ -43,12 +44,14 @@ define([
         iw.open(this.map, m);
       }, this));
 
-      //creating the MarkerImage for the default
+      //creating the MarkerImage for the default red marker and its shadow
       this.redIcon = {
         url: '/img/sprite.png',
+        //size of marker image
         size: new google.maps.Size(20,34),
+        //position of image in sprite
         origin: new google.maps.Point(100,400), 
-        //for anchor, origin x+10, origin y+34
+        //where to anchor the image to the map (ie the bottom tip of the marker in this case)
         anchor: new google.maps.Point(10,34) 
       };
 
@@ -61,6 +64,7 @@ define([
         anchor: new google.maps.Point(10, 34)
       };
 
+      //creating the MarkerImage for the blue marker and its shadow
       this.blueIcon = {
         url: '/img/sprite.png',
         size: new google.maps.Size(20,34),
@@ -70,13 +74,12 @@ define([
 
       this.blueIconShadow = {
         url: '/img/sprite.png',
-        // The shadow image is larger in the horizontal dimension
-        // while the position and offset are the same as for the main image.
         size: new google.maps.Size(37, 34),
         origin: new google.maps.Point(120,434),
         anchor: new google.maps.Point(10, 34)
       };
 
+      //listener for spiderify to set the markers to blue
       this.oms.addListener('spiderfy', $.proxy(function(markers) {
         for(var i = 0; i < markers.length; i ++) {
           markers[i].setIcon(this.blueIcon);
@@ -85,6 +88,7 @@ define([
         iw.close();
       }, this));
 
+      //listener for unspiderfy to reset markers to red
       this.oms.addListener('unspiderfy', $.proxy(function(markers) {
         for(var i = 0; i < markers.length; i ++) {
           markers[i].setIcon(this.redIcon);
@@ -93,12 +97,14 @@ define([
         iw.close();
       }, this)); 
 
+      //listening for mapFilter event which clears and reloads markers based on # hrs passed
       vent.on('mapFilter', $.proxy(function (hours) {
         this.clearMarkers();
         this.loadAllMarkers(hours);
       }, this));
     },
 
+    //loads all markers based on time period from server
     loadAllMarkers: function (hours) {
       var timePeriod = (hours) ? "&pastHours=" + hours : "";
       $.get('/rate?limit=10' + timePeriod, $.proxy(function (data) {
@@ -114,6 +120,7 @@ define([
       }, this));
     },
 
+    //creates a single new marker and adds to Spiderfier, MarkerClusterer, and local arrays for markers
     addNewMarker: function (position, song, artist, album, image, score, key, rank) {
       var marker = new google.maps.Marker({
         position: position,
@@ -133,6 +140,7 @@ define([
       markerArray.push(marker);
     },
 
+    //clears all markers from Spiderfier, MarkerCluster, and local arrays for markers
     clearMarkers: function () {
       if (iw) {
         iw.close();
@@ -148,6 +156,7 @@ define([
       this.mc.clearMarkers();
     },
 
+    //triggers the play-key event to begin playing the song in the marker InfoWindow
     playSong: function () {
       vent.trigger('play-key', this.$('#iw-key').val());
     }
