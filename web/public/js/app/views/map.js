@@ -62,7 +62,6 @@ define([
       }, this));*/
 
       vent.on('mapFilter', $.proxy(function (hours) {
-        this.oms.unspiderfy();
         this.clearMarkers();
         this.loadAllMarkers(hours);
       }, this));
@@ -112,8 +111,11 @@ define([
         for (i=0; i < markerArray.length; i++) {
             markerArray[i].setMap(null);
         }
-      markerArray.length = 0;
+        markerArray.length = 0;
       }
+      this.oms.unspiderfy();
+      this.oms.clearMarkers();
+      this.mc.clearMarkers();
     },
 
     playSong: function () {
