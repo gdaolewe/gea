@@ -8,7 +8,8 @@ public class Track extends MusicServiceObject implements Comparable<Track> {
 	private int duration, trackNum;
 	private int liked = Track.NOT_RATED;
 	public Track(String key, String type, String name, String artist, 
-			String artistKey, String album, String albumKey, String albumArtURL, int duration, int trackNum) {
+				 String artistKey, String album, String albumKey, 
+				 String albumArtURL, int duration, int trackNum) {
 		super (key, type, name);
 		this.artist = artist;
 		this.artistKey = artistKey;
