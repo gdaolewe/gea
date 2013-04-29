@@ -34,7 +34,7 @@ define([
       //creating an OMS (Spiderfier) object
       this.oms = new OverlappingMarkerSpiderfier(this.map, {keepSpiderfied: true});
       //Creating a MarkerClusterer object
-      this.mc = new MarkerClusterer(this.map, {gridSize: 20, maxZoom: 20});
+      this.mc = new MarkerClusterer(this.map, [], {gridSize: 80, maxZoom: 6});
       //initial load of markers, default is all time
       this.loadAllMarkers("");
       //creating InfoWindow object and listener for clicking on pins
@@ -44,9 +44,9 @@ define([
         iw.open(this.map, m);
       }, this));
 
-      this.oms.addListener('spiderfy', $.proxy(function(markers) {
+      /*this.oms.addListener('spiderfy', $.proxy(function(markers) {
         for(var i = 0; i < markers.length; i ++) {
-          //markers[i].fillColor("blue");//setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png'); //do this in the template file?
+          markers[i].setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png'); //do this in the template file?
           //markers[i].setShadow(null);
         } 
         iw.close();
@@ -59,11 +59,7 @@ define([
           //markers[i].setShadow(null);
         } 
         iw.close();
-      }, this));
-
-      /*google.maps.event.addListener(this.mc, 'clusterclick', function(cluster) {
-        map.setCenter(cluster.getCenter());
-      });*/
+      }, this));*/
 
       vent.on('mapFilter', $.proxy(function (hours) {
         this.oms.unspiderfy();
@@ -73,10 +69,7 @@ define([
     },
 
     /*TODO
-      1.triggering listener to infowindow to listen for click on album art to play it
-      2.implement google markerclusterer library
       different colors on spiderfying
-      cycle through colors for each different coordinate
     */
 
     loadAllMarkers: function (hours) {
@@ -107,7 +100,7 @@ define([
         })
       });
       this.oms.addMarker(marker);
-      //this.mc.addMarker(marker);
+      this.mc.addMarker(marker);
       markerArray.push(marker);
     },
 
@@ -121,11 +114,6 @@ define([
         }
       markerArray.length = 0;
       }
-    },
-
-    iconWithColor: function () {
-      return newImage;
-        //color + '|000000|ffff00';
     },
 
     playSong: function () {
