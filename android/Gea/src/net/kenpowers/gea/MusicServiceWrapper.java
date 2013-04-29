@@ -219,7 +219,7 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		});
 	}
 	
-	public void getMusicServiceObjectsForKeys(String[] keys) {
+	public void getMusicServiceObjectsForKeys(String[] keys, final SearchCompleteListener callback) {
 		String keysString = "";
 		for (int i=0; i<keys.length; i++) {
 			keysString += keys[i];
@@ -238,7 +238,6 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 			public void onApiSuccess(JSONObject result) {
 				MusicServiceObject[] results = null;
 				try {
-					Log.d(LOG_TAG, result.toString());
 					JSONObject json = result.getJSONObject("result");
 					results = new MusicServiceObject[json.length()];
 					Iterator<?> jsonKeys = json.keys();
@@ -250,6 +249,7 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 						i++;
 					}
 					notifySearchCompleteListeners(results);
+					callback.onSearchComplete(results);
 				} catch(JSONException e) {
 					Log.e(LOG_TAG,"Error parsing JSON: get");
 				}

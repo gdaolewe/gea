@@ -15,6 +15,9 @@ define([
   // Template
   var template = _.template(html);
 
+  //Truncating length
+  var maxLength = 25;
+
   // View constructor
   // These views represent a search result
   return bb.View.extend({
@@ -26,20 +29,28 @@ define([
       this.render();
     },
     render: function () {
+      var nameTruncated = this.model.get('name');
+      nameTruncated = (nameTruncated && nameTruncated.length > maxLength) ?
+                          $.trim(nameTruncated).substring(0, maxLength).trim(this) + "..."
+                          : nameTruncated;
+      var artistTruncated = this.model.get('artist');
+      artistTruncated = (artistTruncated && artistTruncated.length > maxLength) ?
+                          "by " + $.trim().substring(0, maxLength).trim(this) + "..."
+                          : (artistTruncated) ? "by " + artistTruncated : "";
       this.$el.html(template({
         icon: this.model.get('icon'),
-        artist: this.model.get('artist'),
+        artist: artistTruncated,
         key: this.model.get('key'),
-        name: this.model.get('name')
+        name: nameTruncated
       }));
 
       if (this.$el.hasClass('r')) {
         // Artist results don't have an artist field (ironically)
         this.$('.artist').remove();
+        // Use the artist-icon to show this is an artist result, not a track result
         this.$('.track-icon').toggleClass('track-icon artist-icon');
       } else if (this.$el.hasClass('a')) {
-        // Remove album from album results
-        this.$('.album').remove();
+        // Use the album-icon to show this is an album result, not a track result
         this.$('.track-icon').toggleClass('track-icon album-icon');
       }
     },
