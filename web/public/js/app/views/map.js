@@ -129,8 +129,7 @@ define([
     },
 
     playSong: function () {
-      console.log(iw);
-      //vent.trigger('iw-play', this.iw.)
+      vent.trigger('play-key', this.$('#iw-key').val());
     }
 
   }))();

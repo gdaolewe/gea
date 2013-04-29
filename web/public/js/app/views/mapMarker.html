@@ -1,6 +1,6 @@
 <span id="info-window">
-  <span id="iw-key" style="display:none">{{key}}</span>
-  <img id="iw-img" src="{{image}}" width=100 height=100 />
+  <input id="iw-key" type="hidden" value="{{key}}" />
+  <div id="iw-img" style="background-image:url('{{image}}');"><span id="iw-overlay"></span></div>
   <span id="iw-meta">
     <div><span class="track-header">Song: </span><span id="iw-title">{{song}}</span></div> 
     <div><span class="album-header">Album: </span><span id="iw-album">{{album}}</span></div> 

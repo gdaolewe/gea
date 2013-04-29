@@ -177,7 +177,25 @@ body
   background #ccc
 
 #iw-img
+#iw-overlay
   cursor pointer
+  width 100px
+  height 100px
+  background-size 100%
+
+#iw-img
+  display inline-block
+
+#iw-overlay
+  left 0
+  top 0
+  display inline-block
+  background-image url(/img/sprite.png)
+  background-size 100px
+  background-position -100px -400px
+  opacity 0
+  &:hover
+    opacity .8
 
 #iw-meta
   width 100%
