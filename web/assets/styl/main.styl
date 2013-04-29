@@ -10,10 +10,19 @@ body
   max-width 100%
   max-height 100%
   background-color #eee
-  
+
 #api
   visibility hidden
   height 0
+
+#rdio-logo
+  position absolute
+  left 64
+  bottom 0
+  padding-left 10px
+  padding-bottom 10px
+  width 3%
+  height 3%
 
 #right
   position absolute
@@ -25,34 +34,22 @@ body
   overflow hidden
 
 #player-art
-  display: block; 
+  display: block;
   background-color white
   background-image url(/img/sprite.png);
-  background-position: 0px 0px;  
+  background-position: 0px 0px;
   width 200px
   height 200px
- 
+
 #progress-bar
   width 300px
   height 10px
   background #bbb
 
 #controls
-#top-trending
   height 30px
   position relative
   user-select(none)
-
-#top-trending
-  background #eee
-  width 300px
-  height 30px
-  line-height 30px
-  text-align center
-  position relative
-  cursor pointer
-  &:hover
-    background #fff
 
 #previous
 #next
@@ -70,7 +67,7 @@ body
   background #eee
   background-image url(/img/sprite.png)
   background-repeat no-repeat
-  background-position: -0px -490px; 
+  background-position: -0px -490px;
   &:hover
     background-position: -0px -400px;
   &.end
@@ -82,10 +79,10 @@ body
 #previous
   background #eee
   background-image url(/img/sprite.png)
-  background-position: -0px -520px; 
+  background-position: -0px -520px;
   background-repeat no-repeat
   &:hover
-    background-position: -0px -460px; 
+    background-position: -0px -460px;
 
 #play-pause
   left 100px
@@ -93,18 +90,18 @@ body
 .play-button
   background #eee
   background-image url(/img/sprite.png)
-  background-position: -100px -400px; 
+  background-position: -100px -400px;
   background-repeat no-repeat
   &:hover
-    background-position: -100px -460px; 
+    background-position: -100px -460px;
 
 .pause-button
   background #eee
   background-image url(/img/sprite.png)
-  background-position: -100px -490px; 
+  background-position: -100px -490px;
   background-repeat no-repeat
   &:hover
-    background-position: -0px -430px; 
+    background-position: -0px -430px;
 
 #social
   height 200px
@@ -124,10 +121,10 @@ body
 #like
   top 0
   right 0
-  background-position: -0px -200px; 
+  background-position: -0px -200px;
   background-repeat no-repeat
   &:hover
-    background-position: -100px -200px; 
+    background-position: -100px -200px;
   &.disabled
     cursor default
     background-color #aaa
@@ -137,10 +134,10 @@ body
 #dislike
   top 100px
   right 0
-  background-position: -100px -300px; 
+  background-position: -100px -300px;
   background-repeat no-repeat
   &:hover
-    background-position: -0px -300px; 
+    background-position: -0px -300px;
   &.disabled
     cursor default
     background-color #aaa
@@ -171,6 +168,31 @@ body
   bottom 0
   overflow hidden
   background #ccc
+
+#iw-img
+#iw-overlay
+  cursor pointer
+  width 100px
+  height 100px
+  background-size 100%
+
+#iw-img
+  display inline-block
+
+#iw-overlay
+  left 0
+  top 0
+  display inline-block
+  background-image url(/img/sprite.png)
+  background-size 100px
+  background-position -100px -400px
+  opacity 0
+  &:hover
+    opacity .8
+
+#iw-meta
+  width 100%
+  padding-left 5px
 
 #search
   background #fff
