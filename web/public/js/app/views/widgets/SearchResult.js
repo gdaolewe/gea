@@ -36,9 +36,11 @@ define([
       if (this.$el.hasClass('r')) {
         // Artist results don't have an artist field (ironically)
         this.$('.artist').remove();
+        this.$('.track-icon').toggleClass('track-icon artist-icon');
       } else if (this.$el.hasClass('a')) {
         // Remove album from album results
-        this.$('.album').remove()
+        this.$('.album').remove();
+        this.$('.track-icon').toggleClass('track-icon album-icon');
       }
     },
     click: function () {
