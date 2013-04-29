@@ -100,7 +100,9 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         ft.hide(searchContext);
         Fragment launchFragment = getSupportFragmentManager().findFragmentById(R.id.launch);
         launchFragment.getView().bringToFront();
-        
+        Fragment topTracks = getSupportFragmentManager().findFragmentById(R.id.topTracks);
+        topTracks.getView().bringToFront();
+        ft.hide(topTracks);
         if (music.isReady())
         	ft.hide(launchFragment);
         ft.commit();
@@ -219,6 +221,25 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 					@Override
 					public boolean onMarkerClick(Marker marker) {
 						BasicTrack[] topTracks = markers.get(marker.getTitle());
+						String[] tracksStrings = new String[topTracks.length];
+						for (int i=0; i<topTracks.length; i++)
+							tracksStrings[i] = topTracks[i].toString();
+						ListView list = (ListView)findViewById(R.id.topTracksList);
+						list.setAdapter(new ArrayAdapter<String>(getAppContext(), R.layout.search_result, tracksStrings));
+						Button done = (Button)findViewById(R.id.topTracksDone);
+						done.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View view) {
+								FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+								Fragment topTracksFragment = getSupportFragmentManager().findFragmentById(R.id.topTracks);
+								ft.hide(topTracksFragment);
+								ft.commit();
+							}
+						});
+						FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+						Fragment topTracksFragment = getSupportFragmentManager().findFragmentById(R.id.topTracks);
+						ft.show(topTracksFragment);
+						ft.commit();
 						return true;
 					}
                 	
