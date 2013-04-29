@@ -14,6 +14,11 @@ define([
   var contentMap = null;
   var iw = null;
   var markerArray = [];
+  //first set to 10s
+  var timer = 10000;
+  var timerMultiplier = 1;
+  var thread = null;
+  var prevData = null;
 
   return new (bb.View.extend({
     el: '#map',
@@ -34,8 +39,6 @@ define([
       this.oms = new OverlappingMarkerSpiderfier(this.map, {keepSpiderfied: true});
       //Creating a MarkerClusterer object
       this.mc = new MarkerClusterer(this.map, [], {gridSize: 80, maxZoom: 6});
-      //initial load of markers, default is all time
-      this.loadAllMarkers("");
       
       //creating InfoWindow object and listener for clicking on pins
       iw = new google.maps.InfoWindow();
@@ -80,8 +83,8 @@ define([
       };
 
       //listener for spiderify to set the markers to blue
-      this.oms.addListener('spiderfy', $.proxy(function(markers) {
-        for(var i = 0; i < markers.length; i ++) {
+      this.oms.addListener('spiderfy', $.proxy(function (markers) {
+        for (var i = 0; i < markers.length; i ++) {
           markers[i].setIcon(this.blueIcon);
           markers[i].setShadow(this.blueIconShadow);
         } 
@@ -89,34 +92,58 @@ define([
       }, this));
 
       //listener for unspiderfy to reset markers to red
-      this.oms.addListener('unspiderfy', $.proxy(function(markers) {
-        for(var i = 0; i < markers.length; i ++) {
+      this.oms.addListener('unspiderfy', $.proxy(function (markers) {
+        for (var i = 0; i < markers.length; i ++) {
           markers[i].setIcon(this.redIcon);
           markers[i].setShadow(this.redIconShadow);
         } 
         iw.close();
       }, this)); 
 
+      //default is all time: ""
+      this.hours = "";
       //listening for mapFilter event which clears and reloads markers based on # hrs passed
       vent.on('mapFilter', $.proxy(function (hours) {
+        //since the user triggered a filter change, clear any timer
+        clearTimeout(thread);
         this.clearMarkers();
-        this.loadAllMarkers(hours);
+        //saves the hours filter
+        this.hours = hours;
+        //clears previous data since this is a new hours filter
+        prevData = null;
+        this.loadAllMarkers(this.hours);
       }, this));
+
+      //initial load of markers, default is all time
+      this.loadAllMarkers(this.hours);
     },
 
     //loads all markers based on time period from server
     loadAllMarkers: function (hours) {
       var timePeriod = (hours) ? "&pastHours=" + hours : "";
       $.get('/rate?limit=10' + timePeriod, $.proxy(function (data) {
+        //checks to see if the data has changed. if so, then update
+        if (_.isEqual(prevData,data)) {
+          //same, so increase the multiplier and starts the timer
+          timerMultiplier++;
+          this.startTimer();
+          return;
+        }
+        //new data, so clear and reload
+        this.clearMarkers();
+        timerMultiplier = 1;
+        prevData = data;
         for (var position in data) {
-          var rank = 1;
+          var rank = data[position].length;
           data[position].reverse().forEach($.proxy(function (d) {
             var split = position.split(",");
             var latLng = new google.maps.LatLng(split[0], split[1]);
             this.addNewMarker(latLng, d.title, d.artist, d.album, d.image, d.score, d.rdioId, rank);
-            rank++;
+            rank--;
           }, this));
+          data[position].reverse();
         }
+        this.startTimer();
       }, this));
     },
 
@@ -159,6 +186,16 @@ define([
     //triggers the play-key event to begin playing the song in the marker InfoWindow
     playSong: function () {
       vent.trigger('play-key', this.$('#iw-key').val());
+    },
+
+    //starts up the timer for refreshing data
+    startTimer: function () {
+      //clears the timeout thread first
+      clearTimeout(thread);
+      //initializes the timeout thread based on the multiplier
+      thread = setTimeout($.proxy(function () {
+        this.loadAllMarkers(this.hours);
+      }, this), timer*Math.pow(2, timerMultiplier));
     }
   }))();
 });
