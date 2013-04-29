@@ -1,38 +1,74 @@
+
 package net.kenpowers.gea.test;
 
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Before;
-import org.junit.BeforeClass;
 
-import net.kenpowers.gea.GeaGETRequest;
-import net.kenpowers.gea.GeaPOSTRequest;
 import net.kenpowers.gea.GeaServerHandler;
-import net.kenpowers.gea.GeaServerRequest;
-import net.kenpowers.gea.RequestTask;
+import net.kenpowers.gea.GeaServerHandler.RequestMethod;
 import android.test.AndroidTestCase;
 
 public class RequestTaskTest extends AndroidTestCase{
 	
-	private final String trackID = "t308758"; //lethargica
-	private final String server = "http://gea.kenpowers.net";
-	private GeaServerRequest get;
-	private GeaServerRequest post;
+	private final String lethargica = "t308758"; //lethargica
+	private final RequestMethod GET = GeaServerHandler.RequestMethod.GET;
+	private final RequestMethod POST = GeaServerHandler.RequestMethod.POST;
+	private JSONArray response;
+	private final BasicNameValuePair from = new BasicNameValuePair("from", "rdio");
+	private final BasicNameValuePair id = new BasicNameValuePair("id", lethargica);
+	private final BasicNameValuePair verdict = new BasicNameValuePair("verdict", GeaServerHandler.RATE_UP_ARGUMENT);
 	
-	@BeforeClass
-	public void setup(){
-		get = new GeaGETRequest(server + GeaServerHandler.BASE_RATE_QUERY, null);
-		post = new GeaPOSTRequest(server + GeaServerHandler.BASE_RATE_QUERY, null);
+	@Before
+	public void initialize(){
+		response = null;
 	}
 	
 	@Test
-	public void testPOST(){
-		RequestTask postRequest = new RequestTask(null);
-		
+	public void testURL(){
+		String expected = "http://gea.kenpowers.net/rate?from=rdio&id=t308758&verdict=like";
+		String result = GeaServerHandler.getURLStringForParams(GeaServerHandler.NET_BASE_URL + GeaServerHandler.BASE_RATE_QUERY, new BasicNameValuePair[] { from, id, verdict });
+		assertEquals(expected, result);
 	}
 	
+	@Ignore
 	@Test
 	public void testGET(){
-		RequestTask getRequest = new RequestTask(null);
+		String baseURL = GeaServerHandler.NET_BASE_URL + GeaServerHandler.BASE_RATE_QUERY;
+		BasicNameValuePair limit = new BasicNameValuePair("limit", "10");
+		String getURL = GeaServerHandler.getURLStringForParams(baseURL, new BasicNameValuePair[] { limit });
+		response = GeaServerHandler.getJSONForRequest(getURL, GET);
+		JSONObject jobject = null;
+		try{
+			jobject = response.getJSONObject(0);
+			assertEquals(10, response.length()); //make sure we get back 
+			
+		}
+		catch(JSONException e){
+			fail(e.toString());
+		}
 	}
 	
+	@Ignore
+	@Test
+	public void testPOST(){
+		String postURL = GeaServerHandler.NET_BASE_URL + GeaServerHandler.BASE_RATE_QUERY + "from=rdio&" + "id=" + lethargica + "&verdict=" + GeaServerHandler.RATE_UP_ARGUMENT;
+		response = GeaServerHandler.getJSONForRequest(postURL, POST);
+		JSONObject jobject = null;
+		try{
+			jobject = response.getJSONObject(0);
+			
+		}
+		catch(JSONException e){
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	//@Test
+	//public void test
 }
