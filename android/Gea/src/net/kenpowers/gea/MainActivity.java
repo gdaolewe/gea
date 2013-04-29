@@ -2,6 +2,7 @@ package net.kenpowers.gea;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import android.view.View.OnClickListener;
 import android.widget.*;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -64,6 +66,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	
 	private GoogleMap gmap;
 	private Marker here;
+	private HashMap<String, BasicTrack[]> markers;
 	
 	private int volume;
 
@@ -212,7 +215,14 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
                 CameraUpdate zoom = CameraUpdateFactory.zoomTo(5);
                 gmap.moveCamera(center);
                 gmap.moveCamera(zoom);
-                //here = gmap.addMarker(new MarkerOptions().position(coordinate).title("Top tracks"));
+                gmap.setOnMarkerClickListener(new OnMarkerClickListener() {
+					@Override
+					public boolean onMarkerClick(Marker marker) {
+						BasicTrack[] topTracks = markers.get(marker.getTitle());
+						return true;
+					}
+                	
+                });
             }
         }
     }
@@ -358,29 +368,24 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
    
    @UiThread
    void populateMap(JSONObject json) {
-	  
-	  Geocoder geocoder = new Geocoder(getAppContext());
+	  if (markers == null)
+		  markers = new HashMap<String, BasicTrack[]>();
 	  Iterator<?> stateKeys = json.keys(); 
 	  while (stateKeys.hasNext()) {
 		  String stateCoord = (String)stateKeys.next();
 		  Log.d(LOG_TAG, "state: " + stateCoord);
 		  try {
 			  JSONArray tracks = json.getJSONArray(stateCoord);
-			  String output = "";
+			  BasicTrack[] topForThisState = new BasicTrack[tracks.length()];
 			  for (int i=0; i<tracks.length(); i++) {
 				  JSONObject track = tracks.getJSONObject(i);
-				  output += track.getString("artist") + " - " + track.getString("title") + "\n";
+				  topForThisState[i] = new BasicTrack(track.getString("rdioId"), "track", 
+						  							  track.getString("title"), track.getString("artist"), 
+						  							  track.getString("album"), track.getString("image"));
 			  }
-			  /*List<Address> addresses = geocoder.getFromLocationName(state, 1);
-			  if (addresses.size() > 0) {
-				  Address address = geocoder.getFromLocationName(state, 1).get(0);
-				  //Log.d(LOG_TAG, address.);
-				  LatLng coord = new LatLng(address.getLatitude(), address.getLongitude());
-				  Marker marker = gmap.addMarker(new MarkerOptions().position(coord).title("Top tracks").snippet(output));
-				  
-			  }*/
 			  LatLng coord = GeaServerHandler.getLatLngForCoordinateString(stateCoord);
-			  Marker marker = gmap.addMarker(new MarkerOptions().position(coord).title(stateCoord).snippet(output));
+			  Marker marker = gmap.addMarker(new MarkerOptions().position(coord).title(stateCoord));
+			  markers.put(stateCoord, topForThisState);
 		  } catch(JSONException e) {
 			  
 		  }
