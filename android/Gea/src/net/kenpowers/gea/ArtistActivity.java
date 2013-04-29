@@ -39,7 +39,7 @@ public class ArtistActivity extends SherlockActivity implements SearchCompleteLi
 		music = MusicServiceWrapper.getInstance();
 		music.registerSearchCompleteListener(this);
 		String[] keys = {key};
-		music.getMusicServiceObjectsForKeys(keys);
+		music.getMusicServiceObjectsForKeys(keys, this);
 	}
 
 	@Override

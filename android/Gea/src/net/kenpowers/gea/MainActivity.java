@@ -1,11 +1,14 @@
 package net.kenpowers.gea;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.http.message.BasicNameValuePair;
 import org.json.*;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -18,8 +21,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 import android.widget.*;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -27,7 +32,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.location.Address;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 
@@ -60,6 +67,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	
 	private GoogleMap gmap;
 	private Marker here;
+	private HashMap<String, BasicTrack[]> markers;
 	
 	private int volume;
 
@@ -80,8 +88,9 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         else
         	baseURL = GeaServerHandler.NET_BASE_URL;
         
-        //TODO Connecting to beta server for debugging for now, remove this later
-        baseURL = GeaServerHandler.NET_BASE_URL;
+        //For testing physical device against local server
+        baseURL = "http://10.1.40.121:3000";
+        //baseURL = "http://192.168.1.115:3000";
         
         music = MusicServiceWrapper.getInstance();
         
@@ -93,7 +102,9 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         ft.hide(searchContext);
         Fragment launchFragment = getSupportFragmentManager().findFragmentById(R.id.launch);
         launchFragment.getView().bringToFront();
-        
+        Fragment topTracks = getSupportFragmentManager().findFragmentById(R.id.topTracks);
+        topTracks.getView().bringToFront();
+        ft.hide(topTracks);
         if (music.isReady())
         	ft.hide(launchFragment);
         ft.commit();
@@ -208,7 +219,61 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
                 CameraUpdate zoom = CameraUpdateFactory.zoomTo(5);
                 gmap.moveCamera(center);
                 gmap.moveCamera(zoom);
-                here = gmap.addMarker(new MarkerOptions().position(coordinate).title("Top tracks"));
+                gmap.setOnMarkerClickListener(new OnMarkerClickListener() {
+					@Override
+					public boolean onMarkerClick(Marker marker) {
+						final BasicTrack[] topTracks = markers.get(marker.getTitle());
+						String[] tracksStrings = new String[topTracks.length];
+						for (int i=0; i<topTracks.length; i++)
+							tracksStrings[i] = topTracks[i].toString();
+						ListView list = (ListView)findViewById(R.id.topTracksList);
+						list.setAdapter(new ArrayAdapter<String>(getAppContext(), R.layout.search_result, tracksStrings));
+						list.setOnItemClickListener(new OnItemClickListener() {
+							@Override
+							public void onItemClick(AdapterView<?> parent, View view, 
+													final int position, long id) {
+								setTopTracksVisible(false);
+								String[] trackKeys = new String[topTracks.length];
+								for (int i=0; i<topTracks.length; i++)
+									trackKeys[i] = topTracks[i].getKey();
+								music.getMusicServiceObjectsForKeys(trackKeys, new SearchCompleteListener() {
+									@Override
+									public void onSearchComplete(MusicServiceObject[] results) {
+										HashMap<String, Track> orderTracksMap = new HashMap<String, Track>();
+										for (int i=0; i<results.length; i++) {
+											Track result = (Track)results[i];
+											orderTracksMap.put(result.getKey(), result);
+										}
+										Track[] tracks = new Track[results.length];
+										for (int i=0; i<results.length; i++) {
+											tracks[i] = orderTracksMap.get(topTracks[i].getKey());
+											Log.d(LOG_TAG, tracks[i].getKey());
+										}
+										music.getPlayerForTrack(tracks[position]);
+										music.setPlaylist(tracks, position);
+									}
+								});
+							}
+							
+						});
+						Button done = (Button)findViewById(R.id.topTracksDone);
+						done.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View view) {
+								FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+								Fragment topTracksFragment = getSupportFragmentManager().findFragmentById(R.id.topTracks);
+								ft.hide(topTracksFragment);
+								ft.commit();
+							}
+						});
+						FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+						Fragment topTracksFragment = getSupportFragmentManager().findFragmentById(R.id.topTracks);
+						ft.show(topTracksFragment);
+						ft.commit();
+						return true;
+					}
+                	
+                });
             }
         }
     }
@@ -267,6 +332,16 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     		ft.show(searchContext);
     	else
     		ft.hide(searchContext);
+    	ft.commit();
+    }
+    
+    private void setTopTracksVisible(boolean visible) {
+    	FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+    	Fragment topTracks = getSupportFragmentManager().findFragmentById(R.id.topTracks);
+    	if (visible)
+    		ft.show(topTracks);
+    	else
+    		ft.hide(topTracks);
     	ft.commit();
     }
     
@@ -339,33 +414,44 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
      */
     @Background
     void getApprovalRequest(int num){
-    	JSONArray json;
-    	try {
-    		BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
-    		BasicNameValuePair[] params = {param};
-    		String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
-            json = GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.GET);
-            if (json == null) {
-            	Log.e(LOG_TAG, "Error retrieving JSON from Gea Server");
-            }
-            String output = "";
-            for (int i=0; i < json.length(); i++) {
-            	JSONObject obj = json.getJSONObject(i);
-            	output += obj.getString("artist") + " - " + obj.getString("title") + "\n";
-            }
-            Log.d(LOG_TAG, output);
-            updateMap(output);
-    	} catch (JSONException e) {
-    		Log.e(LOG_TAG, "Error parsing JSON retrived from Gea Server");
-    	} catch (Exception e) {
-    		Log.e(LOG_TAG, e.toString());
-    	}
+    	JSONObject json;
+	    BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
+	    BasicNameValuePair[] params = {param};
+	    String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
+        json = GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.GET);
+        if (json == null) {
+        	Log.e(LOG_TAG, "Error retrieving JSON from Gea Server");
+        	return;
+        }
+        populateMap(json);
+    	
     }
    
    @UiThread
-   void updateMap(String text) {
-	   here.setSnippet(text);
-	   here.showInfoWindow();
+   void populateMap(JSONObject json) {
+	  if (markers == null)
+		  markers = new HashMap<String, BasicTrack[]>();
+	  Iterator<?> stateKeys = json.keys(); 
+	  while (stateKeys.hasNext()) {
+		  String stateCoord = (String)stateKeys.next();
+		  Log.d(LOG_TAG, "state: " + stateCoord);
+		  try {
+			  JSONArray tracks = json.getJSONArray(stateCoord);
+			  BasicTrack[] topForThisState = new BasicTrack[tracks.length()];
+			  for (int i=0; i<tracks.length(); i++) {
+				  JSONObject track = tracks.getJSONObject(i);
+				  topForThisState[i] = new BasicTrack(track.getString("rdioId"), "track", 
+						  							  track.getString("title"), track.getString("artist"), 
+						  							  track.getString("album"), track.getString("image"));
+			  }
+			  LatLng coord = GeaServerHandler.getLatLngForCoordinateString(stateCoord);
+			  Marker marker = gmap.addMarker(new MarkerOptions().position(coord).title(stateCoord));
+			  markers.put(stateCoord, topForThisState);
+		  } catch(JSONException e) {
+			  
+		  }
+	  }
+		  
    }
    
    public void onPrevButtonClicked(View view) {
