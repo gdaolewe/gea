@@ -47,6 +47,7 @@ define([
       if (this.$el.hasClass('r')) {
         // Artist results don't have an artist field (ironically)
         this.$('.artist').remove();
+        this.$('.track-icon').toggleClass('track-icon artist-icon');
       }
     },
     click: function () {
