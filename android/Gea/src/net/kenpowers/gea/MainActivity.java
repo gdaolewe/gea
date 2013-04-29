@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 import android.widget.*;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
@@ -88,7 +89,8 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         	baseURL = GeaServerHandler.NET_BASE_URL;
         
         //For testing physical device against local server
-        baseURL = "http://192.168.1.115:3000";
+        baseURL = "http://10.1.40.121:3000";
+        //baseURL = "http://192.168.1.115:3000";
         
         music = MusicServiceWrapper.getInstance();
         
@@ -220,12 +222,40 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
                 gmap.setOnMarkerClickListener(new OnMarkerClickListener() {
 					@Override
 					public boolean onMarkerClick(Marker marker) {
-						BasicTrack[] topTracks = markers.get(marker.getTitle());
+						final BasicTrack[] topTracks = markers.get(marker.getTitle());
 						String[] tracksStrings = new String[topTracks.length];
 						for (int i=0; i<topTracks.length; i++)
 							tracksStrings[i] = topTracks[i].toString();
 						ListView list = (ListView)findViewById(R.id.topTracksList);
 						list.setAdapter(new ArrayAdapter<String>(getAppContext(), R.layout.search_result, tracksStrings));
+						list.setOnItemClickListener(new OnItemClickListener() {
+							@Override
+							public void onItemClick(AdapterView<?> parent, View view, 
+													final int position, long id) {
+								setTopTracksVisible(false);
+								String[] trackKeys = new String[topTracks.length];
+								for (int i=0; i<topTracks.length; i++)
+									trackKeys[i] = topTracks[i].getKey();
+								music.getMusicServiceObjectsForKeys(trackKeys, new SearchCompleteListener() {
+									@Override
+									public void onSearchComplete(MusicServiceObject[] results) {
+										HashMap<String, Track> orderTracksMap = new HashMap<String, Track>();
+										for (int i=0; i<results.length; i++) {
+											Track result = (Track)results[i];
+											orderTracksMap.put(result.getKey(), result);
+										}
+										Track[] tracks = new Track[results.length];
+										for (int i=0; i<results.length; i++) {
+											tracks[i] = orderTracksMap.get(topTracks[i].getKey());
+											Log.d(LOG_TAG, tracks[i].getKey());
+										}
+										music.getPlayerForTrack(tracks[position]);
+										music.setPlaylist(tracks, position);
+									}
+								});
+							}
+							
+						});
 						Button done = (Button)findViewById(R.id.topTracksDone);
 						done.setOnClickListener(new OnClickListener() {
 							@Override
@@ -302,6 +332,16 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     		ft.show(searchContext);
     	else
     		ft.hide(searchContext);
+    	ft.commit();
+    }
+    
+    private void setTopTracksVisible(boolean visible) {
+    	FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+    	Fragment topTracks = getSupportFragmentManager().findFragmentById(R.id.topTracks);
+    	if (visible)
+    		ft.show(topTracks);
+    	else
+    		ft.hide(topTracks);
     	ft.commit();
     }
     

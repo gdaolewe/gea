@@ -40,7 +40,7 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 		music = MusicServiceWrapper.getInstance();
 		music.registerSearchCompleteListener(this);
 		String[] keys = {key};
-		music.getMusicServiceObjectsForKeys(keys);
+		music.getMusicServiceObjectsForKeys(keys, this);
 	}
 	
 	public void onSearchComplete(MusicServiceObject[] results) {
@@ -48,7 +48,7 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 			album = (Album)results[0];
 			((TextView)findViewById(R.id.artist)).setText(album.getArtist());
 			((TextView)findViewById(R.id.album)).setText(album.getName());
-			music.getMusicServiceObjectsForKeys(album.getTrackKeys());
+			music.getMusicServiceObjectsForKeys(album.getTrackKeys(), this);
 			downloadAlbumArt(album.getAlbumArtURL());
 		} else if (results[0].getType().equals("track")) {
 			tracks = new Track[results.length];
