@@ -19,6 +19,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.UiThread;
 import com.googlecode.androidannotations.annotations.ViewById;
 import com.googlecode.androidannotations.annotations.EActivity;
 
@@ -39,7 +40,7 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 		music = MusicServiceWrapper.getInstance();
 		music.registerSearchCompleteListener(this);
 		String[] keys = {key};
-		music.getMusicServiceObjectsForKeys(keys);
+		music.getMusicServiceObjectsForKeys(keys, this);
 	}
 	
 	public void onSearchComplete(MusicServiceObject[] results) {
@@ -47,19 +48,19 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 			album = (Album)results[0];
 			((TextView)findViewById(R.id.artist)).setText(album.getArtist());
 			((TextView)findViewById(R.id.album)).setText(album.getName());
-			music.getMusicServiceObjectsForKeys(album.getTrackKeys());
+			music.getMusicServiceObjectsForKeys(album.getTrackKeys(), this);
 			downloadAlbumArt(album.getAlbumArtURL());
 		} else if (results[0].getType().equals("track")) {
 			tracks = new Track[results.length];
 			
 			for (int i=0; i<results.length; i++) {
 				tracks[i] = (Track)results[i];
-				//tracksStrings[i] = results[i].getName();
 			}
+			//sorts Tracks in ascending order of trackNum
 			Arrays.sort(tracks);
-			String[] tracksStrings = new String[tracks.length];
-			for (int i=0; i<tracks.length; i++)
-				tracksStrings[i] = tracks[i].getNum() + " - " + tracks[i].getName();
+			String[] tracksStrings = new String[tracks.length];										// sets up list of display strings
+			for (int i=0; i<tracks.length; i++)														// for list view in same order
+				tracksStrings[i] = tracks[i].getNum() + " - " + tracks[i].getName();				// as Tracks
 			ListView list = (ListView)findViewById(R.id.tracks);
 			list.setAdapter(new ArrayAdapter<String>(this, R.layout.search_result, tracksStrings));
 			list.setOnItemClickListener(new ListView.OnItemClickListener() {
@@ -79,7 +80,8 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 	
 	public void listItemSelected(int position) {
 		music.getPlayerForTrack(tracks[position]);
-		startActivity(new Intent(this, MainActivity.class));
+		music.setPlaylist(tracks, position);
+		startActivity(new Intent(this, MainActivity_.class));
 	}
 	
 	public boolean onOptionsItemSelected (MenuItem item) {
@@ -100,11 +102,14 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 		try {
             InputStream in = new java.net.URL(url).openStream();
             bmp = BitmapFactory.decodeStream(in);
+            setAlbumArt(bmp);
         } catch (Exception e) {
-            Log.e("Error", e.getMessage());
-            e.printStackTrace();
+            Log.e("Error", e.toString());
         }
-		if (bmp != null)
-			albumArt.setImageBitmap(bmp);
+		
+	}
+	@UiThread
+	void setAlbumArt(Bitmap bmp) {
+		albumArt.setImageBitmap(bmp);
 	}
 }

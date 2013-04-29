@@ -12,6 +12,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import android.util.Log;
 
 public class GeaServerHandler {
@@ -27,16 +29,19 @@ public class GeaServerHandler {
 	
 	public static enum RequestMethod { GET, POST; }
 	
-	public static JSONArray getJSONForRequest(String urlString, RequestMethod method) {
-		JSONArray json = null;
+	public static void sendRequest(String urlString, RequestMethod method) {
+		connect(urlString, method);
+	}
+	
+	public static JSONObject getJSONForRequest(String urlString, RequestMethod method) {
+		JSONObject json = null;
+		HttpURLConnection connection = connect(urlString, method);
+		if (connection == null) {
+			return null;
+		}
 		try {
-			URL url = new URL(urlString);
-			Log.d(MainActivity_.LOG_TAG, url.toString());
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod(RequestMethod.GET.toString());
-			connection.setRequestProperty("Content-length", "0");
-			connection.connect();
 			int statusCode = connection.getResponseCode();
+			Log.d(LOG_TAG, String.valueOf(statusCode));
 			if (connection.getResponseCode() == 200) {
 	    		BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 	            StringBuilder sb = new StringBuilder();
@@ -46,7 +51,7 @@ public class GeaServerHandler {
 	            }
 	            br.close();
 	            Log.d(LOG_TAG, sb.toString());
-	            json = new JSONArray(sb.toString());
+	            json = new JSONObject(sb.toString());
 	    	} else {
 	    		Log.e(LOG_TAG, "Error connecting to Gea server: " + statusCode);
 	    	}
@@ -57,8 +62,24 @@ public class GeaServerHandler {
 		} catch(JSONException e) {
 			Log.e(LOG_TAG, e.toString());
 		}
-		
 		return json;
+	}
+	
+	private static HttpURLConnection connect(String urlString, RequestMethod method) {
+		HttpURLConnection connection = null;
+		try {
+			URL url = new URL(urlString);
+			Log.d(LOG_TAG, url.toString());
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod(method.toString());
+			connection.setRequestProperty("Content-length", "0");
+			connection.connect();
+		} catch (MalformedURLException e) {
+			Log.e(LOG_TAG, e.toString());
+		} catch(IOException e) {
+			Log.e(LOG_TAG, e.toString());
+		}
+		return connection;
 	}
 	
 	public static String getURLStringForParams(String baseURL, BasicNameValuePair[] parameters) {
@@ -71,5 +92,13 @@ public class GeaServerHandler {
 		return queryString;
 	}
 	
+	public static LatLng getLatLngForCoordinateString(String coordsString) {
+		String[] coords = coordsString.split(",");
+		Log.d(LOG_TAG, coords[0]+" "+coords[1]);
+		Double lat = Double.parseDouble(coords[0]);
+		Double lng = Double.parseDouble(coords[1]);
+		LatLng coord = new LatLng(lat, lng);
+		return coord;
+	}
 	
 }

@@ -35,7 +35,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	        // Inflate the menu; this adds items to the action bar if it is present.
 	        getSupportMenuInflater().inflate(R.menu.main, menu);
 	        
-	        SearchManager searchManager = (SearchManager) getSystemService(MainActivity.SEARCH_SERVICE);
+	        SearchManager searchManager = (SearchManager) getSystemService(MainActivity_.SEARCH_SERVICE);
 	        com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) menu.findItem(R.id.searchField)
 					   .getActionView();
 	        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
@@ -71,9 +71,6 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	    	 ((CheckBox)findViewById(R.id.albumCheckBox)).setChecked(shouldSearchForAlbum);
 	    	 ((CheckBox)findViewById(R.id.artistCheckBox)).setChecked(shouldSearchForArtist);
 			 
-			 /*String type = (shouldSearchForSong? "Song,":"") + (shouldSearchForAlbum? "Album,":"") + (shouldSearchForArtist? "Artist":"");
-			 if (! (shouldSearchForSong | shouldSearchForAlbum | shouldSearchForArtist) )
-				 type = "Song";*/
 	    	 String type = "";
 	    	 if (shouldSearchForSong) {
 	    		 type += "Song";
@@ -99,17 +96,17 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	
 	public void performSearch(String query, String type) {
 		if (query.length() < 1) {
-			Log.e(MainActivity.LOG_TAG, "Search submitted with no search text entered");
+			Log.e(MainActivity_.LOG_TAG, "Search submitted with no search text entered");
 			return;
 		}
-		Log.i(MainActivity.LOG_TAG, "Searched for '" + query + "' with types " + type);
+		Log.i(MainActivity_.LOG_TAG, "Searched for '" + query + "' with types " + type);
 		music.search(query, type);
 	}
 	
 	public void onSearchComplete(MusicServiceObject[] results) {
-		Log.i(MainActivity.LOG_TAG, "Search returned " + results.length + " results");
+		Log.i(MainActivity_.LOG_TAG, "Search returned " + results.length + " results");
 		if (results.length < 1) {
-			Log.i(MainActivity.LOG_TAG, "No search results");
+			Log.i(MainActivity_.LOG_TAG, "No search results");
 			String[] resultsStrings = {"No search results"};
 			setListAdapter(new ArrayAdapter<String>(this, R.layout.search_result, resultsStrings));
 			return;
@@ -136,9 +133,10 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	}
 	
 	public void listItemSelected(int position) {
-		Log.d(MainActivity.LOG_TAG, "item selected");
+		Log.d(MainActivity_.LOG_TAG, "item selected");
 		MusicServiceObject item = searchResults[position];
 		if (item.getType().equals("track")) {
+			
 			music.getPlayerForTrack((Track)item);
 			finish();
 		} else if (item.getType().equals("album")) {

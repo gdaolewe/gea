@@ -15,6 +15,7 @@
     "pg": "0.15.1",
     "db-migrate": "0.4.1",
     "async": "0.2.6",
-    "request": "2.16.6"
+    "request": "2.16.6",
+    "underscore": "~1.4.4"
   }
 }

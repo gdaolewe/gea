@@ -15,8 +15,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.MenuItem;
 
 import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.UiThread;
 import com.googlecode.androidannotations.annotations.ViewById;
 import com.googlecode.androidannotations.annotations.EActivity;
 
@@ -37,7 +39,7 @@ public class ArtistActivity extends SherlockActivity implements SearchCompleteLi
 		music = MusicServiceWrapper.getInstance();
 		music.registerSearchCompleteListener(this);
 		String[] keys = {key};
-		music.getMusicServiceObjectsForKeys(keys);
+		music.getMusicServiceObjectsForKeys(keys, this);
 	}
 
 	@Override
@@ -77,6 +79,15 @@ public class ArtistActivity extends SherlockActivity implements SearchCompleteLi
 		startActivity(intent);
 	}
 	
+	public boolean onOptionsItemSelected (MenuItem item) {
+		if (item.getItemId() == android.R.id.home) {
+			finish();	
+			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
 	@ViewById(R.id.image)
 	ImageView image;
 	
@@ -86,11 +97,13 @@ public class ArtistActivity extends SherlockActivity implements SearchCompleteLi
 		try {
             InputStream in = new java.net.URL(url).openStream();
             bmp = BitmapFactory.decodeStream(in);
+            setImage(bmp);
         } catch (Exception e) {
-            Log.e("Error", e.getMessage());
-            e.printStackTrace();
+            Log.e("Error", e.toString());
         }
-		if (bmp != null)
-			image.setImageBitmap(bmp);
+	}
+	@UiThread
+	void setImage(Bitmap bmp) {
+		image.setImageBitmap(bmp);
 	}
 }
