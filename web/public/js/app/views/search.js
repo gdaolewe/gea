@@ -35,7 +35,6 @@ define([
       'keyup #search-input': 'keyup'
     },
     initialize: function () {
-      this.$topTrending = this.$('#top-trending');
       this.$input = this.$('#search-input');
       this.$results = this.$('#search-results');
       this.listenTo(searchResults, 'reset', this.render);
@@ -112,7 +111,7 @@ define([
     // Set the height of the results
     resizeResults: function () {
       // New height is height of the right bar minus the player and input heights
-      this.$results.height($right.height() - player.$el.height() - this.$input.height() - this.$topTrending.height());
+      this.$results.height($right.height() - player.$el.height() - this.$input.height());
     }
   }))();
 });
