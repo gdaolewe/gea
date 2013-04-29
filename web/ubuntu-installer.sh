@@ -80,8 +80,8 @@ psql -c "CREATE USER gea WITH PASSWORD 'gea';"
 # Grant privileges to the user on the gea database
 psql -c "GRANT ALL PRIVILEGES ON DATABASE gea TO gea;"
 
-# Install the npm packages to integrate with and intialize postgres
-npm install -g pg db-migrate forever
+# Install the npm packages to integrate with and intialize postgres, keep the server running, and setup tests
+npm install -g pg db-migrate forever mocha
 
 # Initialize the database
 cd db; db-migrate up
