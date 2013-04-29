@@ -25,7 +25,8 @@ require({
     'oms': 'lib/oms.min',
     'joyride': 'lib/jquery.joyride',
     'keymaster': 'lib/keymaster.min',
-    'backboneshortcuts': 'lib/backbone.shortcuts.min'
+    'backboneshortcuts': 'lib/backbone.shortcuts.min',
+    'mc': 'lib/markerclusterer_packed'
   },
   shim: {
     'backbone': {
@@ -36,7 +37,8 @@ require({
     'joyride': ['jquery', 'cookie'],
     'cookie': ['jquery'],
     'oms': ['util/googlemaps'],
-    'backboneshortcuts': ['backbone', 'keymaster']
+    'backboneshortcuts': ['backbone', 'keymaster'],
+    'mc': ['util/googlemaps']
   },
   deps: ['app']
 });

@@ -32,8 +32,7 @@ define([
   return new (bb.View.extend({
     el: '#search',
     events: {
-      'keyup #search-input': 'keyup',
-      'click #top-trending': 'topTrendingClick'
+      'keyup #search-input': 'keyup'
     },
     initialize: function () {
       this.$topTrending = this.$('#top-trending');
@@ -90,29 +89,6 @@ define([
           searchResults.reset();
         });
       }
-    },
-    topTrendingClick: function (e) {
-      e.stopPropagation();
-      e.preventDefault();
-      $.get('/rate?limit=10', function (data) {
-        var alertText = '';
-        for (var state in data) {
-          alertText += state + '\n';
-          var counter = 1;
-          data[state].forEach(function (d) {
-            var result = '';
-            if (d.title) result += '\'' + d.title + '\'';
-            if (d.artist) result += ' by ' + d.artist;
-            if (d.album) result += ' from \'' + d.album + '\'';
-            if (result) {
-              alertText += counter + '. ' + result + '\n';
-              counter++;
-            }
-          });
-          alertText += '\n';
-        }
-        alert(alertText.substr(0, alertText.length - 2));
-      });
     },
     render: function () {
       // Remove loading indicator

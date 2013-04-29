@@ -5,6 +5,15 @@
     <title>Gea</title>
   </head>
   <body>
+    <div id="map-panel">
+      <select id="map-filter">
+        <option value="24">Top songs today</option>
+        <option value="168">Top songs this week</option>
+        <option value="730">Top songs this month</option>
+        <option value="8765">Top songs this year</option>
+        <option selected value="">Top songs of all time</option>
+      </select>
+    </div>
     <div id="map"></div>
     <div>
       <a href="http://www.rdio.com">
@@ -33,7 +42,6 @@
         </div>
       </div>
       <div id="search">
-        <div id="top-trending">Get top 10 trending songs</div>
         <input id="search-input" type="text" placeholder="search" />
         <div id="search-results"></div>
       </div>
@@ -44,7 +52,8 @@
         <p>Feel free to take this tour or click the "x" in the top right corner to end the tour.</p>
         <p>(Please note: while we <strong>do</strong> use your IP address for location statistics, no personal data is stored and we only retrieve your state)</p>
       </li>
-      <li><p></p>
+      <li>
+        <p></p>
         <p>This map displays the top trending songs in each state.</p>
         <p>Click on a pin on the map to see song details for that particular state.</p>
       </li>
@@ -62,10 +71,19 @@
         <p>You may 'like' or up-vote the current song.</p>
         <p>This helps us decide what the most popular songs are in your area!</p>
       </li>
-      <li data-id="dislike" data-options="tipLocation:right;"><p>Or if you want, 'dislike' or down-vote the song.</p></li>
-      <li data-id="progress-bar"><p></p><p>Click and drag on the progress bar to scrub through the track.</p></li>
-      <li data-id="controls"><p>Just as you would expect, you can skip to the previous or next songs, as well as play/pause.</p></li>
-      <li data-id="player-metadata" data-options="tipLocation:right;"><p>This is the song information for the currently playing song.</p></li>
+      <li data-id="dislike" data-options="tipLocation:right;">
+        <p>Or if you want, 'dislike' or down-vote the song.</p>
+      </li>
+      <li data-id="progress-bar">
+        <p></p>
+        <p>Click and drag on the progress bar to scrub through the track.</p>
+      </li>
+      <li data-id="controls">
+        <p>Just as you would expect, you can skip to the previous or next songs, as well as play/pause.</p>
+      </li>
+      <li data-id="player-metadata" data-options="tipLocation:right;">
+        <p>This is the song information for the currently playing song.</p>
+      </li>
       <li data-id="search-input" data-options="tipLocation:top;">
         <p>Search for songs, albums, or artists!</p>
         <p>If you stop typing (or hit Enter), we'll see what we can find.</p>
