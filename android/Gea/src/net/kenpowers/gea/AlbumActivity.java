@@ -58,11 +58,9 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 			}
 			//sorts Tracks in ascending order of trackNum
 			Arrays.sort(tracks);
-			String[] tracksStrings = new String[tracks.length];										// sets up list of display strings
-			for (int i=0; i<tracks.length; i++)														// for list view in same order
-				tracksStrings[i] = tracks[i].getNum() + " - " + tracks[i].getName();				// as Tracks
+			
 			ListView list = (ListView)findViewById(R.id.tracks);
-			list.setAdapter(new ArrayAdapter<String>(this, R.layout.search_result, tracksStrings));
+			list.setAdapter(new SearchArrayAdapter(this, R.layout.search_result, tracks));
 			list.setOnItemClickListener(new ListView.OnItemClickListener() {
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

@@ -51,13 +51,9 @@ public class ArtistActivity extends SherlockActivity implements SearchCompleteLi
 			downloadArtistImage(artist.getImageURL());
 		} else if (results[0].getType().equals("album")) {
 			albums = new Album[results.length];
-			String[] albumsStrings = new String[results.length];
-			for (int i=0; i<results.length; i++) {
-				albums[i] = (Album)results[i];
-				albumsStrings[i] = results[i].getName();
-			}
+			
 			ListView list = (ListView)findViewById(R.id.albums);
-			list.setAdapter(new ArrayAdapter<String>(this, R.layout.search_result, albumsStrings));
+			list.setAdapter(new SearchArrayAdapter(this, R.layout.search_result, albums));
 			list.setOnItemClickListener(new ListView.OnItemClickListener() {
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

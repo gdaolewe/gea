@@ -114,11 +114,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 			
 		searchResults = results;
 		
-		String resultsStrings[] = new String[searchResults.length];
-		for (int i=0; i<results.length; i++)
-			resultsStrings[i] = results[i].toString();
-		
-		setListAdapter(new ArrayAdapter<String>(this, R.layout.search_result, resultsStrings));
+		setListAdapter(new SearchArrayAdapter(this, R.layout.search_result, results));
 		
 		ListView listview = getListView();
 		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
