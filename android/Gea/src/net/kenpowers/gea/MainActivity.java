@@ -20,6 +20,7 @@ import android.view.View.OnClickListener;
 
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
@@ -64,15 +65,22 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 	private final int HOURS_IN_YEAR 	   = 8765;
 	private final int HOURS_ALL_TIME	   = -1;
 	private final int DEFAULT_RATING_HOURS = HOURS_ALL_TIME;
+	private final int[] FILTER_CHOICES = {HOURS_IN_DAY,
+										  HOURS_IN_WEEK,
+										  HOURS_IN_MONTH,
+										  HOURS_IN_YEAR,
+										  HOURS_ALL_TIME};
 	
 	private int ratingHours;
+	
+	private final int DEFAULT_LIMIT = 10;
 	
 	MusicServiceWrapper music;
 	private Track currentTrack;
 	private int volume;
 	
 	private GoogleMap gmap;
-	private final int DEFAULT_ZOOM_LEVEL = 6;
+	private final int DEFAULT_ZOOM_LEVEL = 5;
 	private HashMap<String, BasicTrack[]> markers;
 
     @Override
@@ -87,10 +95,12 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         
         //If in debug mode, connect to Gea server running on localhost, else connect to production server
         boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
-        if (isDebuggable)
+        if (isDebuggable) {
         	baseURL = GeaServerHandler.LOCALHOST_BASE_URL;
-        else
+        	Log.d(LOG_TAG, "Debug mode, connect to server at" + baseURL);
+        } else {
         	baseURL = GeaServerHandler.NET_BASE_URL;
+        }
         
         //For testing physical device against local server
         //baseURL = "http://10.1.40.121:3000";
@@ -106,19 +116,8 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         ratingHours = DEFAULT_RATING_HOURS;
         
         setUpMapIfNeeded();
-        getApprovalRequest(5, ratingHours);
+        getApprovalRequest(DEFAULT_LIMIT, ratingHours);
         
-        Spinner filterSpinner = (Spinner)findViewById(R.id.filterSpinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getAppContext(), R.array.filter_array, 
-        									 android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        filterSpinner.setAdapter(adapter);
-        filterSpinner.bringToFront();
-        
-        if (music.isReady())
-        	setLaunchFragmentVisible(false);
-        else
-        	setLaunchFragmentVisible(true);
         setTopTracksVisible(false);
         
         volume = 100;
@@ -128,21 +127,27 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 			public void onMusicServiceReady() {
 				setLaunchFragmentVisible(false);
 			}
-        	
         });
         music.registerTrackChangedListener(this);
-        setUpSeekBarListeners();
-        
-        
+        setUpSeekBarListeners();   
     }
     
     @Override
     protected void onStart() {
     	super.onStart();
-    	((SeekBar)findViewById(R.id.volumeSeekBar)).setProgress(volume);
+    	
+    	setUpFilterSpinner();
+    	
+    	if (music.isReady())
+        	setLaunchFragmentVisible(false);
+        else
+        	setLaunchFragmentVisible(true);
+    	
     	music = MusicServiceWrapper.getInstance();
+    	((SeekBar)findViewById(R.id.volumeSeekBar)).setProgress(volume);
     	music.setPlayerVolume(volume);
     	onTrackChanged(music.getCurrentTrack());
+    	
     	if (currentTrack != null) {
     		onTrackChanged(currentTrack);
     		ImageButton upButton = ((ImageButton)findViewById(R.id.approval_up_button));
@@ -163,6 +168,24 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     		}
     	}
     }
+    
+    private void setUpFilterSpinner() {
+		Spinner filterSpinner = (Spinner)findViewById(R.id.filterSpinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getAppContext(), R.array.filter_array, 
+        									 android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        filterSpinner.setAdapter(adapter);
+        filterSpinner.setSelection(4);
+        filterSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				ratingHours = FILTER_CHOICES[position];
+				getApprovalRequest(DEFAULT_LIMIT, ratingHours);
+			}
+			public void onNothingSelected(AdapterView<?> parent) { /* Do nothing */ }
+        });
+        filterSpinner.bringToFront();
+	}
     
     private void setUpSeekBarListeners() {
     	//set up change listener for song progress seek bar
@@ -423,8 +446,16 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     @Background
     void getApprovalRequest(int num, int hours){
     	JSONObject json;
-	    BasicNameValuePair param = new BasicNameValuePair("limit", String.valueOf(num));
-	    BasicNameValuePair[] params = {param};
+    	BasicNameValuePair[] params;
+	    BasicNameValuePair limitParam = new BasicNameValuePair("limit", String.valueOf(num));
+	    if (hours == -1) {
+	    	params = new BasicNameValuePair[1];
+	    } else {
+	    	params = new BasicNameValuePair[2];
+	    	BasicNameValuePair hoursParam = new BasicNameValuePair("pastHours", String.valueOf(hours));
+	    	params[1] = hoursParam;
+	    }
+	    params[0] = limitParam;
 	    String url = GeaServerHandler.getURLStringForParams(baseURL + GeaServerHandler.BASE_RATE_QUERY, params);
         json = GeaServerHandler.getJSONForRequest(url, GeaServerHandler.RequestMethod.GET);
         if (json == null) {
@@ -437,25 +468,24 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
    
    @UiThread
    void populateMap(JSONObject json) {
-	  if (markers == null)
-		  markers = new HashMap<String, BasicTrack[]>();
-	  Iterator<?> stateKeys = json.keys(); 
-	  while (stateKeys.hasNext()) {
-		  String stateCoord = (String)stateKeys.next();
-		  Log.d(LOG_TAG, "state: " + stateCoord);
-		  try {
-			  JSONArray tracks = json.getJSONArray(stateCoord);
-			  BasicTrack[] topForThisState = new BasicTrack[tracks.length()];
-			  for (int i=0; i<tracks.length(); i++) {
-				  JSONObject track = tracks.getJSONObject(i);
-				  topForThisState[i] = new BasicTrack(track.getString("rdioId"), "track", 
-						  							  track.getString("title"), track.getString("artist"), 
-						  							  track.getString("album"), track.getString("image"));
-			  }
-			  LatLng coord = GeaServerHandler.getLatLngForCoordinateString(stateCoord);
-			  gmap.addMarker(new MarkerOptions().position(coord).title(stateCoord));
-			  markers.put(stateCoord, topForThisState);
-		  } catch(JSONException e) {
+	   gmap.clear();
+	   markers = new HashMap<String, BasicTrack[]>();
+	   Iterator<?> stateKeys = json.keys(); 
+	   while (stateKeys.hasNext()) {
+		   String stateCoord = (String)stateKeys.next();
+		   try {
+			   JSONArray tracks = json.getJSONArray(stateCoord);
+				BasicTrack[] topForThisState = new BasicTrack[tracks.length()];
+				for (int i=0; i<tracks.length(); i++) {
+					JSONObject track = tracks.getJSONObject(i);
+					topForThisState[i] = new BasicTrack(track.getString("rdioId"), "track", 
+						  							    track.getString("title"), track.getString("artist"), 
+						  							    track.getString("album"), track.getString("image"));
+				}
+				LatLng coord = GeaServerHandler.getLatLngForCoordinateString(stateCoord);
+				gmap.addMarker(new MarkerOptions().position(coord).title(stateCoord));
+				markers.put(stateCoord, topForThisState);
+			} catch(JSONException e) {
 			  
 		  }
 	  }
