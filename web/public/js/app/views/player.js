@@ -197,7 +197,8 @@ define([
       e.stopPropagation();
       e.preventDefault();
       if (!loading && currentStreamId && likeEnabled) {
-        $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=like', $.proxy(function () {
+        if (this.$likeReq) this.$likeReq.abort();
+        this.$likeReq = $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=like', $.proxy(function () {
           this.$likeImg.toggleClass('disabled');
           likeEnabled = false;
           if (!dislikeEnabled) {
@@ -212,7 +213,8 @@ define([
       e.stopPropagation();
       e.preventDefault();
       if (!loading && currentStreamId && dislikeEnabled) {
-        $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=dislike', $.proxy(function () {
+        if (this.$dislikeReq) this.$dislikeReq.abort();
+        this.$dislikeReq = $.post('/rate?from=' + this.$streamer.name + '&id=' + currentStreamId + '&verdict=dislike', $.proxy(function () {
           if (!likeEnabled) {
             this.$likeImg.toggleClass('disabled');
             likeEnabled = true;
