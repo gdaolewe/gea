@@ -84,6 +84,7 @@ define([
 
       //listener for spiderify to set the markers to blue
       this.oms.addListener('spiderfy', $.proxy(function (markers) {
+        this.map.panTo(markers[0].getPosition());
         for (var i = 0; i < markers.length; i ++) {
           markers[i].setIcon(this.blueIcon);
           markers[i].setShadow(this.blueIconShadow);
@@ -120,8 +121,9 @@ define([
 
     //loads all markers based on time period from server
     loadAllMarkers: function (hours) {
+      if (this.$req) this.$req.abort();
       var timePeriod = (hours) ? "&pastHours=" + hours : "";
-      $.get('/rate?limit=10' + timePeriod, $.proxy(function (data) {
+      this.$req = $.get('/rate?limit=10' + timePeriod, $.proxy(function (data) {
         //checks to see if the data has changed. if so, then update
         if (_.isEqual(prevData,data)) {
           //same, so increase the multiplier and starts the timer
