@@ -1,0 +1,15 @@
+{
+  "framework": "mocha",
+  "src_files": [
+    "**/*.js"
+  ],
+  "launchers": {
+    "node": {
+      "command": "mocha -R tap test/client.js",
+      "protocol": "tap"
+    }
+  },
+  "launch_in_dev": [
+    "node"
+  ]
+}

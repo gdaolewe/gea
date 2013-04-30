@@ -82,7 +82,7 @@ body
   background-position: -0px -530px;
   background-repeat no-repeat
   &:hover
-    background-position: -0px -560px; 
+    background-position: -0px -560px;
 
 #play-pause
   left 100px
@@ -90,10 +90,10 @@ body
 .play-button
   background #eee
   background-image url(/img/sprite.png)
-  background-position: -100px -468px; 
+  background-position: -100px -468px;
   background-repeat no-repeat
   &:hover
-    background-position: -0px -590px; 
+    background-position: -0px -590px;
 
 .pause-button
   background #eee
@@ -101,7 +101,7 @@ body
   background-position: -100px -528px;
   background-repeat no-repeat
   &:hover
-    background-position: -0px -500px; 
+    background-position: -0px -500px;
 
 #social
   height 200px
@@ -124,20 +124,20 @@ body
   background-position: -0px -200px;
   background-repeat no-repeat
   &:hover
-    background-position: -100px -300px; 
+    background-position: -100px -300px;
   &.disabled
     cursor default
     background-color #aaa
     &:hover
-      background-position: -0px -200px; 
+      background-position: -0px -200px;
 
 #dislike
   top 100px
   right 0
-  background-position: -0px -400px; 
+  background-position: -0px -400px;
   background-repeat no-repeat
   &:hover
-    background-position: -100px -200px; 
+    background-position: -100px -200px;
   &.disabled
     cursor default
     background-color #aaa
@@ -203,7 +203,7 @@ body
 #map-panel
   position absolute
   top 5px
-  left calc(50% \- 200px)
+  left calc(50% \- 250px)
   width 200px
   padding 4px
   border-radius(2px)
@@ -214,6 +214,15 @@ body
 #map-filter
   width 100%
   opacity .7
+
+#map-loading
+  position absolute
+  top calc(50% \- 64px)
+  z-index 5
+  left calc(50% \- 214px)
+  width 128px
+  height 128px
+  opacity 1
 
 #search-input
   width 100%
@@ -262,12 +271,13 @@ body
     .artist-icon
       width 19px
       background-position -176px -400px;
-	  
+
 .loading-widget
   margin auto
   position relative
   width 128px
   height 128px
+  top 5px
   animation scale-fade-in 0.05s linear
   .circle
     position absolute
