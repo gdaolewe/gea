@@ -1,7 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:padding="10dp"
-    android:textSize="20sp" >
-</TextView>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+    
+	<TextView
+	    android:id="@+id/searchResultText"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentTop="true"
+	    android:layout_marginLeft="10dp"
+	    android:padding="10dp"
+	    android:textSize="20sp" >
+
+	</TextView>
+
+	<ImageView
+	    android:id="@+id/listIcon"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignBottom="@id/searchResultText"
+	    android:layout_alignParentLeft="true"
+	    android:layout_alignTop="@id/searchResultText"
+	    android:layout_marginLeft="5dp"
+	    android:layout_toRightOf="@id/searchResultText"
+	    android:adjustViewBounds="true"
+	    android:scaleType="fitCenter"
+	    android:src="@drawable/song" />
+
+</RelativeLayout>

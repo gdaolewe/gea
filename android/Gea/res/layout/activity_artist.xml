@@ -13,6 +13,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:contentDescription="@string/album_art_content_description"
+        android:maxHeight="200dp"
+        android:maxWidth="200dp"
         android:src="@drawable/albumart_placeholder_black" />
     
     <ListView
@@ -30,7 +32,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/image"
-        android:text="Large Text"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </RelativeLayout>
