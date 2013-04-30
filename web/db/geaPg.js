@@ -1,6 +1,6 @@
 var pg = require('pg'),
     path = require('path'),
-    conf = require(path.join(__appDir, 'db/database.json'))[process.env.NODE_ENV === 'production' ? 'prod' : 'dev'];
+    conf = require('./database.json')[process.env.NODE_ENV === 'production' ? 'prod' : 'dev'];
 
 // pg configuration
 pg.defaults.user = conf.user;
