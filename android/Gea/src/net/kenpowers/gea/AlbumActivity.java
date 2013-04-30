@@ -3,6 +3,7 @@ package net.kenpowers.gea;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import net.kenpowers.gea.MusicServiceWrapper.SearchCompleteListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,21 +11,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
-
 import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.EActivity;
 import com.googlecode.androidannotations.annotations.UiThread;
 import com.googlecode.androidannotations.annotations.ViewById;
-import com.googlecode.androidannotations.annotations.EActivity;
 
 @EActivity(R.layout.activity_album)
-public class AlbumActivity extends SherlockActivity implements SearchCompleteListener {
+public class AlbumActivity extends SherlockActivity {
 	private Album album;
 	private Track[] tracks;
 	private MusicServiceWrapper music;
@@ -35,45 +34,57 @@ public class AlbumActivity extends SherlockActivity implements SearchCompleteLis
 		setContentView(R.layout.activity_album);
 	    getSupportActionBar().setHomeButtonEnabled(true);
 	    
+	    setUpList();
+	    
 		Intent intent = getIntent();
 		String key = intent.getStringExtra("key");
 		music = MusicServiceWrapper.getInstance();
-		music.registerSearchCompleteListener(this);
-		String[] keys = {key};
-		music.getMusicServiceObjectsForKeys(keys, this);
+		setUpAlbumAndTracks(key);
+	}
+
+	private void setUpAlbumAndTracks(String albumKey) {
+		String[] keys = {albumKey};
+		//Gets album object for this album
+		music.getMusicServiceObjectsForKeys(keys, new SearchCompleteListener() {
+			@Override
+			public void onSearchComplete(MusicServiceObject[] results) {
+				album = (Album)results[0];
+				((TextView)findViewById(R.id.artist)).setText(album.getArtist());
+				((TextView)findViewById(R.id.album)).setText(album.getName());
+				downloadAlbumArt(album.getAlbumArtURL());
+				//And when album object is obtained, gets track objects for this album
+				music.getMusicServiceObjectsForKeys(album.getTrackKeys(), new SearchCompleteListener() {
+						public void onSearchComplete(MusicServiceObject[] results) {
+							tracks = new Track[results.length];
+							
+							for (int i=0; i<results.length; i++) {
+								tracks[i] = (Track)results[i];
+							}
+							//sorts Tracks in ascending order of trackNum
+							Arrays.sort(tracks);
+							
+							ListView list = (ListView)findViewById(R.id.tracks);
+							list.setAdapter(new SearchArrayAdapter(AlbumActivity.this, R.layout.search_result, tracks, false));
+					}
+				});
+			}
+		});
 	}
 	
-	public void onSearchComplete(MusicServiceObject[] results) {
-		if (results[0].getType().equals("album")) {
-			album = (Album)results[0];
-			((TextView)findViewById(R.id.artist)).setText(album.getArtist());
-			((TextView)findViewById(R.id.album)).setText(album.getName());
-			music.getMusicServiceObjectsForKeys(album.getTrackKeys(), this);
-			downloadAlbumArt(album.getAlbumArtURL());
-		} else if (results[0].getType().equals("track")) {
-			tracks = new Track[results.length];
-			
-			for (int i=0; i<results.length; i++) {
-				tracks[i] = (Track)results[i];
+	private void setUpList() {
+		ListView list = (ListView)findViewById(R.id.tracks);
+		list.setOnItemClickListener(new ListView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				listItemSelected(position);
 			}
-			//sorts Tracks in ascending order of trackNum
-			Arrays.sort(tracks);
-			
-			ListView list = (ListView)findViewById(R.id.tracks);
-			list.setAdapter(new SearchArrayAdapter(this, R.layout.search_result, tracks));
-			list.setOnItemClickListener(new ListView.OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-					listItemSelected(position);
-				}
-			});
-			list.setOnItemSelectedListener(new ListView.OnItemSelectedListener() {
-				@Override
-				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { /*do nothing*/ }
-				@Override
-				public void onNothingSelected(AdapterView<?> parent) { /*do nothing*/ }
-			});
-		}
+		});
+		list.setOnItemSelectedListener(new ListView.OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { /*do nothing*/ }
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) { /*do nothing*/ }
+		});
 	}
 	
 	public void listItemSelected(int position) {

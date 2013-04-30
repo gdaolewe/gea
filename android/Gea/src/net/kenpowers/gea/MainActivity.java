@@ -4,53 +4,58 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.kenpowers.gea.MusicServiceWrapper.SearchCompleteListener;
+import net.kenpowers.gea.MusicServiceWrapper.TrackChangedListener;
+
 import org.apache.http.message.BasicNameValuePair;
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import android.os.Bundle;
-import android.os.Handler;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import android.app.SearchManager;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-
-import android.view.View;
-import android.view.View.OnClickListener;
-
-import android.widget.*;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
-
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.TextView;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.EActivity;
 import com.googlecode.androidannotations.annotations.UiThread;
 import com.googlecode.androidannotations.annotations.ViewById;
-import com.googlecode.androidannotations.annotations.EActivity;
 
 @EActivity
 public class MainActivity extends SherlockFragmentActivity implements TrackChangedListener {
@@ -257,7 +262,7 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 						for (int i=0; i<topTracks.length; i++)
 							tracksStrings[i] = topTracks[i].toString();
 						ListView list = (ListView)findViewById(R.id.topTracksList);
-						list.setAdapter(new ArrayAdapter<String>(getAppContext(), R.layout.search_result, tracksStrings));
+						list.setAdapter(new SearchArrayAdapter(getAppContext(), R.layout.search_result, topTracks, true));
 						list.setOnItemClickListener(new OnItemClickListener() {
 							@Override
 							public void onItemClick(AdapterView<?> parent, View view, 
@@ -313,7 +318,9 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         searchView.setOnQueryTextFocusChangeListener(new com.actionbarsherlock.widget.SearchView.OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
-				if (!hasFocus)
+				if (hasFocus)
+					setSearchContextVisible(true);
+				else
 					setSearchContextVisible(false);
 			}
         	
@@ -387,7 +394,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
             intent.putExtra("Album",  shouldSearchForAlbum);
             intent.putExtra("Artist", shouldSearchForArtist);
         }
-
         super.startActivity(intent);
     }
     
@@ -395,6 +401,34 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
     	return MainActivity.context;
     }
     
+    public void onPrevButtonClicked(View view) {
+	   if (view.getId() != R.id.prevButton)
+		   return;
+	   ((ImageButton)view).setImageResource(R.drawable.prev_over);
+	   new Handler().postDelayed(new Runnable() {
+		@Override
+		public void run() {
+			((ImageButton)findViewById(R.id.prevButton)).setImageResource(R.drawable.prev);
+		}
+	   }, 100);
+	   if (music.getPlayerPosition() < 10000)
+		   music.playPreviousTrack();
+	   else
+		   music.seekPlayerTo(0);
+   }
+   public void onNextButtonClicked(View view) {
+	   if (view.getId() != R.id.nextButton)
+		   return;
+	   ((ImageButton)view).setImageResource(R.drawable.next_over);
+	   new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				((ImageButton)findViewById(R.id.nextButton)).setImageResource(R.drawable.next);
+			}
+		   }, 100);
+	   music.playNextTrack();
+   }
+   
     public void onUpButtonClicked(View view) {
     	ImageButton upButton = (ImageButton)view;
     	if (upButton.getId() != R.id.approval_up_button)
@@ -463,7 +497,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         	return;
         }
         populateMap(json);
-    	
     }
    
    @UiThread
@@ -492,34 +525,6 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
 		  
    }
    
-   public void onPrevButtonClicked(View view) {
-	   if (view.getId() != R.id.prevButton)
-		   return;
-	   ((ImageButton)view).setImageResource(R.drawable.prev_over);
-	   new Handler().postDelayed(new Runnable() {
-		@Override
-		public void run() {
-			((ImageButton)findViewById(R.id.prevButton)).setImageResource(R.drawable.prev);
-		}
-	   }, 100);
-	   if (music.getPlayerPosition() < 10000)
-		   music.playPreviousTrack();
-	   else
-		   music.seekPlayerTo(0);
-   }
-   public void onNextButtonClicked(View view) {
-	   if (view.getId() != R.id.nextButton)
-		   return;
-	   ((ImageButton)view).setImageResource(R.drawable.next_over);
-	   new Handler().postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				((ImageButton)findViewById(R.id.nextButton)).setImageResource(R.drawable.next);
-			}
-		   }, 100);
-	   music.playNextTrack();
-   }
-    
     public void togglePaused(View view) {
     	if (view.getId() == R.id.play_pause_button)
     		music.togglePlayerPaused();

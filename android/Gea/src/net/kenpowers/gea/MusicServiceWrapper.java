@@ -1,25 +1,25 @@
 package net.kenpowers.gea;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.AsyncTask;
 import android.os.PowerManager;
-import android.content.Intent;
 import android.util.Log;
 
 import com.rdio.android.api.Rdio;
 import com.rdio.android.api.RdioApiCallback;
 import com.rdio.android.api.RdioListener;
-import com.rdio.android.api.services.RdioAuthorisationException;
-import com.rdio.android.api.RdioSubscriptionType;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.*;
-
-public class MusicServiceWrapper implements SearchCompletePublisher, 
-											TrackChangedPublisher {
+public class MusicServiceWrapper {
 	
 	private static final MusicServiceWrapper INSTANCE = new MusicServiceWrapper();
 	
@@ -36,6 +36,8 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 	private Track[] currentPlaylist; 
 	private int currentPlaylistIndex;
 	
+	
+	
 	private MusicServiceWrapper() {
 		rdioReady = false;
 		if (rdio == null) {
@@ -50,7 +52,6 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 					public void onRdioUserPlayingElsewhere() {}
 			});
 		}
-		searchCompleteListeners = new ArrayList<SearchCompleteListener>();
 		trackChangedListeners = new ArrayList<TrackChangedListener>();
 		musicServiceReadyListeners = new ArrayList<MusicServiceReadyListener>();
 	}
@@ -73,19 +74,15 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		}
 	}
 	
-	private List<SearchCompleteListener> searchCompleteListeners;
-	
-	public void registerSearchCompleteListener(SearchCompleteListener listener) {
-		searchCompleteListeners.add(listener);
+	public static interface SearchCompleteListener {
+		public void onSearchComplete(MusicServiceObject[] results);
 	}
-	public void notifySearchCompleteListeners(MusicServiceObject[] results) {
-		if (searchCompleteListeners.size() > 0)
-			for (SearchCompleteListener l : searchCompleteListeners)
-				l.onSearchComplete(results);
+	
+	public static interface TrackChangedListener {
+		public void onTrackChanged(Track track);
 	}
 	
 	private List<TrackChangedListener> trackChangedListeners;
-	
 	public void registerTrackChangedListener(TrackChangedListener listener) {
 		trackChangedListeners.add(listener);
 	}
@@ -191,7 +188,7 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		getPlayerForTrack(currentPlaylist[currentPlaylistIndex]);
 	}
 	
-	public void search(String query, String types) {
+	public void search(String query, String types, final SearchCompleteListener callback) {
 		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("query", query));
 		params.add(new BasicNameValuePair("types", types));
@@ -211,7 +208,8 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 						JSONObject obj = json.getJSONObject(i);
 						results[i] = getMusicServiceObjectForJSON(obj);
 					}
-					notifySearchCompleteListeners(results);
+					//notifySearchCompleteListeners(results);
+					callback.onSearchComplete(results);
 				} catch(JSONException e) {
 					Log.e(LOG_TAG,"Error parsing JSON: search");
 				}
@@ -248,7 +246,7 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 						results[i] = getMusicServiceObjectForJSON(obj);
 						i++;
 					}
-					notifySearchCompleteListeners(results);
+					//notifySearchCompleteListeners(results);
 					callback.onSearchComplete(results);
 				} catch(JSONException e) {
 					Log.e(LOG_TAG,"Error parsing JSON: get");
@@ -257,7 +255,7 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 		});
 	}
 	
-	public void getAlbumsForArtist(Artist artist) {
+	public void getAlbumsForArtist(Artist artist, final SearchCompleteListener callback) {
 		ArrayList<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("artist", artist.getKey()));
 		Log.d(LOG_TAG, artist.getKey());
@@ -277,7 +275,8 @@ public class MusicServiceWrapper implements SearchCompletePublisher,
 					JSONObject obj = json.getJSONObject(i);
 					results[i] = getMusicServiceObjectForJSON(obj);
 				}
-				notifySearchCompleteListeners(results);
+				//notifySearchCompleteListeners(results);
+				callback.onSearchComplete(results);
 				} catch (JSONException e) {
 					Log.e(LOG_TAG,"Error parsing JSON: getAlbumsForArtist");
 				}

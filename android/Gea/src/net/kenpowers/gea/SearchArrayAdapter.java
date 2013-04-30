@@ -11,7 +11,8 @@ import android.widget.TextView;
 public class SearchArrayAdapter extends ArrayAdapter<MusicServiceObject> {
 	private Context context;
 	private MusicServiceObject[] objects;
-	public SearchArrayAdapter(Context context, int textViewResourceId, MusicServiceObject[] objects) {
+	private boolean fullNames;
+	public SearchArrayAdapter(Context context, int textViewResourceId, MusicServiceObject[] objects, boolean fullNames) {
 		super(context, textViewResourceId, objects);
 		this.context = context;
 		this.objects = objects;
@@ -25,8 +26,12 @@ public class SearchArrayAdapter extends ArrayAdapter<MusicServiceObject> {
 		 MusicServiceObject obj = objects[position];
 		 if (obj != null) {
 			 TextView text = (TextView)view.findViewById(R.id.searchResultText);
-			 if (text != null)
-				 text.setText(obj.toString());
+			 if (text != null) {
+				 if (fullNames)
+					 text.setText(obj.toString());
+				 else
+					 text.setText(obj.getName());
+			 }
 			 ImageView icon = (ImageView)view.findViewById(R.id.listIcon);
 			 if (icon != null) {
 				 if (obj.getType().equals("track"))
