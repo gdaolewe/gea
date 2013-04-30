@@ -39,7 +39,7 @@ define([
       this.oms = new OverlappingMarkerSpiderfier(this.map, {keepSpiderfied: true});
       //Creating a MarkerClusterer object
       this.mc = new MarkerClusterer(this.map, [], {gridSize: 80, maxZoom: 6});
-      
+
       //creating InfoWindow object and listener for clicking on pins
       iw = new google.maps.InfoWindow();
       this.oms.addListener('click', $.proxy(function(m) {
@@ -53,9 +53,9 @@ define([
         //size of marker image
         size: new google.maps.Size(20,34),
         //position of image in sprite
-        origin: new google.maps.Point(100,400), 
+        origin: new google.maps.Point(100,400),
         //where to anchor the image to the map (ie the bottom tip of the marker in this case)
-        anchor: new google.maps.Point(10,34) 
+        anchor: new google.maps.Point(10,34)
       };
 
       this.redIconShadow = {
@@ -88,7 +88,7 @@ define([
         for (var i = 0; i < markers.length; i ++) {
           markers[i].setIcon(this.blueIcon);
           markers[i].setShadow(this.blueIconShadow);
-        } 
+        }
         iw.close();
       }, this));
 
@@ -97,9 +97,9 @@ define([
         for (var i = 0; i < markers.length; i ++) {
           markers[i].setIcon(this.redIcon);
           markers[i].setShadow(this.redIconShadow);
-        } 
+        }
         iw.close();
-      }, this)); 
+      }, this));
 
       //default is all time: ""
       this.hours = "";
@@ -129,6 +129,7 @@ define([
           //same, so increase the multiplier and starts the timer
           timerMultiplier++;
           this.startTimer();
+          vent.trigger('pinsLoaded');
           return;
         }
         //new data, so clear and reload
@@ -146,6 +147,7 @@ define([
           data[position].reverse();
         }
         this.startTimer();
+        vent.trigger('pinsLoaded');
       }, this));
     },
 

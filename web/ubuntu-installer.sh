@@ -87,7 +87,7 @@ npm install -g pg db-migrate forever mocha
 cd db; db-migrate up
 
 # Insert sample database data
-psql -d gea -f sample-data.sql
+node refreshDb.js
 
 # Create the config folder in which the rdio.json file will be stored
 cd ..; mkdir config
