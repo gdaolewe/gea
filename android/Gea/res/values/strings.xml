@@ -29,5 +29,13 @@
     <string name="powered_by">Powered By</string>
     <string name="loading">loading&#8230;</string>
     <string name="top_tracks_dismiss">Done</string>
+    
+    <string-array name="filter_array">
+        <item>Top songs today</item>
+        <item>Top songs this week</item>
+        <item>Top songs this month</item>
+        <item>Top songs this year</item>
+        <item>Top songs of all time</item>
+    </string-array>
 
 </resources>
