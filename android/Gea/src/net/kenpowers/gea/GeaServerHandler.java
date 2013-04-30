@@ -41,7 +41,7 @@ public class GeaServerHandler {
 		}
 		try {
 			int statusCode = connection.getResponseCode();
-			Log.d(LOG_TAG, String.valueOf(statusCode));
+			Log.i(LOG_TAG, String.valueOf(statusCode));
 			if (connection.getResponseCode() == 200) {
 	    		BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 	            StringBuilder sb = new StringBuilder();
@@ -50,7 +50,6 @@ public class GeaServerHandler {
 	                sb.append(line+"\n");
 	            }
 	            br.close();
-	            Log.d(LOG_TAG, sb.toString());
 	            json = new JSONObject(sb.toString());
 	    	} else {
 	    		Log.e(LOG_TAG, "Error connecting to Gea server: " + statusCode);
@@ -69,7 +68,7 @@ public class GeaServerHandler {
 		HttpURLConnection connection = null;
 		try {
 			URL url = new URL(urlString);
-			Log.d(LOG_TAG, url.toString());
+			Log.i(LOG_TAG, url.toString());
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod(method.toString());
 			connection.setRequestProperty("Content-length", "0");
@@ -94,7 +93,6 @@ public class GeaServerHandler {
 	
 	public static LatLng getLatLngForCoordinateString(String coordsString) {
 		String[] coords = coordsString.split(",");
-		Log.d(LOG_TAG, coords[0]+" "+coords[1]);
 		Double lat = Double.parseDouble(coords[0]);
 		Double lng = Double.parseDouble(coords[1]);
 		LatLng coord = new LatLng(lat, lng);
