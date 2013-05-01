@@ -12,8 +12,6 @@ define([
       "space": "playPause",
       "right": "next",
       "left": "previous",
-      "up": "like",
-      "down": "dislike",
       "enter": "focusSearch"
     },
     playPause: function () {
@@ -24,12 +22,6 @@ define([
     },
     previous: function () {
       vent.trigger('previous-shortcut');
-    },
-    like: function () {
-      vent.trigger('like-shortcut');
-    },
-    dislike: function () {
-      vent.trigger('dislike-shortcut');
     },
     focusSearch: function () {
       vent.trigger('focusSearch-shortcut');

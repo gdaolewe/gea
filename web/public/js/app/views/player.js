@@ -68,12 +68,6 @@ define([
           vent.on('previous-shortcut', $.proxy(function () {
             this.playPrevious($.Event());
           }, this));
-          vent.on('like-shortcut', $.proxy(function () {
-            this.like($.Event());
-          }, this));
-          vent.on('dislike-shortcut', $.proxy(function () {
-            this.dislike($.Event());
-          }, this));
         }, this));
       }, this));
 
