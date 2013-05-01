@@ -25,10 +25,16 @@
     <string name="position_duration_separator_display">/</string>
     <string name="album_art_content_description">Album Art</string>
     <string name="rdio_logo_content_description">Rdio Logo</string>
+    <string name="volume_label">Volume</string>
     <string name="gea_logo_content_description">Gea Logo</string>
     <string name="powered_by">Powered By</string>
     <string name="loading">loading&#8230;</string>
     <string name="top_tracks_dismiss">Done</string>
+    
+    <!-- Change localhost_base_url to address of local machine running Gea server
+    	 to run application in debug mode on physical Android device -->
+    <string name="localhost_base_url">http://10.0.2.2:3000</string>
+    <string name="net_base_url">http://gea.kenpowers.net</string>
     
     <string-array name="filter_array">
         <item>Top songs today</item>

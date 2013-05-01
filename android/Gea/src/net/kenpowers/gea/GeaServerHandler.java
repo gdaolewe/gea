@@ -20,8 +20,10 @@ public class GeaServerHandler {
 	
 	private GeaServerHandler() {}
 	
-	public static final String LOCALHOST_BASE_URL = "http://10.0.2.2:3000";
-	public static final String NET_BASE_URL = "http://gea.kenpowers.net";
+	public static final String LOCALHOST_BASE_URL = 
+			MainActivity_.getAppContext().getString(R.string.localhost_base_url);
+	public static final String NET_BASE_URL = 
+			MainActivity_.getAppContext().getString(R.string.net_base_url);
 	public static final String BASE_RATE_QUERY = "/rate?";
 	public static final String RATE_UP_ARGUMENT = "like";
 	public static final String RATE_DOWN_ARGUMENT = "dislike";
@@ -63,7 +65,7 @@ public class GeaServerHandler {
 		return json;
 	}
 	
-	private static HttpURLConnection connect(String urlString, RequestMethod method) {
+	public static HttpURLConnection connect(String urlString, RequestMethod method) {
 		HttpURLConnection connection = null;
 		try {
 			URL url = new URL(urlString);
@@ -81,13 +83,19 @@ public class GeaServerHandler {
 	}
 	
 	public static String getURLStringForParams(String baseURL, BasicNameValuePair[] parameters) {
-		String queryString = baseURL;
+		String paramString = "";
 		for (int i=0; i<parameters.length; i++) {
-			queryString += parameters[i].getName() + "=" + parameters[i].getValue();
-			if (i<parameters.length-1)
-				queryString += "&";
+			if (parameters[i] != null) {
+				if (parameters[i].getName().length() > 0 && parameters[i].getValue().length() > 0) {
+					if (paramString.length() > 0)
+						paramString += "&";
+					paramString += parameters[i].getName() + "=" + parameters[i].getValue();
+				} else {
+					Log.d(LOG_TAG, "invalid parameter");
+				}
+			}
 		}
-		return queryString;
+		return baseURL + paramString;
 	}
 	
 	public static LatLng getLatLngForCoordinateString(String coordsString) {
@@ -97,5 +105,4 @@ public class GeaServerHandler {
 		LatLng coord = new LatLng(lat, lng);
 		return coord;
 	}
-	
 }

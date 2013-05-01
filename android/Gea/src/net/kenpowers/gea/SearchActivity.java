@@ -1,5 +1,7 @@
 package net.kenpowers.gea;
 
+import java.util.Arrays;
+
 import net.kenpowers.gea.MusicServiceWrapper.SearchCompleteListener;
 import android.app.SearchManager;
 import android.content.Intent;
@@ -46,8 +48,6 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	        searchView.setSubmitButtonEnabled(true);
 	        searchView.setQueryRefinementEnabled(true);
 	        searchView.setQuery(query, false);
-	        
-	        
 	        
 	        return true;
 	 }
@@ -143,12 +143,29 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 		});
 	}
 	
-	public void listItemSelected(int position) {
+	public void listItemSelected(final int position) {
 		Log.d(MainActivity_.LOG_TAG, "item selected");
 		MusicServiceObject item = searchResults[position];
 		if (item.getType().equals("track")) {
-			
-			music.getPlayerForTrack((Track)item);
+			Track track = (Track)item;
+			String[] keys = {track.getAlbumKey()};
+			music.getMusicServiceObjectsForKeys(keys, new SearchCompleteListener() {
+				@Override
+				public void onSearchComplete(MusicServiceObject[] results) {
+					String[] trackKeys = ((Album)results[0]).getTrackKeys();
+					music.getMusicServiceObjectsForKeys(trackKeys, new SearchCompleteListener() {
+						@Override
+						public void onSearchComplete(MusicServiceObject[] results) {
+							Track[] tracks = new Track[results.length];
+							for (int i=0; i<results.length; i++)
+								tracks[i] = (Track)results[i];
+							Arrays.sort(tracks);
+							music.setPlaylist(tracks, position);
+						}
+					});
+				}
+			});
+			music.getPlayerForTrack(track);
 			finish();
 		} else if (item.getType().equals("album")) {
 			Intent intent = new Intent(this, AlbumActivity_.class);

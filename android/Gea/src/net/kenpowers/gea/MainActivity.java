@@ -102,14 +102,10 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
         boolean isDebuggable =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
         if (isDebuggable) {
         	baseURL = GeaServerHandler.LOCALHOST_BASE_URL;
-        	Log.d(LOG_TAG, "Debug mode, connect to server at" + baseURL);
+        	Log.d(LOG_TAG, "Debug mode, connect to server at " + baseURL);
         } else {
         	baseURL = GeaServerHandler.NET_BASE_URL;
         }
-        
-        //For testing physical device against local server
-        //baseURL = "http://10.1.40.121:3000";
-        baseURL = "http://192.168.1.115:3000";
         
         music = MusicServiceWrapper.getInstance();
         
@@ -243,66 +239,65 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
             	
             });
             // Check if we were successful in obtaining the map.
-            if (gmap != null) {
-                // The Map is verified. It is now safe to manipulate the map.
-            	Criteria criteria = new Criteria();
-                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                String provider = locationManager.getBestProvider(criteria, false);
-                Location location = locationManager.getLastKnownLocation(provider);
-                LatLng coordinate = new LatLng(location.getLatitude(), location.getLongitude());
-                CameraUpdate center = CameraUpdateFactory.newLatLng(coordinate);
-                CameraUpdate zoom = CameraUpdateFactory.zoomTo(DEFAULT_ZOOM_LEVEL);
-                gmap.moveCamera(center);
-                gmap.moveCamera(zoom);
-                gmap.setOnMarkerClickListener(new OnMarkerClickListener() {
-					@Override
-					public boolean onMarkerClick(Marker marker) {
-						final BasicTrack[] topTracks = markers.get(marker.getTitle());
-						String[] tracksStrings = new String[topTracks.length];
-						for (int i=0; i<topTracks.length; i++)
-							tracksStrings[i] = topTracks[i].toString();
-						ListView list = (ListView)findViewById(R.id.topTracksList);
-						list.setAdapter(new SearchArrayAdapter(getAppContext(), R.layout.search_result, topTracks, true));
-						list.setOnItemClickListener(new OnItemClickListener() {
-							@Override
-							public void onItemClick(AdapterView<?> parent, View view, 
-													final int position, long id) {
-								setTopTracksVisible(false);
-								String[] trackKeys = new String[topTracks.length];
-								for (int i=0; i<topTracks.length; i++)
-									trackKeys[i] = topTracks[i].getKey();
-								music.getMusicServiceObjectsForKeys(trackKeys, new SearchCompleteListener() {
-									@Override
-									public void onSearchComplete(MusicServiceObject[] results) {
-										HashMap<String, Track> orderTracksMap = new HashMap<String, Track>();
-										for (int i=0; i<results.length; i++) {
-											Track result = (Track)results[i];
-											orderTracksMap.put(result.getKey(), result);
-										}
-										Track[] tracks = new Track[results.length];
-										for (int i=0; i<results.length; i++) {
-											tracks[i] = orderTracksMap.get(topTracks[i].getKey());
-											Log.d(LOG_TAG, tracks[i].getKey());
-										}
-										music.getPlayerForTrack(tracks[position]);
-										music.setPlaylist(tracks, position);
+            if (gmap == null)
+            	return;
+            
+            // The Map is verified. It is now safe to manipulate the map.
+            Criteria criteria = new Criteria();
+			LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+			String provider = locationManager.getBestProvider(criteria, false);
+			Location location = locationManager.getLastKnownLocation(provider);
+			LatLng coordinate = new LatLng(location.getLatitude(), location.getLongitude());
+			CameraUpdate center = CameraUpdateFactory.newLatLng(coordinate);
+			CameraUpdate zoom = CameraUpdateFactory.zoomTo(DEFAULT_ZOOM_LEVEL);
+			gmap.moveCamera(center);
+			gmap.moveCamera(zoom);
+			gmap.setOnMarkerClickListener(new OnMarkerClickListener() {
+				@Override
+				public boolean onMarkerClick(Marker marker) {
+					final BasicTrack[] topTracks = markers.get(marker.getTitle());
+					String[] tracksStrings = new String[topTracks.length];
+					for (int i=0; i<topTracks.length; i++)
+						tracksStrings[i] = topTracks[i].toString();
+					ListView list = (ListView)findViewById(R.id.topTracksList);
+					list.setAdapter(new SearchArrayAdapter(getAppContext(), R.layout.search_result, topTracks, true));
+					list.setOnItemClickListener(new OnItemClickListener() {
+						@Override
+						public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+							setTopTracksVisible(false);
+							String[] trackKeys = new String[topTracks.length];
+							for (int i=0; i<topTracks.length; i++)
+								trackKeys[i] = topTracks[i].getKey();
+							music.getMusicServiceObjectsForKeys(trackKeys, new SearchCompleteListener() {
+								@Override
+								public void onSearchComplete(MusicServiceObject[] results) {
+									HashMap<String, Track> orderTracksMap = new HashMap<String, Track>();
+									for (int i=0; i<results.length; i++) {
+										Track result = (Track)results[i];
+										orderTracksMap.put(result.getKey(), result);
 									}
-								});
-							}
-						});
-						setTopTracksVisible(true);
-						Button done = (Button)findViewById(R.id.topTracksDone);
-						done.setOnClickListener(new OnClickListener() {
-							@Override
-							public void onClick(View view) {
-								setTopTracksVisible(false);
-							}
-						});
-						return true;
-					}
-                	
-                });
-            }
+									Track[] tracks = new Track[results.length];
+									for (int i=0; i<results.length; i++) {
+										tracks[i] = orderTracksMap.get(topTracks[i].getKey());
+										Log.d(LOG_TAG, tracks[i].getKey());
+									}
+									music.getPlayerForTrack(tracks[position]);
+									music.setPlaylist(tracks, position);
+								}
+							});
+						}
+					});
+					setTopTracksVisible(true);
+					Button done = (Button)findViewById(R.id.topTracksDone);
+					done.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View view) {
+							setTopTracksVisible(false);
+						}
+					});
+					return true;
+				}
+			});
         }
     }
 
@@ -501,6 +496,8 @@ public class MainActivity extends SherlockFragmentActivity implements TrackChang
    
    @UiThread
    void populateMap(JSONObject json) {
+	   if (gmap == null)
+		   return;
 	   gmap.clear();
 	   markers = new HashMap<String, BasicTrack[]>();
 	   Iterator<?> stateKeys = json.keys(); 

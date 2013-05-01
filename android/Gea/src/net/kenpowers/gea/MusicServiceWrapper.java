@@ -208,7 +208,6 @@ public class MusicServiceWrapper {
 						JSONObject obj = json.getJSONObject(i);
 						results[i] = getMusicServiceObjectForJSON(obj);
 					}
-					//notifySearchCompleteListeners(results);
 					callback.onSearchComplete(results);
 				} catch(JSONException e) {
 					Log.e(LOG_TAG,"Error parsing JSON: search");
@@ -246,7 +245,6 @@ public class MusicServiceWrapper {
 						results[i] = getMusicServiceObjectForJSON(obj);
 						i++;
 					}
-					//notifySearchCompleteListeners(results);
 					callback.onSearchComplete(results);
 				} catch(JSONException e) {
 					Log.e(LOG_TAG,"Error parsing JSON: get");
@@ -275,7 +273,6 @@ public class MusicServiceWrapper {
 					JSONObject obj = json.getJSONObject(i);
 					results[i] = getMusicServiceObjectForJSON(obj);
 				}
-				//notifySearchCompleteListeners(results);
 				callback.onSearchComplete(results);
 				} catch (JSONException e) {
 					Log.e(LOG_TAG,"Error parsing JSON: getAlbumsForArtist");
