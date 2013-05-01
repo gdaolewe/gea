@@ -1,6 +1,6 @@
 #Release binary
 ##Pre-Built APK
-There is a pre-compiled `apk` available for download to use on Android [here](https://s3.amazonaws.com/OpenGea/GeaBETA.apk).
+There is a pre-compiled `apk` available for download to use on Android [here](https://s3.amazonaws.com/OpenGea/Gea.apk).
 
 #Building for Android from source
 
