@@ -30,7 +30,7 @@ public class RequestTaskTest{
 	@Before
 	public void initialize(){
 		response = null;
-		jobject = null;
+		//jobject = null;
 	}
 	
 	@Test
@@ -46,13 +46,13 @@ public class RequestTaskTest{
 		String getURL = GeaServerHandler.getURLStringForParams(baseURL, new BasicNameValuePair[] { limit });
 		response = GeaServerHandler.getJSONForRequest(getURL, GET);
 		assertEquals(10, response.length());
-		assertNotNull(jobject.getString("artist"));
-		assertFalse(jobject.getString("artist").equals(""));
-		assertNotNull(jobject.getString("album"));
-		assertFalse(jobject.getString("album").equals(""));
-		assertNotNull(jobject.getString("title"));
-		assertFalse(jobject.getString("title").equals(""));
-		assertNotNull(jobject.getString("id"));
+		assertNotNull(response.getString("artist"));
+		assertFalse(response.getString("artist").equals(""));
+		assertNotNull(response.getString("album"));
+		assertFalse(response.getString("album").equals(""));
+		assertNotNull(response.getString("title"));
+		assertFalse(response.getString("title").equals(""));
+		assertNotNull(response.getString("id"));
 	}
 	
 	@Test
@@ -62,16 +62,16 @@ public class RequestTaskTest{
 		response = GeaServerHandler.getJSONForRequest(postURL, POST);
 		assertEquals(1, response.length());
 		//jobject = response.getJSONObject(0);
-		int rating = jobject.getInt("id");
+		int rating = response.getInt("id");
 		postURL = GeaServerHandler.getURLStringForParams(postURL, new BasicNameValuePair[] { from, id, dislike });
 		response = GeaServerHandler.getJSONForRequest(postURL, POST);
 		//jobject = response.getJSONObject(0);
-		int updatedRating = jobject.getInt("id");
+		int updatedRating = response.getInt("id");
 		assertEquals(rating + 1, updatedRating);
 		postURL = GeaServerHandler.getURLStringForParams(postURL, new BasicNameValuePair[] { from, id, like });
 		response = GeaServerHandler.getJSONForRequest(postURL, POST);
 		//jobject = response.getJSONObject(0);
-		updatedRating = jobject.getInt("id");
+		updatedRating = response.getInt("id");
 		assertEquals(rating, updatedRating);
 	}
 }
