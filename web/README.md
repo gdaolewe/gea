@@ -60,6 +60,13 @@ running Ubuntu 12.10, you can install the plugin with `sudo apt-get -f install
 flashplugin-installer`. The current release of the web server and client are
 running [here](http://gea.kenpowers.net) (April 2nd, 2013).
 
+##Tests
+
+To run the web server and client tests using `testem`.
+1. Install `testem` with `npm install -g testem`.
+2. Execute the tests with `testem` while in the `web/` folder.
+**Note: The server must be running before tests are executed.**
+
 ##BETA Functionality:
 
 * Server
