@@ -31,6 +31,11 @@
     <string name="loading">loading&#8230;</string>
     <string name="top_tracks_dismiss">Done</string>
     
+    <!-- Change localhost_base_url to address of local machine running Gea server
+    	 to run application in debug mode on physical Android device -->
+    <string name="localhost_base_url">http://10.0.2.2:3000</string>
+    <string name="net_base_url">http://gea.kenpowers.net</string>
+    
     <string-array name="filter_array">
         <item>Top songs today</item>
         <item>Top songs this week</item>
