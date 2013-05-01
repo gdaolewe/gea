@@ -61,7 +61,9 @@ The application is now installed on the device, but hasn't been started. To star
 
 Or simply find the application in your device or emulator's launcher.
 
-Note: Maps will not display and no map functionality will be present on an Android emulator. This is a limitation of Google Play Services and the Android Google Maps API v2.
+##Notes
+
+Maps will not display and no map functionality will be present on an Android emulator. This is a limitation of Google Play Services and the Android Google Maps API v2.
 
 Additionally, when run on an emulator in debug mode the application will attempt to connect to a server running on the host machine rather than the Gea server at http://gea.kenpowers.net. When run on a physical Android device in debug mode, the application must be given the IP address of a server to connect to. This can be set by editing the value of the `localhost_base_url` element in `gea/android/Gea/res/values/strings.xml` and re-building.
 
