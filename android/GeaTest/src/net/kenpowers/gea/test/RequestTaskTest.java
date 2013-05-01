@@ -20,7 +20,7 @@ public class RequestTaskTest{
 	private final RequestMethod GET = GeaServerHandler.RequestMethod.GET;
 	private final RequestMethod POST = GeaServerHandler.RequestMethod.POST;
 	private final String baseURL = GeaServerHandler.NET_BASE_URL + GeaServerHandler.BASE_RATE_QUERY;
-	private JSONArray response;
+	private JSONObject response;
 	private JSONObject jobject;
 	private final BasicNameValuePair from = new BasicNameValuePair("from", "rdio");
 	private final BasicNameValuePair id = new BasicNameValuePair("id", lethargica);
@@ -46,7 +46,6 @@ public class RequestTaskTest{
 		String getURL = GeaServerHandler.getURLStringForParams(baseURL, new BasicNameValuePair[] { limit });
 		response = GeaServerHandler.getJSONForRequest(getURL, GET);
 		assertEquals(10, response.length());
-		jobject = response.getJSONObject(0);
 		assertNotNull(jobject.getString("artist"));
 		assertFalse(jobject.getString("artist").equals(""));
 		assertNotNull(jobject.getString("album"));
@@ -62,16 +61,16 @@ public class RequestTaskTest{
 		String postURL = GeaServerHandler.getURLStringForParams(baseURL, new BasicNameValuePair[] { from, id, like });
 		response = GeaServerHandler.getJSONForRequest(postURL, POST);
 		assertEquals(1, response.length());
-		jobject = response.getJSONObject(0);
+		//jobject = response.getJSONObject(0);
 		int rating = jobject.getInt("id");
 		postURL = GeaServerHandler.getURLStringForParams(postURL, new BasicNameValuePair[] { from, id, dislike });
 		response = GeaServerHandler.getJSONForRequest(postURL, POST);
-		jobject = response.getJSONObject(0);
+		//jobject = response.getJSONObject(0);
 		int updatedRating = jobject.getInt("id");
 		assertEquals(rating + 1, updatedRating);
 		postURL = GeaServerHandler.getURLStringForParams(postURL, new BasicNameValuePair[] { from, id, like });
 		response = GeaServerHandler.getJSONForRequest(postURL, POST);
-		jobject = response.getJSONObject(0);
+		//jobject = response.getJSONObject(0);
 		updatedRating = jobject.getInt("id");
 		assertEquals(rating, updatedRating);
 	}
