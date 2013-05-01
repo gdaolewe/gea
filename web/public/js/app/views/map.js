@@ -14,10 +14,6 @@ define([
   var contentMap = null;
   var iw = null;
   var markerArray = [];
-  //first set to 10s
-  var timer = 10000;
-  var timerMultiplier = 1;
-  var thread = null;
   var prevData = null;
 
   return new (bb.View.extend({
@@ -105,8 +101,7 @@ define([
       this.hours = "";
       //listening for mapFilter event which clears and reloads markers based on # hrs passed
       vent.on('mapFilter', $.proxy(function (hours) {
-        //since the user triggered a filter change, clear any timer
-        clearTimeout(thread);
+        //clear the markers
         this.clearMarkers();
         //saves the hours filter
         this.hours = hours;
@@ -126,15 +121,11 @@ define([
       this.$req = $.get('/rate?limit=10' + timePeriod, $.proxy(function (data) {
         //checks to see if the data has changed. if so, then update
         if (_.isEqual(prevData,data)) {
-          //same, so increase the multiplier and starts the timer
-          timerMultiplier++;
-          this.startTimer();
           vent.trigger('pinsLoaded');
           return;
         }
         //new data, so clear and reload
         this.clearMarkers();
-        timerMultiplier = 1;
         prevData = data;
         for (var position in data) {
           var rank = data[position].length;
@@ -146,7 +137,6 @@ define([
           }, this));
           data[position].reverse();
         }
-        this.startTimer();
         vent.trigger('pinsLoaded');
       }, this));
     },
@@ -190,16 +180,6 @@ define([
     //triggers the play-key event to begin playing the song in the marker InfoWindow
     playSong: function () {
       vent.trigger('play-key', this.$('#iw-key').val());
-    },
-
-    //starts up the timer for refreshing data
-    startTimer: function () {
-      //clears the timeout thread first
-      clearTimeout(thread);
-      //initializes the timeout thread based on the multiplier
-      thread = setTimeout($.proxy(function () {
-        this.loadAllMarkers(this.hours);
-      }, this), timer*Math.pow(2, timerMultiplier));
     }
   }))();
 });
