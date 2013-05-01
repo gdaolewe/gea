@@ -63,7 +63,7 @@ public class GeaServerHandler {
 		return json;
 	}
 	
-	private static HttpURLConnection connect(String urlString, RequestMethod method) {
+	public static HttpURLConnection connect(String urlString, RequestMethod method) {
 		HttpURLConnection connection = null;
 		try {
 			URL url = new URL(urlString);
@@ -81,13 +81,19 @@ public class GeaServerHandler {
 	}
 	
 	public static String getURLStringForParams(String baseURL, BasicNameValuePair[] parameters) {
-		String queryString = baseURL;
+		String paramString = "";
 		for (int i=0; i<parameters.length; i++) {
-			queryString += parameters[i].getName() + "=" + parameters[i].getValue();
-			if (i<parameters.length-1)
-				queryString += "&";
+			if (parameters[i] != null) {
+				if (parameters[i].getName().length() > 0 && parameters[i].getValue().length() > 0) {
+					if (paramString.length() > 0)
+						paramString += "&";
+					paramString += parameters[i].getName() + "=" + parameters[i].getValue();
+				} else {
+					Log.d(LOG_TAG, "invalid parameter");
+				}
+			}
 		}
-		return queryString;
+		return baseURL + paramString;
 	}
 	
 	public static LatLng getLatLngForCoordinateString(String coordsString) {
@@ -97,5 +103,4 @@ public class GeaServerHandler {
 		LatLng coord = new LatLng(lat, lng);
 		return coord;
 	}
-	
 }
