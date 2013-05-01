@@ -1,5 +1,15 @@
 # GEA Web Server / Client
 
+##Keyboard Shortcuts for Web
+
+Toggle Play/Pause: Space
+
+Next: Right arrow
+
+Previous: Left arrow
+
+Start/Enter Search music: Enter
+
 ##Prerequisites
 
 In order to run the web server and client you should be running a machine with
@@ -39,7 +49,7 @@ please follow these directions in your terminal:
 
 The database can be populated with sample data using the following command:
 
-    psql -d gea -f db/sample-data.sql
+    node db/refreshDb.js
 
 ##Running the Server
 
@@ -49,6 +59,13 @@ installed in your browser for the web client to function correctly. If you are
 running Ubuntu 12.10, you can install the plugin with `sudo apt-get -f install
 flashplugin-installer`. The current release of the web server and client are
 running [here](http://gea.kenpowers.net) (April 2nd, 2013).
+
+##Tests
+
+To run the web server and client tests using `testem`.
+1. Install `testem` with `npm install -g testem`.
+2. Execute the tests with `testem` while in the `web/` folder.
+**Note: The server must be running before tests are executed.**
 
 ##BETA Functionality:
 
@@ -71,4 +88,4 @@ running [here](http://gea.kenpowers.net) (April 2nd, 2013).
     * The top 10 songs are available through a button in the player.
 
 ##Release notes
-See [`../release-notes_beta-binary.txt`](../release-notes_beta-binary.txt) and [`../release-notes_beta-search.txt`](../release-notes_beta-search.txt).
+See [`../release-notes_beta-binary.txt`](../release-notes_beta-binary.txt) and [`../release-notes_beta-source.txt`](../release-notes_beta-source.txt).
