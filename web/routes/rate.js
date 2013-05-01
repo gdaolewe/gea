@@ -1,13 +1,12 @@
 // requirements
 var _ = require('underscore'),
-    pg = require('pg'),
+    pg = require(__appDir + '/db/geaPg'),
     async = require('async'),
     fs = require('fs'),
     path = require('path'),
     util = require('util'),
     request = require('request'),
-    rdio = require('./util/rdio'),
-    config = require(path.join(__appDir, 'db/database.json'))[process.env.NODE_ENV === 'production' ? 'prod' : 'dev'];
+    rdio = require('./util/rdio');
 
 // import sql queries
 const DML_DIR = path.join(__appDir, 'db/dml');
@@ -21,14 +20,6 @@ const VERDICTS = {
   like: 1,
   dislike: -1
 };
-
-// pg configuration
-pg.defaults.user = config.user;
-pg.defaults.password = config.password;
-pg.defaults.host = config.host;
-pg.defaults.port = config.port;
-pg.defaults.database = config.database;
-pg.defaults.poolSize = config.max_connections;
 
 // routes
 module.exports = {
