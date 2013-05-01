@@ -8,13 +8,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
 
 public class GeaServerHandler {
 	private static final String LOG_TAG = "Gea Server Handler";

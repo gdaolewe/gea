@@ -1,18 +1,19 @@
 package net.kenpowers.gea;
 
-import com.actionbarsherlock.app.SherlockListActivity;
+import net.kenpowers.gea.MusicServiceWrapper.SearchCompleteListener;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.ListView;
+
+import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import android.widget.CheckBox;
-
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 public class SearchActivity extends SherlockListActivity implements SearchCompleteListener {
 	private MusicServiceObject searchResults[];
@@ -26,7 +27,9 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	
 	    setContentView(R.layout.search);
 	    getSupportActionBar().setHomeButtonEnabled(true);
-
+	    
+	    setUpList();
+	    
 	    handleIntent(getIntent());
 	}
 	
@@ -88,7 +91,6 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 	    	 if (! (shouldSearchForSong | shouldSearchForAlbum | shouldSearchForArtist) )
 				 type = "Song";
 		      music = MusicServiceWrapper.getInstance();
-		      music.registerSearchCompleteListener(this);
 		      query = intent.getStringExtra(SearchManager.QUERY);
 		      performSearch(query, type);
 		 }
@@ -100,7 +102,20 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 			return;
 		}
 		Log.i(MainActivity_.LOG_TAG, "Searched for '" + query + "' with types " + type);
-		music.search(query, type);
+		music.search(query, type, new SearchCompleteListener() {
+			@Override
+			public void onSearchComplete(MusicServiceObject[] results) {
+				Log.i(MainActivity_.LOG_TAG, "Search returned " + results.length + " results");
+				if (results.length < 1) {
+					Log.i(MainActivity_.LOG_TAG, "No search results");
+					String[] resultsStrings = {"No search results"};
+					setListAdapter(new ArrayAdapter<String>(SearchActivity.this, R.layout.search_result, resultsStrings));
+					return;
+				}
+				searchResults = results;
+				setListAdapter(new SearchArrayAdapter(SearchActivity.this, R.layout.search_result, results, true));
+			}
+		});
 	}
 	
 	public void onSearchComplete(MusicServiceObject[] results) {
@@ -114,11 +129,7 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 			
 		searchResults = results;
 		
-		String resultsStrings[] = new String[searchResults.length];
-		for (int i=0; i<results.length; i++)
-			resultsStrings[i] = results[i].toString();
-		
-		setListAdapter(new ArrayAdapter<String>(this, R.layout.search_result, resultsStrings));
+		setListAdapter(new SearchArrayAdapter(this, R.layout.search_result, results, true));
 		
 		ListView listview = getListView();
 		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -158,6 +169,19 @@ public class SearchActivity extends SherlockListActivity implements SearchComple
 		} else {
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	private void setUpList() {
+		ListView listview = getListView();
+		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				listItemSelected(position);
+			}
+		});
+		listview.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { /*do nothing*/ }
+			public void onNothingSelected(AdapterView<?> parent) { /*do nothing*/ }
+		});
 	}
 	
 }
