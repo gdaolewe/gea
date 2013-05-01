@@ -1,5 +1,15 @@
 # GEA Web Server / Client
 
+##Keyboard Shortcuts for Web
+
+Toggle Play/Pause: Space
+
+Next: Right arrow
+
+Previous: Left arrow
+
+Start/Enter Search music: Enter
+
 ##Prerequisites
 
 In order to run the web server and client you should be running a machine with
@@ -39,7 +49,7 @@ please follow these directions in your terminal:
 
 The database can be populated with sample data using the following command:
 
-    psql -d gea -f db/sample-data.sql
+    node db/refreshDb.js
 
 ##Running the Server
 
@@ -71,4 +81,4 @@ running [here](http://gea.kenpowers.net) (April 2nd, 2013).
     * The top 10 songs are available through a button in the player.
 
 ##Release notes
-See [`../release-notes_beta-binary.txt`](../release-notes_beta-binary.txt) and [`../release-notes_beta-search.txt`](../release-notes_beta-search.txt).
+See [`../release-notes_beta-binary.txt`](../release-notes_beta-binary.txt) and [`../release-notes_beta-source.txt`](../release-notes_beta-source.txt).
