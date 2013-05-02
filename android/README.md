@@ -22,19 +22,18 @@ Now navigate to the android directory:
 
 `cd gea/android/`
 
-Copy the google-play-services_lib from [androidsdk location]/extras/google/google-play-services/libproject to gea/android. 
+Copy the google-play-services_lib from [androidsdk location]/extras/google/google-play-services/libproject to gea/android.
+Run the shell script to get the rest of the libraries: `sh getLibs.sh` 
 
 Prepare the project for building:
 
 Prepare the google-play-services_lib: `android update project -t "android-17" -p google-play-services_lib`
 
-Download [ActionBarSherlock](http://actionbarsherlock.com/) and place the actionbarsherlock folder in gea/android.
-
 Prepare ActionBarSherlock: `android update project -t "android-17" -p actionbarsherlock`
 
 Link the libary projects: 
-`android update project -p Gea --library actionbarsherlock`
-`android update project -p Gea --google-play-services_lib`
+`android update project -p Gea --library ../actionbarsherlock`
+`android update project -p Gea --library ../google-play-services_lib`
 
 Prepare the project itself: `android update project -p Gea`
 
@@ -66,6 +65,3 @@ Or simply find the application in your device or emulator's launcher.
 Maps will not display and no map functionality will be present on an Android emulator. This is a limitation of Google Play Services and the Android Google Maps API v2.
 
 Additionally, when run on an emulator in debug mode the application will attempt to connect to a server running on the host machine rather than the Gea server at http://gea.kenpowers.net. When run on a physical Android device in debug mode, the application must be given the IP address of a server to connect to. This can be set by editing the value of the `localhost_base_url` element in `gea/android/Gea/res/values/strings.xml` and re-building.
-
-
-
