@@ -20,7 +20,7 @@ Take note of the name you chose for the emulator.
 
 Now navigate to the android directory:
 
-`cd gea/android/`
+`cd [Gea project root]/android/`
 
 Copy the google-play-services_lib from [androidsdk location]/extras/google/google-play-services/libproject to gea/android.
 Run the shell script to get the rest of the libraries: `sh getLibs.sh` 
@@ -31,11 +31,11 @@ Prepare the google-play-services_lib: `android update project -t "android-17" -p
 
 Prepare ActionBarSherlock: `android update project -t "android-17" -p actionbarsherlock`
 
+Prepare the project itself: `android update project -t "android-17" -p Gea`
+
 Link the libary projects: 
 `android update project -p Gea --library ../actionbarsherlock`
 `android update project -p Gea --library ../google-play-services_lib`
-
-Prepare the project itself: `android update project -p Gea`
 
 To prepare tests:
 
@@ -44,7 +44,7 @@ To prepare tests:
 Before building, start the emulator: `emulator "<emulator-name>"`
 On 64-bit Linux, you may have to install ia32-libs to run the emulator and build. On Ubuntu: `apt-get install ia32-libs`
 
-To build, `cd gea/android/Gea` and run `ant clean debug`
+To build, `cd [Gea project root]/android/Gea` and run `ant clean debug`
 
 To run tests:
 
