@@ -24,7 +24,7 @@ For instructions on how to set up the server, see
 [`web/README.md`](web/README.md). For instructions on how to build the Android
 client, see [`android/README.md`](android/README.md). There is also a pre-
 compiled `apk` available for download to use on Android
-[here](https://s3.amazonaws.com/OpenGea/GeaBETA.apk).
+[here](https://s3.amazonaws.com/OpenGea/Gea.apk).
 
 ##Issues and Milestones
 Issues are tracked [here on Github](https://github.com/OpenGea/gea/issues).
