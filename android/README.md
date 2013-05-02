@@ -7,11 +7,13 @@ There is a pre-compiled `apk` available for download to use on Android [here](ht
 ##Installing Android SDK
 
 You must have Java installed, as well as the Android SDK. The Android SDK can be obtained [here](
-http://developer.android.com/sdk/index.html).
+http://developer.android.com/sdk/index.html). 
+On 64-bit Linux, you may have to install ia32-libs to run the emulator and build. On Ubuntu: `apt-get install ia32-libs`
+
 
 Choose 'Use an existing IDE' and download the SDK tools. Follow the instructions for installing them [here](http://developer.android.com/sdk/installing/index.html)
 
-Once the SDK tools are installed, add the `tools` and `platform-tools` directories to your PATH environment variable. Open a console and type `android` to launch the SDK Manager. Use it to install the following packages: Android 4.2 API 17 -> SDK Platform and Extras -> Google Play Services.
+Once the SDK tools are installed, add the `tools` and `platform-tools` directories to your PATH environment variable. Open a console and type `android` to launch the SDK Manager. Use it to install the following packages: Android 4.2 (API 17), Android 2.2 (API 8), and Extras -> Google Play Services.
 
 Configure an emulator: `android create avd -n <emulator-name> -t android-17`
 Take note of the name you chose for the emulator.
@@ -42,7 +44,6 @@ To prepare tests:
 `android update test-project -m ../Gea -p GeaTest`
 
 Before building, start the emulator: `emulator "<emulator-name>"`
-On 64-bit Linux, you may have to install ia32-libs to run the emulator and build. On Ubuntu: `apt-get install ia32-libs`
 
 To build, `cd [Gea project root]/android/Gea` and run `ant clean debug`
 
